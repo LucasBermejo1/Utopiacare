@@ -1,0 +1,65 @@
+[
+  {
+    "productId": "skin1004-centella-ampoule",
+    "reviews": [
+      {
+        "id": "r1",
+        "user": {
+          "name": "Destinawah",
+          "verified": true,
+          "skinType": "Oily/Sensitive"
+        },
+        "date": "2021-06-03",
+        "lang": "English",
+        "rating": 5,
+        "textShort": "Honestly, I already have this ampoule...",
+        "textFull": "Honestly, I already have this Ampoule with the largest size, but it still contains half left. This is my holy grail for calming my irritated skin. I use it every night and my skin feels so much better. The texture is watery and absorbs quickly without any stickiness.",
+        "photos": [
+          "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300&h=300&fit=crop"
+        ],
+        "upvotes": 502,
+        "views": 4800
+      },
+      {
+        "id": "r2",
+        "user": {
+          "name": "SkincareLover123",
+          "verified": false,
+          "skinType": "Combination"
+        },
+        "date": "2022-03-15",
+        "lang": "English",
+        "rating": 5,
+        "textShort": "Amazing for sensitive skin!",
+        "textFull": "I've been using this for 3 months and my redness has significantly reduced. Perfect for post-procedure care too.",
+        "photos": [],
+        "upvotes": 124,
+        "views": 1850
+      }
+    ]
+  },
+  {
+    "productId": "cosrx-snail-essence",
+    "reviews": [
+      {
+        "id": "r3",
+        "user": {
+          "name": "GlowingSkin",
+          "verified": true,
+          "skinType": "Dry"
+        },
+        "date": "2023-01-10",
+        "lang": "English",
+        "rating": 5,
+        "textShort": "Holy grail product!",
+        "textFull": "This essence has transformed my dry, flaky skin into plump, hydrated skin. The texture is unique but absorbs beautifully.",
+        "photos": [
+          "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=300&h=300&fit=crop"
+        ],
+        "upvotes": 890,
+        "views": 8200
+      }
+    ]
+  }
+]
