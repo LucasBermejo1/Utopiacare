@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Search } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -13,7 +14,11 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger
+} from "@/components/ui/collapsible";
 import productsData from "@/data/products.json";
 import { Product } from "@/types/product";
 import {
@@ -25,6 +30,10 @@ import {
 
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [attributesOpen, setAttributesOpen] = useState(true);
+  const [concernsOpen, setConcernsOpen] = useState(true);
+  const [categoriesOpen, setCategoriesOpen] = useState(true);
 
   const selectedAttributes = useMemo(
     () => searchParams.get("a")?.split(",").filter(Boolean) || [],
@@ -39,6 +48,7 @@ export default function Products() {
     [searchParams]
   );
   const sortMode = searchParams.get("sort") || "mostReviews";
+  const urlSearch = searchParams.get("search") || "";
 
   const toggleFilter = (key: string, value: string) => {
     const current = searchParams.get(key)?.split(",").filter(Boolean) || [];
@@ -53,8 +63,28 @@ export default function Products() {
     setSearchParams(newParams);
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set("search", searchQuery.trim());
+      setSearchParams(newParams);
+    }
+  };
+
   const filteredProducts = useMemo(() => {
     let result = [...productsData] as Product[];
+
+    // Search filter
+    if (urlSearch.trim()) {
+      const query = urlSearch.toLowerCase();
+      result = result.filter((p) => 
+        p.name.toLowerCase().includes(query) ||
+        p.brand.toLowerCase().includes(query) ||
+        p.categories?.some(c => c.toLowerCase().includes(query)) ||
+        p.attributes?.some(a => a.toLowerCase().includes(query))
+      );
+    }
 
     if (selectedAttributes.length > 0) {
       result = result.filter((p) =>
@@ -95,7 +125,8 @@ export default function Products() {
     selectedAttributes,
     selectedConcerns,
     selectedCategories,
-    sortMode
+    sortMode,
+    urlSearch
   ]);
 
   return (
@@ -103,73 +134,103 @@ export default function Products() {
       {/* Filters sidebar */}
       <aside>
         <Card className="p-4 sticky top-20">
-          <h4 className="font-semibold mb-3">Attributes</h4>
-          <div className="space-y-2 mb-4">
-            {ATTRIBUTES.map((attr) => (
-              <div key={attr} className="flex items-center gap-2">
-                <Checkbox
-                  id={`attr-${attr}`}
-                  checked={selectedAttributes.includes(attr)}
-                  onCheckedChange={() => toggleFilter("a", attr)}
-                />
-                <Label
-                  htmlFor={`attr-${attr}`}
-                  className="text-sm cursor-pointer"
-                >
-                  {attr}
-                </Label>
+          <Collapsible open={attributesOpen} onOpenChange={setAttributesOpen}>
+            <CollapsibleTrigger className="flex justify-between items-center w-full">
+              <h4 className="font-semibold mb-3">Attributes</h4>
+              <span className="text-xs">{attributesOpen ? '−' : '+'}</span>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="space-y-2 mb-4">
+                {ATTRIBUTES.map((attr) => (
+                  <div key={attr} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`attr-${attr}`}
+                      checked={selectedAttributes.includes(attr)}
+                      onCheckedChange={() => toggleFilter("a", attr)}
+                    />
+                    <Label
+                      htmlFor={`attr-${attr}`}
+                      className="text-sm cursor-pointer"
+                    >
+                      {attr}
+                    </Label>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </CollapsibleContent>
+          </Collapsible>
 
-          <Separator className="my-4" />
-
-          <h4 className="font-semibold mb-3">Concern</h4>
-          <div className="space-y-2 mb-4">
-            {CONCERNS.map((concern) => (
-              <div key={concern} className="flex items-center gap-2">
-                <Checkbox
-                  id={`concern-${concern}`}
-                  checked={selectedConcerns.includes(concern)}
-                  onCheckedChange={() => toggleFilter("g", concern)}
-                />
-                <Label
-                  htmlFor={`concern-${concern}`}
-                  className="text-sm cursor-pointer"
-                >
-                  {concern}
-                </Label>
+          <Collapsible open={concernsOpen} onOpenChange={setConcernsOpen} className="mt-4">
+            <CollapsibleTrigger className="flex justify-between items-center w-full">
+              <h4 className="font-semibold mb-3">Concern</h4>
+              <span className="text-xs">{concernsOpen ? '−' : '+'}</span>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="space-y-2 mb-4">
+                {CONCERNS.map((concern) => (
+                  <div key={concern} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`concern-${concern}`}
+                      checked={selectedConcerns.includes(concern)}
+                      onCheckedChange={() => toggleFilter("g", concern)}
+                    />
+                    <Label
+                      htmlFor={`concern-${concern}`}
+                      className="text-sm cursor-pointer"
+                    >
+                      {concern}
+                    </Label>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </CollapsibleContent>
+          </Collapsible>
 
-          <Separator className="my-4" />
-
-          <h4 className="font-semibold mb-3">Category</h4>
-          <div className="space-y-2 max-h-64 overflow-y-auto">
-            {CATEGORIES.map((cat) => (
-              <div key={cat} className="flex items-center gap-2">
-                <Checkbox
-                  id={`cat-${cat}`}
-                  checked={selectedCategories.includes(cat)}
-                  onCheckedChange={() => toggleFilter("c", cat)}
-                />
-                <Label
-                  htmlFor={`cat-${cat}`}
-                  className="text-sm cursor-pointer"
-                >
-                  {cat}
-                </Label>
+          <Collapsible open={categoriesOpen} onOpenChange={setCategoriesOpen} className="mt-4">
+            <CollapsibleTrigger className="flex justify-between items-center w-full">
+              <h4 className="font-semibold mb-3">Category</h4>
+              <span className="text-xs">{categoriesOpen ? '−' : '+'}</span>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {CATEGORIES.map((cat) => (
+                  <div key={cat} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`cat-${cat}`}
+                      checked={selectedCategories.includes(cat)}
+                      onCheckedChange={() => toggleFilter("c", cat)}
+                    />
+                    <Label
+                      htmlFor={`cat-${cat}`}
+                      className="text-sm cursor-pointer"
+                    >
+                      {cat}
+                    </Label>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </CollapsibleContent>
+          </Collapsible>
         </Card>
       </aside>
 
       {/* Products grid */}
       <section>
-        <div className="flex justify-between items-center mb-4">
-          <Badge variant="secondary">{filteredProducts.length} Products</Badge>
+        <div className="mb-4">
+          <form onSubmit={handleSearch} className="relative mb-4">
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="px-4 py-2 pr-10 border border-border rounded-full bg-card w-full"
+              placeholder="Search products, brands..."
+            />
+            <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2">
+              <Search className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </form>
+          
+          <div className="flex justify-between items-center">
+            <Badge variant="secondary">{filteredProducts.length} Products</Badge>
           <Select
             value={sortMode}
             onValueChange={(val) => {
@@ -189,6 +250,7 @@ export default function Products() {
               ))}
             </SelectContent>
           </Select>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

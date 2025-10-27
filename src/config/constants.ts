@@ -21,7 +21,7 @@ export const CONCERNS = [
 
 export const CATEGORIES = [
   "Face Skincare", "Cleansers", "Exfoliators", "Toners",
-  "Treatments", "Masks", "Eye Care", "Moisturizers",
+  "Treatments", "Masks", "Eye Care", "Moisturizers", "Cremas",
   "Lip Care", "Sun Care", "Body Care", "Serums", "Ampoules",
   "Essences", "Night Care"
 ];
