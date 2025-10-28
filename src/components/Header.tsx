@@ -4,6 +4,7 @@ import { Input } from "./ui/input";
 import { Search } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "@/assets/logo.svg";
 
 export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,9 +24,10 @@ export function Header() {
           <div className="flex items-center gap-6">
             <Link
               to="/"
-              className="text-xl font-bold text-primary hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              utopiacare
+              <img src={logo} alt="Utopiacare" className="w-10 h-10" />
+              <span className="text-xl font-bold text-primary">utopiacare</span>
             </Link>
             <nav className="hidden md:flex items-center gap-2">
               <Button variant="ghost" size="sm" asChild>

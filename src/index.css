@@ -8,61 +8,62 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Utopiacare Minimalist Design System */
-    --background: 33 21% 86%; /* #dcd2c1 */
-    --foreground: 0 0% 17%; /* #2c2c2c */
+    /* Utopiacare Color Palette */
+    --background: 33 21% 86%; /* #dcd2c1 - Beige background */
+    --foreground: 214 26% 32%; /* #3f4e65 - Deep navy for text */
 
     --card: 0 0% 100%; /* #ffffff */
-    --card-foreground: 0 0% 17%;
+    --card-foreground: 214 26% 32%; /* #3f4e65 */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 17%;
+    --popover-foreground: 214 26% 32%;
 
-    --primary: 96 16% 38%; /* #5b7050 */
-    --primary-foreground: 0 0% 98%;
+    --primary: 214 26% 32%; /* #3f4e65 - Deep navy */
+    --primary-foreground: 33 21% 86%; /* Beige */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 96 16% 38%;
+    --secondary: 33 21% 90%; /* Lighter beige */
+    --secondary-foreground: 214 26% 32%;
 
-    --muted: 214 16% 65%; /* #9ca3af */
-    --muted-foreground: 214 16% 65%;
+    --muted: 33 15% 75%; /* Muted beige */
+    --muted-foreground: 214 20% 50%;
 
-    --accent: 17 37% 61%; /* #c58b74 */
+    --accent: 17 37% 61%; /* #c58b74 - Terracotta accent */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214 32% 91%; /* #e5e7eb */
-    --input: 214 32% 91%;
-    --ring: 96 16% 38%;
+    --border: 33 18% 80%; /* Beige border */
+    --input: 0 0% 100%; /* White input */
+    --ring: 214 26% 32%;
 
     --radius: 0.75rem; /* 12px */
 
-    --deep: 214 26% 32%; /* #3f4e65 */
+    --deep: 214 26% 32%; /* #3f4e65 - Deep navy */
     
-    --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
+    --shadow-sm: 0 2px 4px rgba(63, 78, 101, 0.08);
+    --shadow-md: 0 4px 8px rgba(63, 78, 101, 0.12);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
     --background: 214 26% 20%;
-    --foreground: 210 40% 98%;
+    --foreground: 33 21% 86%;
 
     --card: 214 26% 24%;
-    --card-foreground: 210 40% 98%;
+    --card-foreground: 33 21% 86%;
 
     --popover: 214 26% 24%;
-    --popover-foreground: 210 40% 98%;
+    --popover-foreground: 33 21% 86%;
 
-    --primary: 96 16% 48%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 33 21% 86%;
+    --primary-foreground: 214 26% 20%;
 
     --secondary: 214 26% 28%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary-foreground: 33 21% 86%;
 
     --muted: 214 26% 28%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted-foreground: 33 15% 65%;
 
     --accent: 17 37% 55%;
     --accent-foreground: 0 0% 98%;
@@ -71,10 +72,10 @@ All colors MUST be HSL.
     --destructive-foreground: 210 40% 98%;
 
     --border: 214 26% 32%;
-    --input: 214 26% 32%;
-    --ring: 96 16% 48%;
+    --input: 214 26% 28%;
+    --ring: 33 21% 86%;
 
-    --deep: 214 16% 75%;
+    --deep: 33 21% 86%;
   }
 }
 
