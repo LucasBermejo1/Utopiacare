@@ -27,8 +27,11 @@ All colors MUST be HSL.
     --muted: 33 15% 75%; /* Muted beige */
     --muted-foreground: 214 20% 50%;
 
-    --accent: 17 37% 61%; /* #c58b74 - Terracotta accent */
+    --accent: 17 55% 56%; /* #c77850 - Terracotta accent */
     --accent-foreground: 0 0% 98%;
+    
+    --terracotta: 17 55% 56%; /* Mediterranean terracotta */
+    --mediterranean-blue: 207 89% 42%; /* #0c76d1 */
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -65,8 +68,11 @@ All colors MUST be HSL.
     --muted: 214 26% 28%;
     --muted-foreground: 33 15% 65%;
 
-    --accent: 17 37% 55%;
+    --accent: 17 55% 56%;
     --accent-foreground: 0 0% 98%;
+    
+    --terracotta: 17 55% 56%;
+    --mediterranean-blue: 207 89% 42%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
