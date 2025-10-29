@@ -1,0 +1,92 @@
+[
+  {
+    "id": "d1",
+    "author": {
+      "name": "AmanSandhu",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=AmanSandhu",
+      "skinType": "Dry/Sensitive"
+    },
+    "title": "COSRX PEPTIDE-132",
+    "excerpt": "totally recommend if you're looking to restore your hair health and smoothness! 💕✨",
+    "timeAgo": "21 hours ago",
+    "views": 217,
+    "upvotes": 124,
+    "comments": 33,
+    "category": "Product Info"
+  },
+  {
+    "id": "d2",
+    "author": {
+      "name": "KahokoVeah",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=KahokoVeah",
+      "skinType": "Oily/Sensitive"
+    },
+    "title": "Worried",
+    "excerpt": "Guys I won an event and they told me to check my email but I can't see any email from picky",
+    "timeAgo": "21 hours ago",
+    "views": 250,
+    "upvotes": 99,
+    "comments": 20,
+    "category": "Routine Help"
+  },
+  {
+    "id": "d3",
+    "author": {
+      "name": "EVNA",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=EVNA",
+      "skinType": "Oily/Resilient"
+    },
+    "title": "Happy",
+    "excerpt": "I just got my pr box",
+    "timeAgo": "21 hours ago",
+    "views": 230,
+    "upvotes": 101,
+    "comments": 29,
+    "category": "Product Info"
+  },
+  {
+    "id": "d4",
+    "author": {
+      "name": "ellulina",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=ellulina",
+      "skinType": "Oily/Sensitive"
+    },
+    "title": "Madagascar Centella Face Mask",
+    "excerpt": "I love this Madagascar Centella poremizing clarifying mask ✨",
+    "timeAgo": "18 hours ago",
+    "views": 35,
+    "upvotes": 13,
+    "comments": 3,
+    "category": "Skin Concern"
+  },
+  {
+    "id": "d5",
+    "author": {
+      "name": "Missabigail",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Missabigail",
+      "skinType": "Oily/Sensitive"
+    },
+    "title": "HAPPY!😊",
+    "excerpt": "Just won an event ❤️",
+    "timeAgo": "1 day ago",
+    "views": 476,
+    "upvotes": 204,
+    "comments": 80,
+    "category": "Product Info"
+  },
+  {
+    "id": "d6",
+    "author": {
+      "name": "Pynovvv",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Pynovvv",
+      "skinType": "Oily/Sensitive"
+    },
+    "title": "PR package from Stylevana ✨",
+    "excerpt": "Oh to be a part of VANA creator's family! 🤍",
+    "timeAgo": "1 day ago",
+    "views": 130,
+    "upvotes": 64,
+    "comments": 17,
+    "category": "Product Info"
+  }
+]

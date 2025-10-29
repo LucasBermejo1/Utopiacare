@@ -1,21 +1,9 @@
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Search } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { SearchDropdown } from "./SearchDropdown";
 import logo from "@/assets/logo.svg";
 
 export function Header() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const navigate = useNavigate();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
 
   return (
     <header className="sticky top-0 z-50 bg-card border-b border-border">
@@ -45,17 +33,7 @@ export function Header() {
             </nav>
           </div>
           <div className="flex items-center gap-2">
-            <form onSubmit={handleSearch} className="hidden sm:block relative">
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Products, brands, discussions"
-                className="w-64 pr-10"
-              />
-              <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2">
-                <Search className="w-4 h-4 text-muted-foreground" />
-              </button>
-            </form>
+            <SearchDropdown className="hidden sm:block w-64" />
             <Button size="sm" asChild>
               <Link to="/products">Join Utopia+</Link>
             </Button>
