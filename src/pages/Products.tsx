@@ -136,7 +136,7 @@ export default function Products() {
         <Card className="p-4 sticky top-20">
           <Collapsible open={attributesOpen} onOpenChange={setAttributesOpen}>
             <CollapsibleTrigger className="flex justify-between items-center w-full">
-              <h4 className="font-semibold mb-3">Attributes</h4>
+              <h4 className="font-semibold mb-3">Atributos</h4>
               <span className="text-xs">{attributesOpen ? '−' : '+'}</span>
             </CollapsibleTrigger>
             <CollapsibleContent>
@@ -162,7 +162,7 @@ export default function Products() {
 
           <Collapsible open={concernsOpen} onOpenChange={setConcernsOpen} className="mt-4">
             <CollapsibleTrigger className="flex justify-between items-center w-full">
-              <h4 className="font-semibold mb-3">Concern</h4>
+              <h4 className="font-semibold mb-3">Preocupaciones</h4>
               <span className="text-xs">{concernsOpen ? '−' : '+'}</span>
             </CollapsibleTrigger>
             <CollapsibleContent>
@@ -188,7 +188,7 @@ export default function Products() {
 
           <Collapsible open={categoriesOpen} onOpenChange={setCategoriesOpen} className="mt-4">
             <CollapsibleTrigger className="flex justify-between items-center w-full">
-              <h4 className="font-semibold mb-3">Category</h4>
+              <h4 className="font-semibold mb-3">Categorías</h4>
               <span className="text-xs">{categoriesOpen ? '−' : '+'}</span>
             </CollapsibleTrigger>
             <CollapsibleContent>
@@ -222,7 +222,7 @@ export default function Products() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="px-4 py-2 pr-10 border border-border rounded-full bg-card w-full"
-              placeholder="Search products, brands..."
+              placeholder="Buscar productos, marcas..."
             />
             <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2">
               <Search className="w-4 h-4 text-muted-foreground" />
@@ -230,7 +230,7 @@ export default function Products() {
           </form>
           
           <div className="flex justify-between items-center">
-            <Badge variant="secondary">{filteredProducts.length} Products</Badge>
+            <Badge variant="secondary">{filteredProducts.length} Productos</Badge>
           <Select
             value={sortMode}
             onValueChange={(val) => {
@@ -261,7 +261,7 @@ export default function Products() {
 
         {filteredProducts.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
-            No products found matching your filters.
+            No se encontraron productos con tus filtros.
           </div>
         )}
       </section>

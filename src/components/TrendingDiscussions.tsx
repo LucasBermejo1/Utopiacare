@@ -6,12 +6,12 @@ import { Button } from "./ui/button";
 import discussionsData from "@/data/discussions.json";
 import { Discussion } from "@/types/discussion";
 
-const categories = ["All", "Skin Concern", "Routine Help", "Makeup Help", "Hair & Body Care Help", "Product Info"];
+const categories = ["Todas", "Preocupación Cutánea", "Ayuda con Rutina", "Ayuda con Maquillaje", "Cuidado Capilar y Corporal", "Info de Producto"];
 
 export function TrendingDiscussions() {
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState("Todas");
 
-  const filteredDiscussions = selectedCategory === "All"
+  const filteredDiscussions = selectedCategory === "Todas"
     ? discussionsData
     : discussionsData.filter((d: Discussion) => d.category === selectedCategory);
 
@@ -19,11 +19,11 @@ export function TrendingDiscussions() {
     <section className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Flower2 className="w-6 h-6 text-primary" />
-          Trending Discussions
+          <Flower2 className="w-6 h-6" style={{ color: 'hsl(var(--terracotta))' }} />
+          Discusiones Populares
         </h2>
         <Link to="/products">
-          <Button variant="ghost" size="sm">VIEW ALL</Button>
+          <Button variant="ghost" size="sm">VER TODAS</Button>
         </Link>
       </div>
 

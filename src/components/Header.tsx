@@ -19,23 +19,23 @@ export function Header() {
             </Link>
             <nav className="hidden md:flex items-center gap-2">
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/">Home</Link>
+                <Link to="/">Inicio</Link>
               </Button>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/products">Products</Link>
+                <Link to="/products">Productos</Link>
               </Button>
               <Button variant="ghost" size="sm" disabled>
-                Curation
+                Curación
               </Button>
               <Button variant="ghost" size="sm" disabled>
-                Discussion
+                Discusión
               </Button>
             </nav>
           </div>
           <div className="flex items-center gap-2">
             <SearchDropdown className="hidden sm:block w-64" />
             <Button size="sm" asChild>
-              <Link to="/products">Join Utopia+</Link>
+              <Link to="/products">Únete a Utopia+</Link>
             </Button>
           </div>
         </div>

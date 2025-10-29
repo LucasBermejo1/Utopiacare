@@ -37,14 +37,19 @@ export default function Home() {
         <CategoryIconNav />
       </section>
 
-      {/* Curated Collections */}
+      {/* Featured Valencia Stores */}
       <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Flower2 className="w-6 h-6" style={{ color: 'hsl(var(--terracotta))' }} />
-            Colecciones destacadas
-          </h2>
-          <Button variant="ghost" size="sm">VER TODAS</Button>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <Flower2 className="w-6 h-6" style={{ color: 'hsl(var(--terracotta))' }} />
+              Tiendas destacadas de Valencia
+            </h2>
+            <Button variant="ghost" size="sm">VER TODAS</Button>
+          </div>
+          <p className="text-sm text-muted-foreground italic">
+            Desarrollado desde Seúl para España · Comenzando por Valencia
+          </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
@@ -52,7 +57,7 @@ export default function Home() {
               key={i}
               className="h-48 rounded-xl bg-gradient-to-br from-accent to-muted flex items-center justify-center text-muted-foreground"
             >
-              Collection {i}
+              Tienda {i}
             </div>
           ))}
         </div>

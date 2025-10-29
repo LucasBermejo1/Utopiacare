@@ -10,7 +10,7 @@ interface SearchDropdownProps {
   className?: string;
 }
 
-export function SearchDropdown({ placeholder = "Products, brands, discussions", className = "" }: SearchDropdownProps) {
+export function SearchDropdown({ placeholder = "Productos, marcas, discusiones...", className = "" }: SearchDropdownProps) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const debouncedQuery = useDebounce(query, 300);
@@ -76,7 +76,7 @@ export function SearchDropdown({ placeholder = "Products, brands, discussions", 
         <div className="absolute top-full mt-2 w-full bg-card border border-border rounded-xl shadow-lg z-50 max-h-96 overflow-y-auto">
           {results.brands.length > 0 && (
             <div className="p-3 border-b border-border">
-              <div className="text-xs font-semibold text-muted-foreground uppercase mb-2">Brands</div>
+              <div className="text-xs font-semibold text-muted-foreground uppercase mb-2">Marcas</div>
               {results.brands.map((brand) => (
                 <Link
                   key={brand}
@@ -92,7 +92,7 @@ export function SearchDropdown({ placeholder = "Products, brands, discussions", 
 
           {results.products.length > 0 && (
             <div className="p-3">
-              <div className="text-xs font-semibold text-muted-foreground uppercase mb-2">Products</div>
+              <div className="text-xs font-semibold text-muted-foreground uppercase mb-2">Productos</div>
               {results.products.map((product) => (
                 <Link
                   key={product.id}
@@ -114,7 +114,7 @@ export function SearchDropdown({ placeholder = "Products, brands, discussions", 
 
       {isOpen && query.trim().length >= 2 && results.products.length === 0 && results.brands.length === 0 && (
         <div className="absolute top-full mt-2 w-full bg-card border border-border rounded-xl shadow-lg z-50 p-4 text-center">
-          <p className="text-muted-foreground">No se encontraron resultados para '{query}'</p>
+          <p className="text-muted-foreground">No se encontraron resultados para &apos;{query}&apos;</p>
         </div>
       )}
     </div>
