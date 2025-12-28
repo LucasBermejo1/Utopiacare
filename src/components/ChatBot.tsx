@@ -337,14 +337,14 @@ export function ChatBot() {
       {/* Animación de presentación - Solo en producción */}
       {showPresentation && BETA_MODE && (
         <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm animate-in fade-in duration-500 overflow-hidden">
-          <div className="relative w-full h-full flex flex-col items-center justify-center">
+          <div className="relative w-full h-full flex flex-col items-center justify-center px-4">
             {/* Bot grande animado moviéndose por la pantalla */}
             <div className="relative utopia-presentation-bot">
               <div className="relative">
                 <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] opacity-30 animate-ping" />
-                <div className="relative w-48 h-48 md:w-64 md:h-64 rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] flex items-center justify-center shadow-2xl border-4 border-white/30">
+                <div className="relative w-40 h-40 sm:w-48 sm:h-48 md:w-64 md:h-64 rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] flex items-center justify-center shadow-2xl border-4 border-white/30">
                   <div className="relative w-full h-full flex items-center justify-center">
-                    <div className="scale-[2.5] md:scale-[3]">
+                    <div className="scale-[2] sm:scale-[2.5] md:scale-[3]">
                       <UtopiaEyes size="lg" />
                     </div>
                   </div>
@@ -353,14 +353,14 @@ export function ChatBot() {
             </div>
             
             {/* Mensaje de presentación fijo debajo del bot */}
-            <div className="mt-8 text-center space-y-2 px-6 animate-in fade-in duration-700 delay-300">
-              <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] bg-clip-text text-transparent">
+            <div className="mt-6 sm:mt-8 text-center space-y-2 px-4 sm:px-6 animate-in fade-in duration-700 delay-300">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] bg-clip-text text-transparent">
                 ¡Hola! Soy Utopia
               </h2>
-              <p className="text-lg md:text-xl text-muted-foreground">
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
                 Tu asistente de Utopiacare
               </p>
-              <p className="text-base text-muted-foreground/80">
+              <p className="text-sm sm:text-base text-muted-foreground/80">
                 Estoy disponible para ayudarte ✨
               </p>
             </div>
