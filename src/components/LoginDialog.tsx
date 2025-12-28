@@ -254,6 +254,8 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
                 duration: 6000,
               }
             );
+            // Opcional: ofrecer reenviar email de verificación
+            // Podrías añadir un botón aquí para reenviar
           } else {
             toast.error(error.message || "Error al iniciar sesión");
           }
