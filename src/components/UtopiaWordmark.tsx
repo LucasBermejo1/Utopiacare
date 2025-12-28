@@ -72,26 +72,35 @@ export function UtopiaWordmark() {
           letterSpacing: "-0.04em"
         }}
       >
-        utopi
-        <span
-          ref={dotRef}
-          className="relative inline-block"
-          style={{
-            transition: showAnimation && !isFlying ? "opacity 0.3s" : "none",
-          }}
-        >
-          {showAnimation && !isFlying && (
-            <span className="absolute top-0 left-0 w-full h-full flex items-center justify-center pointer-events-none">
-              <div className="relative w-8 h-8 md:w-12 md:h-12">
-                <UtopiaEyes size="md" />
-              </div>
-            </span>
-          )}
-          a
+        utop
+        <span className="relative inline-block">
+          i
+          {/* Punto de la i con ojos */}
+          <span
+            ref={dotRef}
+            className="absolute -top-2 left-1/2 -translate-x-1/2 inline-block"
+            style={{
+              fontSize: "0.3em",
+              transition: showAnimation && !isFlying ? "opacity 0.3s" : "none",
+            }}
+          >
+            {showAnimation && !isFlying && (
+              <span className="relative inline-block">
+                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                  <div className="relative w-8 h-8 md:w-12 md:h-12">
+                    <UtopiaEyes size="md" />
+                  </div>
+                </span>
+                <span className="opacity-0">·</span>
+              </span>
+            )}
+            {!showAnimation && <span>·</span>}
+          </span>
         </span>
+        a
       </span>
 
-      {/* Punto volando hacia el chat */}
+      {/* Punto volando hacia el chat (con ojos) */}
       {isFlying && (
         <div
           ref={flyingDotRef}
