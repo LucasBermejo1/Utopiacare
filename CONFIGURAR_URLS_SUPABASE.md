@@ -13,13 +13,13 @@ Cuando un usuario se registra, Supabase envía un email de confirmación con un 
 
 #### Site URL
 ```
-https://tu-dominio-vercel.vercel.app
+https://utopiacare-jwvg.vercel.app
 ```
 
 #### Redirect URLs (añadir todas estas):
 ```
-https://tu-dominio-vercel.vercel.app/**
-https://tu-dominio-vercel.vercel.app/auth/callback
+https://utopiacare-jwvg.vercel.app/**
+https://utopiacare-jwvg.vercel.app/auth/callback
 http://localhost:5173/**
 http://localhost:5173/auth/callback
 http://localhost:3000/**
