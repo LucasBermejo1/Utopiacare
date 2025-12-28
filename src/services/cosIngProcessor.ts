@@ -82,7 +82,7 @@ REQUISITOS DEL INFORME:
 - Si un ingrediente no aparece en CosIng, marca found_in_cosing: false y explica en safety_assessment por qué no se encontró.
 - NO inventes datos. Si no encuentras información en CosIng, indica "No encontrado en CosIng" en safety_assessment.
 - NO añadas texto fuera del JSON. Responde SOLO con el JSON válido.
-- NO uses markdown code blocks (```json). Responde directamente con el JSON.`;
+- NO uses markdown code blocks (\`\`\`json). Responde directamente con el JSON.`;
 }
 
 async function callEUAssistant(prompt: string): Promise<string> {
