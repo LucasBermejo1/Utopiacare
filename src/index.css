@@ -121,23 +121,25 @@ All colors MUST be HSL.
 
 @keyframes flyToChat {
   0% {
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
     opacity: 1;
   }
-  50% {
-    transform: translate(-50%, -50%) scale(1.2) translateY(-20px);
+  30% {
+    transform: translate(calc(var(--delta-x) * 0.3), calc(var(--delta-y) * 0.3 - 30px)) translate(-50%, -50%) scale(1.3) rotate(10deg);
+    opacity: 1;
+  }
+  70% {
+    transform: translate(calc(var(--delta-x) * 0.7), calc(var(--delta-y) * 0.7 - 10px)) translate(-50%, -50%) scale(1.1) rotate(-5deg);
     opacity: 1;
   }
   100% {
-    left: calc(100% - 120px);
-    top: calc(100% - 120px);
-    transform: translate(-50%, -50%) scale(0.8);
+    transform: translate(var(--delta-x), var(--delta-y)) translate(-50%, -50%) scale(0.9) rotate(0deg);
     opacity: 0;
   }
 }
 
 .utopia-flying-dot {
-  animation: flyToChat 2s ease-in-out forwards;
+  --delta-x: 0px;
+  --delta-y: 0px;
+  animation: flyToChat 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }

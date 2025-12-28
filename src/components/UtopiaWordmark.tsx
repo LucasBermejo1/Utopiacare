@@ -5,8 +5,10 @@ import { UtopiaEyes } from "./ChatBot";
 export function UtopiaWordmark() {
   const [showAnimation, setShowAnimation] = useState(false);
   const [isFlying, setIsFlying] = useState(false);
+  const [flyStyle, setFlyStyle] = useState<React.CSSProperties>({});
   const dotRef = useRef<HTMLSpanElement>(null);
   const wordmarkRef = useRef<HTMLDivElement>(null);
+  const flyingDotRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!BETA_MODE) return;
@@ -16,16 +18,42 @@ export function UtopiaWordmark() {
       setShowAnimation(true);
 
       // Iniciar la animación de vuelo después de 2 segundos
-      setTimeout(() => {
-        setIsFlying(true);
+      const flyTimer = setTimeout(() => {
+        // Calcular posiciones
+        const dotElement = dotRef.current;
+        const chatButton = document.querySelector('[aria-label="Hablar con Utopia"]') as HTMLElement;
         
-        // Después de la animación, ocultar el punto original
-        setTimeout(() => {
-          if (dotRef.current) {
-            dotRef.current.style.opacity = "0";
-          }
-        }, 2000);
+        if (dotElement && chatButton) {
+          const dotRect = dotElement.getBoundingClientRect();
+          const chatRect = chatButton.getBoundingClientRect();
+          
+          const startX = dotRect.left + dotRect.width / 2;
+          const startY = dotRect.top + dotRect.height / 2;
+          const endX = chatRect.left + chatRect.width / 2;
+          const endY = chatRect.top + chatRect.height / 2;
+          
+          const deltaX = endX - startX;
+          const deltaY = endY - startY;
+          
+          setFlyStyle({
+            left: `${startX}px`,
+            top: `${startY}px`,
+            '--delta-x': `${deltaX}px`,
+            '--delta-y': `${deltaY}px`,
+          } as React.CSSProperties);
+          
+          setIsFlying(true);
+          
+          // Después de la animación, ocultar el punto original
+          setTimeout(() => {
+            if (dotRef.current) {
+              dotRef.current.style.opacity = "0";
+            }
+          }, 2000);
+        }
       }, 2000);
+
+      return () => clearTimeout(flyTimer);
     }, 1000);
 
     return () => clearTimeout(timer);
@@ -63,12 +91,9 @@ export function UtopiaWordmark() {
       {/* Punto volando hacia el chat */}
       {isFlying && (
         <div
+          ref={flyingDotRef}
           className="fixed z-[60] pointer-events-none utopia-flying-dot"
-          style={{
-            left: "50%",
-            top: "50%",
-            transform: "translate(-50%, -50%)",
-          }}
+          style={flyStyle}
         >
           <div className="relative w-12 h-12 md:w-16 md:h-16">
             <UtopiaEyes size="lg" />
