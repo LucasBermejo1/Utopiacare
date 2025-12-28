@@ -13,12 +13,14 @@ export function UtopiaWordmark() {
   useEffect(() => {
     if (!BETA_MODE) return;
 
+    let flyTimer: NodeJS.Timeout;
+    
     // Esperar a que la página cargue completamente
     const timer = setTimeout(() => {
       setShowAnimation(true);
 
       // Iniciar la animación de vuelo después de 2 segundos
-      const flyTimer = setTimeout(() => {
+      flyTimer = setTimeout(() => {
         // Calcular posiciones
         const dotElement = dotRef.current;
         const chatButton = document.querySelector('[aria-label="Hablar con Utopia"]') as HTMLElement;
@@ -52,11 +54,12 @@ export function UtopiaWordmark() {
           }, 2000);
         }
       }, 2000);
-
-      return () => clearTimeout(flyTimer);
     }, 1000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (flyTimer) clearTimeout(flyTimer);
+    };
   }, []);
 
   return (
