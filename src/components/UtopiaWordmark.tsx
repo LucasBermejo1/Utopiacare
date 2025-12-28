@@ -3,7 +3,8 @@ import { BETA_MODE } from "@/config/constants";
 import { UtopiaEyes } from "./ChatBot";
 
 export function UtopiaWordmark() {
-  const [showAnimation, setShowAnimation] = useState(false);
+  const [showEyes, setShowEyes] = useState(false);
+  const [eyesOpacity, setEyesOpacity] = useState(0);
   const [isFlying, setIsFlying] = useState(false);
   const [flyStyle, setFlyStyle] = useState<React.CSSProperties>({});
   const dotRef = useRef<HTMLSpanElement>(null);
@@ -14,12 +15,24 @@ export function UtopiaWordmark() {
     if (!BETA_MODE) return;
 
     let flyTimer: NodeJS.Timeout;
+    let opacityTimer: NodeJS.Timeout;
     
     // Esperar a que la página cargue completamente
     const timer = setTimeout(() => {
-      setShowAnimation(true);
+      // Aparición gradual de los ojos (1 segundo)
+      setShowEyes(true);
+      let currentOpacity = 0;
+      const opacityInterval = setInterval(() => {
+        currentOpacity += 0.05;
+        if (currentOpacity >= 1) {
+          clearInterval(opacityInterval);
+          setEyesOpacity(1);
+        } else {
+          setEyesOpacity(currentOpacity);
+        }
+      }, 50);
 
-      // Iniciar la animación de vuelo después de 2 segundos
+      // Iniciar la animación de vuelo después de que los ojos aparezcan y parpadeen
       flyTimer = setTimeout(() => {
         // Calcular posiciones
         const dotElement = dotRef.current;
@@ -51,14 +64,15 @@ export function UtopiaWordmark() {
             if (dotRef.current) {
               dotRef.current.style.opacity = "0";
             }
-          }, 2000);
+          }, 2500);
         }
-      }, 2000);
+      }, 3000); // 3 segundos: 1s aparición + 2s parpadeos
     }, 1000);
 
     return () => {
       clearTimeout(timer);
       if (flyTimer) clearTimeout(flyTimer);
+      if (opacityTimer) clearTimeout(opacityTimer);
     };
   }, []);
 
@@ -81,20 +95,28 @@ export function UtopiaWordmark() {
             className="absolute -top-2 left-1/2 -translate-x-1/2 inline-block"
             style={{
               fontSize: "0.3em",
-              transition: showAnimation && !isFlying ? "opacity 0.3s" : "none",
+              transition: !isFlying ? "opacity 0.3s" : "none",
             }}
           >
-            {showAnimation && !isFlying && (
-              <span className="relative inline-block">
-                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <div className="relative w-8 h-8 md:w-12 md:h-12">
-                    <UtopiaEyes size="md" />
+            <span className="relative inline-block">
+              {/* Punto base siempre visible */}
+              <span className="inline-block" style={{ opacity: showEyes ? 0.3 : 1 }}>·</span>
+              
+              {/* Ojos con aparición gradual y parpadeos */}
+              {showEyes && !isFlying && (
+                <span 
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                  style={{
+                    opacity: eyesOpacity,
+                    transition: "opacity 0.1s ease-in-out",
+                  }}
+                >
+                  <div className="relative w-6 h-6 md:w-10 md:h-10">
+                    <UtopiaEyes size="sm" />
                   </div>
                 </span>
-                <span className="opacity-0">·</span>
-              </span>
-            )}
-            {!showAnimation && <span>·</span>}
+              )}
+            </span>
           </span>
         </span>
         a
