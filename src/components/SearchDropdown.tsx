@@ -73,16 +73,16 @@ export function SearchDropdown({ placeholder = defaultPlaceholder, className = "
         currentCharIndex++;
         typingTimeout = setTimeout(type, 100);
       } else if (!isDeleting && currentCharIndex === currentText.length) {
-        // Esperar antes de borrar
+        // Esperar 1.5 segundos antes de borrar
         typingTimeout = setTimeout(() => {
           isDeleting = true;
           type();
-        }, 2000);
+        }, 1500);
       } else if (isDeleting && currentCharIndex > 0) {
-        // Borrando
+        // Borrando rápido (como si estuviera presionando delete)
         setAnimatedPlaceholder(currentText.substring(0, currentCharIndex - 1));
         currentCharIndex--;
-        typingTimeout = setTimeout(type, 50);
+        typingTimeout = setTimeout(type, 30);
       } else if (isDeleting && currentCharIndex === 0) {
         // Cambiar al siguiente texto
         isDeleting = false;
