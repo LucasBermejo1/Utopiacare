@@ -54,48 +54,6 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Sección destacada del Chat - Solo en producción */}
-        {BETA_MODE && (
-          <div className="max-w-4xl mx-auto mt-12 p-8 rounded-2xl bg-gradient-to-br from-[hsl(var(--terracotta))]/10 via-[hsl(var(--accent))]/10 to-[hsl(var(--terracotta))]/10 border-2 border-[hsl(var(--accent))]/30 shadow-lg relative overflow-hidden">
-            {/* Efecto de brillo animado */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_3s_infinite]"></div>
-            
-            <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
-              <div className="flex-1 text-center md:text-left">
-                <h3 className="text-2xl md:text-3xl font-bold mb-3 bg-gradient-to-r from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] bg-clip-text text-transparent">
-                  💬 ¡Chatea con Utopia!
-                </h3>
-                <p className="text-base md:text-lg text-muted-foreground mb-4">
-                  Tu asesor de belleza personal está listo para ayudarte. Haz clic en el botón flotante 
-                  <span className="inline-block mx-2">👇</span> para comenzar una conversación y obtener recomendaciones personalizadas.
-                </p>
-                <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                  <span className="px-3 py-1 rounded-full bg-[hsl(var(--accent))]/20 text-sm font-medium">
-                    ✨ Recomendaciones personalizadas
-                  </span>
-                  <span className="px-3 py-1 rounded-full bg-[hsl(var(--accent))]/20 text-sm font-medium">
-                    🧪 Análisis de ingredientes
-                  </span>
-                  <span className="px-3 py-1 rounded-full bg-[hsl(var(--accent))]/20 text-sm font-medium">
-                    💡 Consejos de cuidado
-                  </span>
-                </div>
-              </div>
-              <div className="flex-shrink-0">
-                <div className="relative">
-                  {/* Indicador animado apuntando al botón */}
-                  <div className="absolute -top-8 -right-8 animate-bounce">
-                    <div className="text-4xl">👆</div>
-                  </div>
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] flex items-center justify-center shadow-xl border-4 border-white/30 animate-pulse">
-                    <div className="text-4xl">💬</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         <div className="max-w-3xl mx-auto space-y-4">
           <h2 className="text-2xl font-semibold text-left">¿Qué buscas hoy?</h2>
           <SearchDropdown className="w-full" enableTypingEffect={true} />
