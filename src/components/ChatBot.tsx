@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, X, Send, Sparkles, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { BETA_MODE } from "@/config/constants";
 import {
   saveChatMessage,
   extractRelevantDataFromMessage,
