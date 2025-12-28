@@ -113,6 +113,7 @@ export function ChatBot() {
   const { user, loading: authLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [showPresentation, setShowPresentation] = useState(false);
   
   // Mensaje inicial adaptado según si el usuario está autenticado
   const getInitialMessage = () => {
@@ -154,6 +155,25 @@ export function ChatBot() {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isOpen]);
+
+  // Animación de presentación solo en producción
+  useEffect(() => {
+    if (!BETA_MODE) return;
+
+    // Mostrar presentación después de 1 segundo
+    const presentationTimer = setTimeout(() => {
+      setShowPresentation(true);
+      
+      // Ocultar presentación después de 4 segundos y animar vuelta
+      const hideTimer = setTimeout(() => {
+        setShowPresentation(false);
+      }, 4000);
+
+      return () => clearTimeout(hideTimer);
+    }, 1000);
+
+    return () => clearTimeout(presentationTimer);
+  }, []);
 
   // Actualizar mensaje inicial cuando el usuario inicia sesión
   useEffect(() => {
@@ -314,9 +334,41 @@ export function ChatBot() {
 
   return (
     <>
+      {/* Animación de presentación - Solo en producción */}
+      {showPresentation && BETA_MODE && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in duration-500">
+          <div className="flex flex-col items-center gap-6 animate-in zoom-in-95 duration-500">
+            {/* Bot grande en el centro */}
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] opacity-30 animate-ping" />
+              <div className="relative w-48 h-48 md:w-64 md:h-64 rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] flex items-center justify-center shadow-2xl border-4 border-white/30">
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <UtopiaEyes size="lg" />
+                </div>
+              </div>
+            </div>
+            
+            {/* Mensaje de presentación */}
+            <div className="text-center space-y-2 px-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+              <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] bg-clip-text text-transparent">
+                ¡Hola! Soy Utopia
+              </h2>
+              <p className="text-lg md:text-xl text-muted-foreground">
+                Tu asistente de Utopiacare
+              </p>
+              <p className="text-base text-muted-foreground/80">
+                Estoy disponible para ayudarte ✨
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Botón flotante para abrir el chat */}
       {!isOpen && (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className={`fixed bottom-6 right-6 z-50 transition-all duration-1000 ${
+          showPresentation ? "opacity-0 scale-0" : "opacity-100 scale-100"
+        }`}>
           {/* Pulso animado de fondo - más intenso en producción */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] opacity-30 animate-ping" />
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] opacity-20 animate-pulse" />
