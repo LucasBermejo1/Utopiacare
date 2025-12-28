@@ -321,14 +321,6 @@ export function ChatBot() {
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] opacity-30 animate-ping" />
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] opacity-20 animate-pulse" />
           
-          {/* Tooltip en producción */}
-          {BETA_MODE && (
-            <div className="absolute bottom-full right-0 mb-4 px-4 py-2 bg-gradient-to-r from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] text-white rounded-lg shadow-xl whitespace-nowrap animate-bounce">
-              <div className="text-sm font-semibold">💬 ¡Haz clic para chatear!</div>
-              <div className="absolute bottom-0 right-6 transform translate-y-1/2 rotate-45 w-2 h-2 bg-gradient-to-r from-[hsl(var(--terracotta))] to-[hsl(var(--accent))]"></div>
-            </div>
-          )}
-          
           <Button
             onClick={() => setIsOpen(true)}
             className={`relative rounded-full shadow-2xl hover:scale-110 transition-all duration-300 bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] hover:shadow-3xl hover:shadow-[hsl(var(--terracotta))]/50 border-2 border-white/20 ${
