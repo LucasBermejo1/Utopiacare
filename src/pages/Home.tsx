@@ -56,7 +56,7 @@ export default function Home() {
 
         <div className="max-w-3xl mx-auto space-y-4">
           <h2 className="text-2xl font-semibold text-left">¿Qué buscas hoy?</h2>
-          <SearchDropdown className="w-full" enableTypingEffect={true} />
+          <SearchDropdown className="w-full" enableTypingEffect={!BETA_MODE} />
         </div>
         
         {/* Category Navigation - Solo visible si no está en modo beta */}

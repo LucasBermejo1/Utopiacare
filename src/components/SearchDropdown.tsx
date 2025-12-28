@@ -4,6 +4,7 @@ import { Search, ArrowRight } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
 import productsData from "@/data/products.json";
 import { Product } from "@/types/product";
+import { BETA_MODE } from "@/config/constants";
 
 interface SearchDropdownProps {
   placeholder?: string;
@@ -11,7 +12,21 @@ interface SearchDropdownProps {
   enableTypingEffect?: boolean; // Prop para habilitar el efecto solo en la página de inicio
 }
 
-export function SearchDropdown({ placeholder = "Productos, marcas, discusiones...", className = "", enableTypingEffect = false }: SearchDropdownProps) {
+// Detectar si estamos en producción (Vercel) o desarrollo local
+// Usa la misma lógica que BETA_MODE para consistencia
+const isDevelopment = typeof window !== "undefined" && (
+  import.meta.env.DEV || 
+  window.location.hostname === "localhost" || 
+  window.location.hostname === "127.0.0.1"
+);
+
+const isProduction = !isDevelopment;
+
+const defaultPlaceholder = isProduction 
+  ? "Esta función estará disponible dentro de poco. Muy pronto abriremos toda la plataforma para vosotr@s..."
+  : "Productos, marcas, discusiones...";
+
+export function SearchDropdown({ placeholder = defaultPlaceholder, className = "", enableTypingEffect = false }: SearchDropdownProps) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -140,13 +155,21 @@ export function SearchDropdown({ placeholder = "Productos, marcas, discusiones..
             setTimeout(() => setIsFocused(false), 200);
           }}
           placeholder={animatedPlaceholder || placeholder}
-          className="w-full h-16 pl-16 pr-20 rounded-full border-2 border-[hsl(var(--border))] bg-card text-foreground placeholder:text-muted-foreground placeholder:text-lg text-lg shadow-[var(--shadow-sm)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:border-transparent"
+          disabled={isProduction}
+          className={`w-full h-16 pl-16 pr-20 rounded-full border-2 border-[hsl(var(--border))] bg-card text-foreground placeholder:text-muted-foreground placeholder:text-lg text-lg shadow-[var(--shadow-sm)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:border-transparent ${
+            isProduction ? "opacity-60 cursor-not-allowed" : ""
+          }`}
         />
         {/* Botón circular rosa a la derecha */}
         <button
           type="button"
           aria-label="Buscar"
-          className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center bg-[hsl(var(--accent))] text-white shadow-md hover:opacity-95 active:scale-95 transition"
+          disabled={isProduction}
+          className={`absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center bg-[hsl(var(--accent))] text-white shadow-md transition ${
+            isProduction 
+              ? "opacity-60 cursor-not-allowed" 
+              : "hover:opacity-95 active:scale-95"
+          }`}
           onClick={() => setIsOpen(true)}
         >
           <ArrowRight className="w-6 h-6" />
