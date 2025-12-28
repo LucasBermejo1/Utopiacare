@@ -209,33 +209,26 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
 
         // Verificar si el email necesita confirmación
         if (data.user && !data.session) {
-          // Email de confirmación enviado - intentar iniciar sesión automáticamente
-          console.log("Email no confirmado, intentando iniciar sesión automáticamente...");
+          // Email de confirmación enviado - REQUERIR verificación
+          console.log("Email de confirmación enviado, esperando verificación del usuario");
           
-          // Intentar iniciar sesión automáticamente (si la verificación está deshabilitada)
-          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-
-          if (signInError) {
-            // Si falla, mostrar mensaje de verificación
-            toast.success(
-              "¡Cuenta creada! Revisa tu email (y spam) para verificar tu cuenta.",
-              {
-                duration: 6000,
-              }
-            );
-            setOpen(false);
-          } else if (signInData.session) {
-            // Sesión iniciada exitosamente
-            toast.success("¡Cuenta creada e iniciada sesión!");
-            setOpen(false);
-            setShowOnboarding(true);
-            onLoginSuccess?.();
-          }
+          toast.success(
+            "¡Cuenta creada! 📧 Revisa tu email (y la carpeta de spam) para verificar tu cuenta. Debes verificar tu email antes de poder iniciar sesión.",
+            {
+              duration: 8000,
+            }
+          );
+          
+          // Cerrar el diálogo y mostrar mensaje
+          setOpen(false);
+          setEmail("");
+          setPassword("");
+          
+          // NO intentar iniciar sesión automáticamente - requerir verificación
+          return;
         } else if (data.session) {
-          // Email confirmado automáticamente (modo desarrollo)
+          // Email ya confirmado (puede pasar en desarrollo si está deshabilitada la verificación)
+          console.log("Email ya confirmado, iniciando sesión automáticamente");
           toast.success("¡Cuenta creada e iniciada sesión!");
           setOpen(false);
           setShowOnboarding(true);
@@ -254,8 +247,13 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
           // Mensajes más específicos según el tipo de error
           if (error.message.includes("Invalid login credentials")) {
             toast.error("Email o contraseña incorrectos");
-          } else if (error.message.includes("Email not confirmed")) {
-            toast.error("Por favor, verifica tu email antes de iniciar sesión");
+          } else if (error.message.includes("Email not confirmed") || error.message.includes("email_not_confirmed")) {
+            toast.error(
+              "Por favor, verifica tu email antes de iniciar sesión. Revisa tu bandeja de entrada y spam.",
+              {
+                duration: 6000,
+              }
+            );
           } else {
             toast.error(error.message || "Error al iniciar sesión");
           }
