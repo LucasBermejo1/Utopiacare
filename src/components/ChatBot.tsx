@@ -15,7 +15,7 @@ import {
 import { getChatGPTResponse, convertMessagesToChatGPTFormat } from "@/services/chatGPTService";
 
 // Componente para los ojos animados de Utopia
-function UtopiaEyes({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+export function UtopiaEyes({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   const [isBlinking, setIsBlinking] = useState(false);
   const blinkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 

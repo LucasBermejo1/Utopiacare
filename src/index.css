@@ -118,3 +118,26 @@ All colors MUST be HSL.
 .animate-shimmer {
   animation: shimmer 3s infinite;
 }
+
+@keyframes flyToChat {
+  0% {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2) translateY(-20px);
+    opacity: 1;
+  }
+  100% {
+    left: calc(100% - 120px);
+    top: calc(100% - 120px);
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+  }
+}
+
+.utopia-flying-dot {
+  animation: flyToChat 2s ease-in-out forwards;
+}
