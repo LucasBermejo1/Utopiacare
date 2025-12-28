@@ -155,9 +155,18 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
       if (isSignUp) {
         // Registro
         console.log("Intentando registrar usuario:", email);
+        
+        // Determinar la URL de redirección según el entorno
+        const redirectUrl = BETA_MODE 
+          ? window.location.origin // URL pública en producción
+          : `${window.location.origin}/auth/callback`; // URL local en desarrollo
+        
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            emailRedirectTo: redirectUrl,
+          },
         });
 
         if (error) {
