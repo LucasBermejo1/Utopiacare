@@ -98,11 +98,16 @@ export function UtopiaWordmark() {
               transition: !isFlying ? "opacity 0.3s" : "none",
             }}
           >
-            <span className="relative inline-block">
-              {/* Punto base siempre visible */}
-              <span className="inline-block" style={{ opacity: showEyes ? 0.3 : 1 }}>·</span>
+            <span className="relative inline-block w-full h-full">
+              {/* Punto base siempre visible - se hace más transparente cuando aparecen los ojos */}
+              <span 
+                className="inline-block transition-opacity duration-1000" 
+                style={{ opacity: showEyes ? 0.2 : 1 }}
+              >
+                ·
+              </span>
               
-              {/* Ojos con aparición gradual y parpadeos */}
+              {/* Ojos con aparición gradual y parpadeos - mejor centrados e integrados */}
               {showEyes && !isFlying && (
                 <span 
                   className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
@@ -111,7 +116,7 @@ export function UtopiaWordmark() {
                     transition: "opacity 0.1s ease-in-out",
                   }}
                 >
-                  <div className="relative w-6 h-6 md:w-10 md:h-10">
+                  <div className="relative w-5 h-5 md:w-8 md:h-8" style={{ transform: "scale(0.8)" }}>
                     <UtopiaEyes size="sm" />
                   </div>
                 </span>
