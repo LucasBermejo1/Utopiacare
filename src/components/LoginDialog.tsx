@@ -144,6 +144,18 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar campos
+    if (!email || !password) {
+      toast.error("Por favor completa todos los campos");
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+
     if (!supabase) {
       toast.error("Supabase no configurado. Verifica las variables de entorno.");
       console.error("Supabase no está inicializado. Verifica VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY");
