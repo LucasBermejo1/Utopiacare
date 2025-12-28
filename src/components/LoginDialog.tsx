@@ -157,9 +157,13 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
         console.log("Intentando registrar usuario:", email);
         
         // Determinar la URL de redirección según el entorno
-        const redirectUrl = BETA_MODE 
-          ? window.location.origin // URL pública en producción
+        // En producción, usar siempre el dominio público de Vercel
+        const isProduction = BETA_MODE || window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1";
+        const redirectUrl = isProduction 
+          ? "https://utopiacare-jwvg.vercel.app/auth/callback" // URL pública en producción
           : `${window.location.origin}/auth/callback`; // URL local en desarrollo
+        
+        console.log("URL de redirección configurada:", redirectUrl);
         
         const { data, error } = await supabase.auth.signUp({
           email,

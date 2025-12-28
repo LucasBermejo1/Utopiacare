@@ -11,6 +11,7 @@ import Stores from "./pages/Stores";
 import StoreDetail from "./pages/StoreDetail";
 import Discussions from "./pages/Discussions";
 import ResetPassword from "./pages/ResetPassword";
+import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 import { ComingSoon } from "./components/ComingSoon";
 import { BETA_MODE } from "./config/constants";
@@ -78,6 +79,10 @@ const router = createBrowserRouter([
   {
     path: "/reset-password",
     element: <ResetPassword />
+  },
+  {
+    path: "/auth/callback",
+    element: <AuthCallback />
   }
 ]);
 
