@@ -167,15 +167,18 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
 
         console.log("Registro exitoso, datos:", data);
 
-        // Crear perfil básico del usuario automáticamente
+        // Crear perfil básico del usuario automáticamente (en segundo plano, no bloquea)
         if (data.user) {
-          try {
-            await ensureUserProfile(data.user.id, data.user.email || email);
-            console.log("Perfil básico creado para nuevo usuario");
-          } catch (profileError) {
-            console.error("Error creando perfil básico:", profileError);
-            // Continuar aunque falle la creación del perfil
-          }
+          // Usar setTimeout para no bloquear la UI
+          setTimeout(async () => {
+            try {
+              await ensureUserProfile(data.user.id, data.user.email || email);
+              console.log("Perfil básico creado para nuevo usuario");
+            } catch (profileError) {
+              console.error("Error creando perfil básico:", profileError);
+              // No mostrar error al usuario, es operación en segundo plano
+            }
+          }, 100);
         }
 
         // Verificar si el email necesita confirmación
