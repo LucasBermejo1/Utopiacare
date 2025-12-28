@@ -37,8 +37,11 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
 
     setLoading(true);
     try {
+      // Siempre usar el dominio público para emails
+      const redirectUrl = "https://utopiacare-jwvg.vercel.app/reset-password";
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: redirectUrl,
       });
 
       if (error) throw error;
@@ -96,8 +99,11 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
                   setEmailSent(false);
                   setLoading(true);
                   try {
+                    // Siempre usar el dominio público para emails
+                    const redirectUrl = "https://utopiacare-jwvg.vercel.app/reset-password";
+                    
                     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                      redirectTo: `${window.location.origin}/reset-password`,
+                      redirectTo: redirectUrl,
                     });
                     if (error) throw error;
                     setEmailSent(true);
