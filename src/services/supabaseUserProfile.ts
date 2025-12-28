@@ -81,61 +81,89 @@ export async function ensureUserProfile(userId: string, userEmail?: string | nul
     throw new Error("Supabase no configurado");
   }
 
-  // Obtener email si no se proporcionó
-  let email = userEmail;
-  if (!email) {
-    email = await getUserEmail(userId);
-  }
-
-  // Primero verificar si existe
-  let profile = await getUserProfile(userId);
-  
-  // Si no existe, crear uno básico
-  if (!profile) {
-    console.log("Creando perfil básico para usuario:", userId);
-    
-    const { data, error } = await supabase
-      .from("user_profiles")
-      .insert({
-        user_id: userId,
-        email: email || null,
-        skin_type: "normal", // Valor por defecto
-        concerns: [],
-        onboarding_completed: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error("Error creando perfil básico:", error);
-      throw new Error(error.message);
+  try {
+    // Obtener email si no se proporcionó
+    let email = userEmail;
+    if (!email) {
+      try {
+        email = await getUserEmail(userId);
+      } catch (emailError) {
+        console.warn("No se pudo obtener email, continuando sin él:", emailError);
+        // Continuar sin email si no se puede obtener
+      }
     }
 
-    profile = data as UserProfile;
-    console.log("Perfil básico creado exitosamente");
-  } else if (email && !profile.email) {
-    // Si el perfil existe pero no tiene email, actualizarlo
-    console.log("Actualizando email en perfil existente:", userId);
-    try {
+    // Primero verificar si existe
+    let profile = await getUserProfile(userId);
+    
+    // Si no existe, crear uno básico
+    if (!profile) {
+      console.log("Creando perfil básico para usuario:", userId);
+      
       const { data, error } = await supabase
         .from("user_profiles")
-        .update({ email: email })
-        .eq("user_id", userId)
+        .insert({
+          user_id: userId,
+          email: email || null,
+          skin_type: "normal", // Valor por defecto
+          concerns: [],
+          onboarding_completed: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
         .select()
         .single();
 
-      if (!error && data) {
-        profile = data as UserProfile;
+      if (error) {
+        // Si el error es de conflicto (ya existe), intentar obtenerlo
+        if (error.code === "23505" || error.message.includes("duplicate") || error.message.includes("unique")) {
+          console.log("Perfil ya existe, obteniéndolo...");
+          profile = await getUserProfile(userId);
+          if (profile) {
+            return profile;
+          }
+        }
+        console.error("Error creando perfil básico:", error);
+        throw new Error(error.message);
       }
-    } catch (updateError) {
-      console.error("Error actualizando email en perfil:", updateError);
-      // No lanzar error, es opcional
-    }
-  }
 
-  return profile;
+      profile = data as UserProfile;
+      console.log("Perfil básico creado exitosamente");
+    } else if (email && !profile.email) {
+      // Si el perfil existe pero no tiene email, actualizarlo
+      console.log("Actualizando email en perfil existente:", userId);
+      try {
+        const { data, error } = await supabase
+          .from("user_profiles")
+          .update({ email: email })
+          .eq("user_id", userId)
+          .select()
+          .single();
+
+        if (!error && data) {
+          profile = data as UserProfile;
+        }
+      } catch (updateError) {
+        console.error("Error actualizando email en perfil:", updateError);
+        // No lanzar error, es opcional
+      }
+    }
+
+    return profile;
+  } catch (error) {
+    console.error("Error en ensureUserProfile:", error);
+    // Si hay un error crítico, intentar obtener el perfil de nuevo
+    try {
+      const fallbackProfile = await getUserProfile(userId);
+      if (fallbackProfile) {
+        return fallbackProfile;
+      }
+    } catch (fallbackError) {
+      console.error("Error en fallback:", fallbackError);
+    }
+    // Re-lanzar el error original si no se pudo recuperar
+    throw error;
+  }
 }
 
 /**
