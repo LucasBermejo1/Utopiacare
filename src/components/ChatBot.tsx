@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, X, Send, Sparkles, Heart } from "lucide-react";
+import { MessageCircle, X, Send, Sparkles, Heart, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { BETA_MODE } from "@/config/constants";
@@ -107,6 +107,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  images?: string[]; // URLs o base64 de imágenes
 }
 
 export function ChatBot() {
@@ -137,8 +138,10 @@ export function ChatBot() {
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-scroll al final cuando hay nuevos mensajes
   useEffect(() => {
@@ -245,10 +248,12 @@ export function ChatBot() {
       role: "user",
       content: inputValue.trim(),
       timestamp: new Date(),
+      images: selectedImages.length > 0 ? selectedImages : undefined,
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
+    setSelectedImages([]); // Limpiar imágenes seleccionadas
     setIsLoading(true);
     setShowLoginPrompt(false); // Resetear el prompt si el usuario envía un mensaje
 
@@ -289,11 +294,12 @@ export function ChatBot() {
           messages.map(msg => ({ role: msg.role, content: msg.content }))
         );
         
-        // Obtener respuesta de ChatGPT (pasar userId para personalización)
+        // Obtener respuesta de ChatGPT (pasar userId e imágenes para personalización)
         const response = await getChatGPTResponse(
           userMessage.content, 
           conversationHistory,
-          user?.id || null
+          user?.id || null,
+          userMessage.images
         );
       
       const assistantMessage: Message = {
@@ -368,6 +374,35 @@ export function ChatBot() {
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const newImages: string[] = [];
+    const maxImages = 3; // Máximo 3 imágenes por mensaje
+    const remainingSlots = maxImages - selectedImages.length;
+
+    Array.from(files).slice(0, remainingSlots).forEach((file) => {
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const base64 = event.target?.result as string;
+          setSelectedImages((prev) => [...prev, base64]);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -502,7 +537,23 @@ export function ChatBot() {
                         : "bg-white/80 backdrop-blur-sm border border-[hsl(var(--terracotta))]/20 rounded-bl-sm"
                     )}
                   >
-                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                    {/* Mostrar imágenes si existen */}
+                    {message.images && message.images.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {message.images.map((img, imgIndex) => (
+                          <div key={imgIndex} className="relative group">
+                            <img
+                              src={img}
+                              alt={`Imagen ${imgIndex + 1}`}
+                              className="w-24 h-24 object-cover rounded-lg border-2 border-white/30"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {message.content && (
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                    )}
                     <p className={cn(
                       "text-xs mt-2",
                       message.role === "user" ? "text-primary-foreground/70" : "text-muted-foreground"
@@ -539,7 +590,47 @@ export function ChatBot() {
 
           {/* Input */}
           <div className="p-4 border-t bg-gradient-to-r from-[hsl(var(--terracotta))]/5 to-[hsl(var(--accent))]/5 backdrop-blur-sm">
+            {/* Vista previa de imágenes seleccionadas */}
+            {selectedImages.length > 0 && (
+              <div className="flex gap-2 mb-3 overflow-x-auto pb-2">
+                {selectedImages.map((img, index) => (
+                  <div key={index} className="relative flex-shrink-0">
+                    <img
+                      src={img}
+                      alt={`Preview ${index + 1}`}
+                      className="w-16 h-16 object-cover rounded-lg border-2 border-[hsl(var(--terracotta))]/30"
+                    />
+                    <button
+                      onClick={() => removeImage(index)}
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                      aria-label="Eliminar imagen"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="flex gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageSelect}
+                className="hidden"
+                aria-label="Seleccionar imágenes"
+              />
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isLoading || selectedImages.length >= 3}
+                size="icon"
+                variant="outline"
+                className="rounded-full border-[hsl(var(--terracotta))]/20 hover:bg-[hsl(var(--terracotta))]/10 transition-all disabled:opacity-50"
+                aria-label="Añadir imagen"
+              >
+                <ImageIcon className="h-4 w-4" />
+              </Button>
               <Input
                 ref={inputRef}
                 value={inputValue}
@@ -551,7 +642,7 @@ export function ChatBot() {
               />
               <Button
                 onClick={handleSendMessage}
-                disabled={!inputValue.trim() || isLoading}
+                disabled={(!inputValue.trim() && selectedImages.length === 0) || isLoading}
                 size="icon"
                 className="rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50"
                 aria-label="Enviar mensaje"

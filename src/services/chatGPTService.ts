@@ -39,13 +39,19 @@ interface ChatGPTResponse {
 export async function getChatGPTResponse(
   userMessage: string,
   conversationHistory: ChatGPTMessage[] = [],
-  userId?: string | null
+  userId?: string | null,
+  images?: string[] // Array de imágenes en base64
 ): Promise<string> {
   const apiKey = import.meta.env.VITE_CHATGPT_API_KEY;
   const assistantId = import.meta.env.VITE_CHATGPT_ASSISTANT_ID?.trim();
 
   if (!apiKey) {
     throw new Error("VITE_CHATGPT_API_KEY no está configurada. Por favor, añádela en tu archivo .env.local");
+  }
+
+  // Si hay imágenes, usar el modelo con visión (gpt-4o o gpt-4o-mini con visión)
+  if (images && images.length > 0) {
+    return await getChatCompletionsResponse(apiKey, userMessage, conversationHistory, images);
   }
 
   // Si se especifica un Assistant ID, usar la API de Assistants
@@ -275,7 +281,8 @@ async function getAssistantResponse(
 async function getChatCompletionsResponse(
   apiKey: string,
   userMessage: string,
-  conversationHistory: ChatGPTMessage[]
+  conversationHistory: ChatGPTMessage[],
+  images?: string[]
 ): Promise<string> {
   const systemPrompt: ChatGPTMessage = {
     role: "system",
@@ -289,15 +296,35 @@ INSTRUCCIONES:
 - Si no estás seguro de algo, admítelo y sugiere consultar con un dermatólogo
 - Mantén las respuestas concisas pero completas (máximo 300 palabras)
 - Personaliza tus respuestas según el contexto de la conversación
-- Si el usuario menciona preocupaciones específicas (acné, arrugas, manchas, etc.), enfócate en eso`,
+- Si el usuario menciona preocupaciones específicas (acné, arrugas, manchas, etc.), enfócate en eso
+- Si el usuario envía fotos de productos, analiza la imagen y proporciona información sobre el producto, ingredientes visibles, y recomendaciones basadas en lo que ves`,
   };
 
-  const messages: ChatGPTMessage[] = [
+  // Si hay imágenes, construir el mensaje con contenido multimodal
+  let userContent: any;
+  if (images && images.length > 0) {
+    userContent = [
+      {
+        type: "text",
+        text: userMessage || "¿Puedes analizar este producto de belleza?"
+      },
+      ...images.map((img) => ({
+        type: "image_url",
+        image_url: {
+          url: img // Base64 data URL
+        }
+      }))
+    ];
+  } else {
+    userContent = userMessage;
+  }
+
+  const messages: any[] = [
     systemPrompt,
     ...conversationHistory,
     {
       role: "user",
-      content: userMessage,
+      content: userContent,
     },
   ];
 
@@ -309,7 +336,7 @@ INSTRUCCIONES:
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: images && images.length > 0 ? "gpt-4o" : "gpt-4o-mini", // Usar gpt-4o para visión
         messages: messages,
         temperature: 0.7,
         max_tokens: 800,
