@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ProductCard } from "@/components/ProductCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,8 @@ import {
 } from "@/components/ui/collapsible";
 import productsData from "@/data/products.json";
 import { Product } from "@/types/product";
+import { fetchProductsFromSupabase } from "@/services/supabaseProducts";
+import { AddProductDialog } from "@/components/AddProductDialog";
 import {
   ATTRIBUTES,
   CONCERNS,
@@ -29,11 +32,12 @@ import {
 } from "@/config/constants";
 
 export default function Products() {
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
-  const [attributesOpen, setAttributesOpen] = useState(true);
-  const [concernsOpen, setConcernsOpen] = useState(true);
-  const [categoriesOpen, setCategoriesOpen] = useState(true);
+  const [attributesOpen, setAttributesOpen] = useState(false);
+  const [concernsOpen, setConcernsOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
 
   const selectedAttributes = useMemo(
     () => searchParams.get("a")?.split(",").filter(Boolean) || [],
@@ -49,6 +53,29 @@ export default function Products() {
   );
   const sortMode = searchParams.get("sort") || "mostReviews";
   const urlSearch = searchParams.get("search") || "";
+
+  // React Query para caché y optimización
+  const { data: remoteProducts = null, isLoading: loading, error: loadError } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      try {
+        const data = await fetchProductsFromSupabase();
+        console.log("Productos cargados desde Supabase:", data?.length || 0);
+        return Array.isArray(data) ? data : [];
+      } catch (e) {
+        console.error("Error cargando productos desde Supabase:", e);
+        // Si hay error, devolver array vacío para que use el fallback
+        return [];
+      }
+    },
+    staleTime: 30000, // 30 segundos de caché
+    gcTime: 5 * 60 * 1000, // 5 minutos en caché
+    retry: 1,
+  });
+
+  const loadProducts = () => {
+    queryClient.invalidateQueries({ queryKey: ["products"] });
+  };
 
   const toggleFilter = (key: string, value: string) => {
     const current = searchParams.get(key)?.split(",").filter(Boolean) || [];
@@ -73,7 +100,12 @@ export default function Products() {
   };
 
   const filteredProducts = useMemo(() => {
-    let result = [...productsData] as Product[];
+    // Usar productos de Supabase si están disponibles, sino usar el fallback JSON
+    const source = (remoteProducts && remoteProducts.length > 0) 
+      ? remoteProducts 
+      : (productsData as Product[]);
+    
+    let result = [...source] as Product[];
 
     // Search filter
     if (urlSearch.trim()) {
@@ -126,7 +158,8 @@ export default function Products() {
     selectedConcerns,
     selectedCategories,
     sortMode,
-    urlSearch
+    urlSearch,
+    remoteProducts
   ]);
 
   return (
@@ -230,7 +263,12 @@ export default function Products() {
           </form>
           
           <div className="flex justify-between items-center">
-            <Badge variant="secondary">{filteredProducts.length} Productos</Badge>
+            <div className="flex items-center gap-3">
+              <Badge variant="secondary">
+                {loading ? "Cargando…" : `${filteredProducts.length} productos`}
+              </Badge>
+              <AddProductDialog onProductAdded={loadProducts} />
+            </div>
           <Select
             value={sortMode}
             onValueChange={(val) => {
@@ -259,9 +297,17 @@ export default function Products() {
           ))}
         </div>
 
-        {filteredProducts.length === 0 && (
+        {filteredProducts.length === 0 && !loading && (
           <div className="text-center py-12 text-muted-foreground">
-            No se encontraron productos con tus filtros.
+            {loadError ? (
+              <div>
+                <p className="text-destructive mb-2">Error al cargar productos:</p>
+                <p className="text-sm">{(loadError as Error)?.message || "Error desconocido"}</p>
+                <p className="text-xs mt-2">Usando productos de ejemplo mientras se resuelve el problema.</p>
+              </div>
+            ) : (
+              "No se encontraron productos con tus filtros."
+            )}
           </div>
         )}
       </section>

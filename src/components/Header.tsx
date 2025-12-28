@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { SearchDropdown } from "./SearchDropdown";
+import { LoginDialog } from "./LoginDialog";
 import logo from "@/assets/logo.svg";
+import { BETA_MODE } from "@/config/constants";
+import { cn } from "@/lib/utils";
 
 export function Header() {
-
   return (
     <header className="sticky top-0 z-50 bg-card border-b border-border">
       <div className="container mx-auto px-4 py-3">
@@ -21,22 +23,60 @@ export function Header() {
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/">Inicio</Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/products">Productos</Link>
-              </Button>
-              <Button variant="ghost" size="sm" disabled>
-                Curación
-              </Button>
-              <Button variant="ghost" size="sm" disabled>
-                Discusión
-              </Button>
+              {BETA_MODE ? (
+                <>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={cn("cursor-not-allowed opacity-50")}
+                    disabled
+                  >
+                    Productos
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={cn("cursor-not-allowed opacity-50")}
+                    disabled
+                  >
+                    Tiendas
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={cn("cursor-not-allowed opacity-50")}
+                    disabled
+                  >
+                    Discusiones
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/products">Productos</Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/stores">Tiendas</Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/discussions">Discusiones</Link>
+                  </Button>
+                </>
+              )}
             </nav>
           </div>
           <div className="flex items-center gap-2">
-            <SearchDropdown className="hidden sm:block w-64" />
-            <Button size="sm" asChild>
-              <Link to="/products">Únete a Utopia+</Link>
-            </Button>
+            {!BETA_MODE && <SearchDropdown className="hidden sm:block w-64" />}
+            <LoginDialog />
+            {BETA_MODE ? (
+              <Button size="sm" disabled className="opacity-50 cursor-not-allowed">
+                Próximamente
+              </Button>
+            ) : (
+              <Button size="sm" asChild>
+                <Link to="/products">Únete a Utopia+</Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>

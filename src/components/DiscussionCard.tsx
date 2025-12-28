@@ -1,6 +1,7 @@
 import { ArrowBigUp, MessageCircle, Eye } from "lucide-react";
 import { Discussion } from "@/types/discussion";
 import { Card } from "./ui/card";
+import { Link } from "react-router-dom";
 
 interface DiscussionCardProps {
   discussion: Discussion;
@@ -8,7 +9,8 @@ interface DiscussionCardProps {
 
 export function DiscussionCard({ discussion }: DiscussionCardProps) {
   return (
-    <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+    <Link to={`/discussions/${discussion.id}`}>
+      <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer h-full">
       <div className="flex items-start gap-3 mb-3">
         <img
           src={discussion.author.avatar}
@@ -46,6 +48,7 @@ export function DiscussionCard({ discussion }: DiscussionCardProps) {
           <span>{discussion.comments}</span>
         </button>
       </div>
-    </Card>
+      </Card>
+    </Link>
   );
 }

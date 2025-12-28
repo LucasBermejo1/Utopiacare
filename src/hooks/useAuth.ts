@@ -1,0 +1,55 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import type { User } from "@supabase/supabase-js";
+
+export function useAuth() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
+    // Obtener sesión actual
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+      
+      // Asegurar perfil en segundo plano (no bloquea)
+      if (session?.user) {
+        import("@/services/supabaseUserProfile")
+          .then(({ ensureUserProfile }) => ensureUserProfile(session.user.id, session.user.email || undefined))
+          .catch((error) => {
+            console.error("Error asegurando perfil del usuario:", error);
+            // No bloquear si falla, es operación en segundo plano
+          });
+      }
+    });
+
+    // Escuchar cambios en la autenticación
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("🔐 Auth state changed:", event, session?.user?.email);
+      setUser(session?.user ?? null);
+      setLoading(false);
+      
+      // Asegurar perfil en segundo plano (no bloquea)
+      if (session?.user) {
+        import("@/services/supabaseUserProfile")
+          .then(({ ensureUserProfile }) => ensureUserProfile(session.user.id, session.user.email || undefined))
+          .catch((error) => {
+            console.error("Error asegurando perfil del usuario:", error);
+            // No bloquear si falla, es operación en segundo plano
+          });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return { user, loading };
+}
+

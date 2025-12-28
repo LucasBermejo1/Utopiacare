@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Search, ArrowRight } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
 import productsData from "@/data/products.json";
 import { Product } from "@/types/product";
@@ -8,14 +8,77 @@ import { Product } from "@/types/product";
 interface SearchDropdownProps {
   placeholder?: string;
   className?: string;
+  enableTypingEffect?: boolean; // Prop para habilitar el efecto solo en la página de inicio
 }
 
-export function SearchDropdown({ placeholder = "Productos, marcas, discusiones...", className = "" }: SearchDropdownProps) {
+export function SearchDropdown({ placeholder = "Productos, marcas, discusiones...", className = "", enableTypingEffect = false }: SearchDropdownProps) {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [animatedPlaceholder, setAnimatedPlaceholder] = useState("");
   const debouncedQuery = useDebounce(query, 300);
   const [results, setResults] = useState<{ products: Product[]; brands: string[] }>({ products: [], brands: [] });
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Efecto de escritura automática solo cuando el input está vacío y no está enfocado
+  const typingTexts = [
+    "Busca productos de belleza...",
+    "Descubre ingredientes naturales...",
+    "Explora productos valencianos...",
+    "Encuentra reviews honestas...",
+    "Busca marcas locales...",
+    "Descubre nuevos productos...",
+    "Explora tratamientos faciales...",
+    "Encuentra limpiadores perfectos...",
+    "Busca productos coreanos...",
+    "Descubre mascarillas efectivas...",
+  ];
+  
+  useEffect(() => {
+    // Solo animar si está habilitado, el input está vacío, no está enfocado y no hay query
+    if (!enableTypingEffect || query.trim() !== "" || isFocused) {
+      setAnimatedPlaceholder("");
+      return;
+    }
+    
+    let currentTextIndex = 0;
+    let currentCharIndex = 0;
+    let isDeleting = false;
+    let typingTimeout: NodeJS.Timeout;
+    
+    const type = () => {
+      const currentText = typingTexts[currentTextIndex];
+      
+      if (!isDeleting && currentCharIndex < currentText.length) {
+        // Escribiendo
+        setAnimatedPlaceholder(currentText.substring(0, currentCharIndex + 1));
+        currentCharIndex++;
+        typingTimeout = setTimeout(type, 100);
+      } else if (!isDeleting && currentCharIndex === currentText.length) {
+        // Esperar antes de borrar
+        typingTimeout = setTimeout(() => {
+          isDeleting = true;
+          type();
+        }, 2000);
+      } else if (isDeleting && currentCharIndex > 0) {
+        // Borrando
+        setAnimatedPlaceholder(currentText.substring(0, currentCharIndex - 1));
+        currentCharIndex--;
+        typingTimeout = setTimeout(type, 50);
+      } else if (isDeleting && currentCharIndex === 0) {
+        // Cambiar al siguiente texto
+        isDeleting = false;
+        currentTextIndex = (currentTextIndex + 1) % typingTexts.length;
+        typingTimeout = setTimeout(type, 500);
+      }
+    };
+    
+    typingTimeout = setTimeout(type, 1000);
+    
+    return () => {
+      if (typingTimeout) clearTimeout(typingTimeout);
+    };
+  }, [query, isFocused, enableTypingEffect]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -61,15 +124,33 @@ export function SearchDropdown({ placeholder = "Productos, marcas, discusiones..
   return (
     <div ref={dropdownRef} className={`relative ${className}`}>
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+        <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-muted-foreground" />
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => query.trim().length >= 2 && setIsOpen(true)}
-          placeholder={placeholder}
-          className="w-full h-12 pl-12 pr-4 rounded-full border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          onFocus={() => {
+            setIsFocused(true);
+            if (query.trim().length >= 2) {
+              setIsOpen(true);
+            }
+          }}
+          onBlur={() => {
+            // Delay para permitir que los clicks en los resultados funcionen
+            setTimeout(() => setIsFocused(false), 200);
+          }}
+          placeholder={animatedPlaceholder || placeholder}
+          className="w-full h-16 pl-16 pr-20 rounded-full border-2 border-[hsl(var(--border))] bg-card text-foreground placeholder:text-muted-foreground placeholder:text-lg text-lg shadow-[var(--shadow-sm)] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--accent))] focus:border-transparent"
         />
+        {/* Botón circular rosa a la derecha */}
+        <button
+          type="button"
+          aria-label="Buscar"
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center bg-[hsl(var(--accent))] text-white shadow-md hover:opacity-95 active:scale-95 transition"
+          onClick={() => setIsOpen(true)}
+        >
+          <ArrowRight className="w-6 h-6" />
+        </button>
       </div>
 
       {isOpen && (results.products.length > 0 || results.brands.length > 0) && (

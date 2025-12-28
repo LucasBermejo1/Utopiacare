@@ -1,10 +1,41 @@
+import { useState, useEffect } from "react";
 import { SearchDropdown } from "@/components/SearchDropdown";
 import { CategoryIconNav } from "@/components/CategoryIconNav";
 import { TrendingDiscussions } from "@/components/TrendingDiscussions";
-import { Flower2, ArrowRight } from "lucide-react";
+import { Flower2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { UtopiaWordmark } from "@/components/UtopiaWordmark";
+import { featuredStores } from "@/data/stores";
+import { fetchStoresFromSupabase } from "@/services/supabaseStores";
+import { Store } from "@/data/stores";
+import { Link } from "react-router-dom";
+import { SafeImage } from "@/components/SafeImage";
+import { AddStoreDialog } from "@/components/AddStoreDialog";
+import { BETA_MODE } from "@/config/constants";
 
 export default function Home() {
+  const [stores, setStores] = useState<Store[]>(featuredStores);
+
+  useEffect(() => {
+    const loadStores = async () => {
+      try {
+        const remoteStores = await fetchStoresFromSupabase();
+        if (remoteStores.length > 0) {
+          setStores(remoteStores);
+        } else {
+          // Si no hay tiendas en Supabase, usar las del archivo local
+          setStores(featuredStores);
+        }
+      } catch (error) {
+        console.error("Error cargando tiendas:", error);
+        // En caso de error, usar las tiendas locales
+        setStores(featuredStores);
+      }
+    };
+
+    loadStores();
+  }, []);
+
   return (
     <div className="space-y-16">
       {/* Hero Section */}
@@ -14,11 +45,8 @@ export default function Home() {
             <h1 className="text-4xl md:text-5xl font-light text-foreground leading-tight tracking-wide">
               Cuídate con
             </h1>
-            <h1 className="text-7xl md:text-8xl font-bold leading-none tracking-tight">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[hsl(var(--terracotta))] to-[hsl(var(--accent))]">
-                Utopia
-              </span>
-            </h1>
+            {/* Wordmark replicado por tipografía/estilos */}
+            <UtopiaWordmark />
           </div>
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mt-8 font-light">
             Descubre productos de belleza locales a través de reviews honestas, foros comunitarios,
@@ -28,16 +56,19 @@ export default function Home() {
 
         <div className="max-w-3xl mx-auto space-y-4">
           <h2 className="text-2xl font-semibold text-left">¿Qué buscas hoy?</h2>
-          <SearchDropdown className="w-full" />
+          <SearchDropdown className="w-full" enableTypingEffect={true} />
         </div>
+        
+        {/* Category Navigation - Solo visible si no está en modo beta */}
+        {!BETA_MODE && (
+          <div className="max-w-full mx-auto mt-6">
+            <CategoryIconNav />
+          </div>
+        )}
       </section>
 
-      {/* Category Navigation */}
-      <section className="py-8">
-        <CategoryIconNav />
-      </section>
-
-      {/* Featured Valencia Stores */}
+      {/* Featured Valencia Stores - Solo visible si no está en modo beta */}
+      {!BETA_MODE && (
       <section className="space-y-6">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -45,26 +76,52 @@ export default function Home() {
               <Flower2 className="w-6 h-6" style={{ color: 'hsl(var(--terracotta))' }} />
               Tiendas destacadas de Valencia
             </h2>
-            <Button variant="ghost" size="sm">VER TODAS</Button>
+            <div className="flex items-center gap-2">
+              <AddStoreDialog onStoreAdded={async () => {
+                try {
+                  const remoteStores = await fetchStoresFromSupabase();
+                  if (remoteStores.length > 0) {
+                    setStores(remoteStores);
+                  }
+                } catch (error) {
+                  console.error("Error recargando tiendas:", error);
+                }
+              }} />
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/stores">VER TODAS</Link>
+              </Button>
+            </div>
           </div>
           <p className="text-sm text-muted-foreground italic">
             Desarrollado desde Seúl para España · Comenzando por Valencia
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="h-48 rounded-xl bg-gradient-to-br from-accent to-muted flex items-center justify-center text-muted-foreground"
+          {stores.map((store) => (
+            <Link
+              key={store.id}
+              to={`/stores/${store.id}`}
+              className="group rounded-xl overflow-hidden border border-border bg-card shadow-sm hover:shadow-md transition"
             >
-              Tienda {i}
-            </div>
+              <div className="aspect-[4/3] w-full overflow-hidden">
+                <SafeImage
+                  src={store.image}
+                  alt={store.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+              <div className="p-3">
+                <div className="font-semibold text-sm truncate">{store.name}</div>
+                <div className="text-xs text-muted-foreground">{store.area}, Valencia</div>
+              </div>
+            </Link>
           ))}
         </div>
       </section>
+      )}
 
-      {/* Trending Discussions */}
-      <TrendingDiscussions />
+      {/* Trending Discussions - Solo visible si no está en modo beta */}
+      {!BETA_MODE && <TrendingDiscussions />}
     </div>
   );
 }

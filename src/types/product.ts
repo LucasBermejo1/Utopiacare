@@ -1,3 +1,23 @@
+export interface CosIngIngredientAnalysis {
+  name: string;
+  cosing_ref_number?: string;
+  cas_number?: string;
+  ec_number?: string;
+  function?: string[];
+  restrictions?: string;
+  warnings?: string;
+  safety_assessment?: string;
+  found_in_cosing?: boolean;
+  error?: string;
+}
+
+export interface CosIngAnalysis {
+  ingredients: CosIngIngredientAnalysis[];
+  summary?: string;
+  concerns?: string[];
+  recommendations?: string[];
+}
+
 export interface Product {
   id: string;
   brand: string;
@@ -11,6 +31,7 @@ export interface Product {
   picks: number;
   addedAt: string;
   ingredients: string[];
+  cosingAnalysis?: CosIngAnalysis | null;
 }
 
 export interface Review {

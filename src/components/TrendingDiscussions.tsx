@@ -1,19 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Flower2 } from "lucide-react";
 import { DiscussionCard } from "./DiscussionCard";
 import { Button } from "./ui/button";
-import discussionsData from "@/data/discussions.json";
 import { Discussion } from "@/types/discussion";
+import { fetchDiscussionsByCategoryFromSupabase } from "@/services/supabaseDiscussions";
 
 const categories = ["Todas", "Preocupación Cutánea", "Ayuda con Rutina", "Ayuda con Maquillaje", "Cuidado Capilar y Corporal", "Info de Producto"];
 
 export function TrendingDiscussions() {
   const [selectedCategory, setSelectedCategory] = useState("Todas");
+  const [discussions, setDiscussions] = useState<Discussion[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredDiscussions = selectedCategory === "Todas"
-    ? discussionsData
-    : discussionsData.filter((d: Discussion) => d.category === selectedCategory);
+  useEffect(() => {
+    const loadDiscussions = async () => {
+      try {
+        setLoading(true);
+        // Limitar a las 6 más populares (ordenadas por upvotes)
+        const data = await fetchDiscussionsByCategoryFromSupabase(selectedCategory);
+        // Ordenar por upvotes y tomar las 6 primeras
+        const sorted = [...data].sort((a, b) => b.upvotes - a.upvotes).slice(0, 6);
+        setDiscussions(sorted);
+      } catch (err) {
+        console.error("Error cargando discusiones:", err);
+        setDiscussions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDiscussions();
+  }, [selectedCategory]);
 
   return (
     <section className="space-y-6">
@@ -22,7 +40,7 @@ export function TrendingDiscussions() {
           <Flower2 className="w-6 h-6" style={{ color: 'hsl(var(--terracotta))' }} />
           Discusiones Populares
         </h2>
-        <Link to="/products">
+        <Link to="/discussions">
           <Button variant="ghost" size="sm">VER TODAS</Button>
         </Link>
       </div>
@@ -41,11 +59,21 @@ export function TrendingDiscussions() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredDiscussions.map((discussion: Discussion) => (
-          <DiscussionCard key={discussion.id} discussion={discussion} />
-        ))}
-      </div>
+      {loading ? (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Cargando discusiones...</p>
+        </div>
+      ) : discussions.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {discussions.map((discussion: Discussion) => (
+            <DiscussionCard key={discussion.id} discussion={discussion} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">No hay discusiones en esta categoría aún.</p>
+        </div>
+      )}
     </section>
   );
 }

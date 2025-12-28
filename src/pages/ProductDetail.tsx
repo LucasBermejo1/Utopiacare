@@ -4,79 +4,62 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RatingStars } from "@/components/RatingStars";
-import { IngredientDonut } from "@/components/IngredientDonut";
-import { CompatibilityPanel } from "@/components/CompatibilityPanel";
-import { OnlineBadge } from "@/components/OnlineBadge";
 import productsData from "@/data/products.json";
 import reviewsData from "@/data/reviews.json";
-import { Product, DonutData, Ingredient, Review } from "@/types/product";
-import { ingredientService } from "@/services/ingredientService";
-import { evaluateCompatibility } from "@/utils/compatibility";
-import { MAX_REQUESTS_PER_VIEW, CREDIT_LIMIT } from "@/config/constants";
+import { Product, Review } from "@/types/product";
 import { ThumbsUp, Eye } from "lucide-react";
-import { EU_DB_IFRAME } from "@/config/constants";
+import { fetchProductByIdFromSupabase } from "@/services/supabaseProducts";
+import { fetchReviewsByProductIdFromSupabase, deleteReviewFromSupabase } from "@/services/supabaseReviews";
+import { AddReviewDialog } from "@/components/AddReviewDialog";
+import { EUCosmIngSection } from "@/components/EUCosmIngSection";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [donut, setDonut] = useState<DonutData>({
-    LOW: 0,
-    MODERATE: 0,
-    HIGH: 0,
-    UNKNOWN: 0
-  });
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
-  const [requestsMade, setRequestsMade] = useState(0);
 
-  useEffect(() => {
-    const loadProduct = async () => {
-      const found = productsData.find((p) => p.id === id) as Product | undefined;
-      if (!found) {
+  const loadProduct = async () => {
+    if (!id) return;
+    setLoading(true);
+    try {
+      // 1) Intentar en Supabase primero
+      const remote = await fetchProductByIdFromSupabase(id);
+      console.log("Producto cargado desde Supabase:", remote);
+      const selected = remote ?? (productsData.find((p) => p.id === id) as Product | undefined);
+      if (!selected) {
         setLoading(false);
         return;
       }
-      setProduct(found);
+      console.log("Producto seleccionado - Rating:", selected.rating, "Reviews:", selected.reviewsCount);
+      setProduct(selected);
 
-      // Fetch ingredients with budget limit
-      const creditsBefore = ingredientService.getCreditsLeft();
-      const ingList: Ingredient[] = [];
-      let made = 0;
-
-      for (const inci of found.ingredients || []) {
-        if (made >= MAX_REQUESTS_PER_VIEW) {
-          ingList.push({
-            inci,
-            risk: "UNKNOWN",
-            source: "limited"
-          });
-          continue;
-        }
-
-        const data = await ingredientService.fetchINCI(inci);
-        ingList.push(data);
-        if (data.source === "cosmili") {
-          made++;
-        }
-        if (ingredientService.getCreditsLeft() <= 0) break;
-      }
-
-      setIngredients(ingList);
-      setRequestsMade(creditsBefore - ingredientService.getCreditsLeft());
-
-      // Calculate donut
-      const donutData: DonutData = { LOW: 0, MODERATE: 0, HIGH: 0, UNKNOWN: 0 };
-      ingList.forEach((ing) => {
-        const risk = (ing.risk || "UNKNOWN").toUpperCase() as keyof DonutData;
-        donutData[risk] = (donutData[risk] || 0) + 1;
-      });
-      setDonut(donutData);
+      // Cargar reseñas (Supabase -> fallback JSON)
+      const supaReviews = selected.id ? await fetchReviewsByProductIdFromSupabase(selected.id) : [];
+      setReviews(supaReviews.length > 0 ? supaReviews : (reviewsData.find((r) => r.productId === selected.id)?.reviews || []));
 
       setLoading(false);
-    };
+    } catch (error) {
+      console.error("Error loading product:", error);
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadProduct();
   }, [id]);
 
@@ -96,9 +79,7 @@ export default function ProductDetail() {
     );
   }
 
-  const compatibility = evaluateCompatibility(ingredients);
-  const productReviews =
-    reviewsData.find((r) => r.productId === product.id)?.reviews || [];
+  const productReviews = reviews;
 
   return (
     <div className="space-y-6">
@@ -136,12 +117,6 @@ export default function ProductDetail() {
               <Badge variant="outline">
                 Affiliate links — we earn from qualifying purchases.
               </Badge>
-              <OnlineBadge
-                status={ingredientService.getOnlineStatus()}
-                creditMax={CREDIT_LIMIT}
-                creditLeft={ingredientService.getCreditsLeft()}
-                requestsMade={requestsMade}
-              />
             </div>
           </div>
         </div>
@@ -150,52 +125,49 @@ export default function ProductDetail() {
       {/* Ingredients */}
       <Card className="p-6">
         <h3 className="text-xl font-semibold mb-4">Ingredients</h3>
-        <Tabs defaultValue="overview">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="eudb">EU DB</TabsTrigger>
-          </TabsList>
-          <TabsContent value="overview" className="space-y-4">
-            <IngredientDonut donut={donut} />
-            <CompatibilityPanel data={compatibility} />
-            <div className="flex flex-wrap gap-2 mt-4">
-              {product.attributes.map((attr) => (
-                <Badge key={attr} variant="secondary">
-                  {attr}
-                </Badge>
-              ))}
-            </div>
-            <Separator />
-            <div>
-              <h4 className="font-semibold mb-2">INCI (top ingredients)</h4>
-              <div className="flex flex-wrap gap-2">
-                {ingredients.slice(0, 6).map((ing) => (
-                  <Badge
-                    key={ing.inci}
-                    variant="outline"
-                    title={(ing.functions || []).join(", ")}
-                  >
-                    {ing.inci} · {ing.risk || "UNKNOWN"}
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {product.attributes.map((attr) => (
+              <Badge key={attr} variant="secondary">
+                {attr}
+              </Badge>
+            ))}
+          </div>
+          <Separator />
+          <div>
+            <h4 className="font-semibold mb-2">Lista de ingredientes</h4>
+            <div className="flex flex-wrap gap-2">
+              {product.ingredients && product.ingredients.length > 0 ? (
+                product.ingredients.map((ing, index) => (
+                  <Badge key={index} variant="outline">
+                    {ing}
                   </Badge>
-                ))}
-              </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">No hay ingredientes disponibles</p>
+              )}
             </div>
-          </TabsContent>
-          <TabsContent value="eudb">
-            <iframe
-              src={EU_DB_IFRAME}
-              width="100%"
-              height="600"
-              className="border-0 rounded-lg"
-              title="EU Cosmetic Ingredient Database"
-            />
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </Card>
+
+      {/* EU CosmIle Section */}
+      <EUCosmIngSection
+        analysis={product.cosingAnalysis}
+        productName={`${product.brand} - ${product.name}`}
+      />
 
       {/* Reviews */}
       <Card className="p-6">
-        <h3 className="text-xl font-semibold mb-4">Ratings & Reviews</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-semibold">Ratings & Reviews</h3>
+          <AddReviewDialog productId={product.id} onReviewAdded={async () => {
+            console.log("Callback onReviewAdded llamado, recargando producto...");
+            // Recargar todo el producto (incluye rating actualizado y reseñas)
+            await loadProduct();
+            console.log("Producto recargado");
+          }} />
+        </div>
         <div className="grid md:grid-cols-[260px_1fr] gap-6 mb-6">
           <div className="text-center">
             <div className="text-5xl font-bold mb-2">
@@ -230,17 +202,57 @@ export default function ProductDetail() {
         <div className="space-y-4">
           {productReviews.map((review) => (
             <Card key={review.id} className="p-4">
-              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                <strong className="text-sm">{review.user.name}</strong>
-                <Badge variant="outline" className="text-xs">
-                  {review.user.skinType}
-                </Badge>
-                <Badge variant="outline" className="text-xs">
-                  {review.lang}
-                </Badge>
-                <span className="text-xs text-muted-foreground">
-                  {review.date}
-                </span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <strong className="text-sm">{review.user.name}</strong>
+                  <Badge variant="outline" className="text-xs">
+                    {review.user.skinType}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {review.lang}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">
+                    {review.date}
+                  </span>
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Eliminar reseña?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta acción no se puede deshacer. La reseña será eliminada permanentemente
+                        y el rating del producto se actualizará automáticamente.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={async () => {
+                          try {
+                            await deleteReviewFromSupabase(review.id, product.id);
+                            toast.success("Reseña eliminada");
+                            // Recargar producto y reseñas
+                            await loadProduct();
+                          } catch (error) {
+                            toast.error(error instanceof Error ? error.message : "Error al eliminar reseña");
+                          }
+                        }}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Eliminar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
               <div className="mb-2">
                 <RatingStars rating={review.rating} size={16} />

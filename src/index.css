@@ -8,9 +8,9 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Utopiacare Color Palette */
-    --background: 33 21% 86%; /* #dcd2c1 - Beige background */
-    --foreground: 214 26% 32%; /* #3f4e65 - Deep navy for text */
+    /* Utopiacare Color Palette (fondo casi blanco con toque beige) */
+    --background: 33 25% 96%; /* Blanco cálido/beige muy suave */
+    --foreground: 214 26% 28%; /* Contraste suficiente sobre fondo claro */
 
     --card: 0 0% 100%; /* #ffffff */
     --card-foreground: 214 26% 32%; /* #3f4e65 */
@@ -21,11 +21,11 @@ All colors MUST be HSL.
     --primary: 214 26% 32%; /* #3f4e65 - Deep navy */
     --primary-foreground: 33 21% 86%; /* Beige */
 
-    --secondary: 33 21% 90%; /* Lighter beige */
+    --secondary: 33 20% 94%; /* Pastel suave para superficies secundarias */
     --secondary-foreground: 214 26% 32%;
 
-    --muted: 33 15% 75%; /* Muted beige */
-    --muted-foreground: 214 20% 50%;
+    --muted: 33 16% 90%; /* Chips/etiquetas muy suaves */
+    --muted-foreground: 214 20% 42%;
 
     --accent: 17 55% 56%; /* #c77850 - Terracotta accent */
     --accent-foreground: 0 0% 98%;
@@ -36,7 +36,7 @@ All colors MUST be HSL.
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 33 18% 80%; /* Beige border */
+    --border: 33 18% 88%; /* Borde sutil en el nuevo fondo */
     --input: 0 0% 100%; /* White input */
     --ring: 214 26% 32%;
 
@@ -93,5 +93,15 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
