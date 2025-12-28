@@ -211,3 +211,58 @@ All colors MUST be HSL.
   --delta-y: 0px;
   animation: flyToChat 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
+
+@keyframes utopiaPresentation {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
+    opacity: 1;
+  }
+  20% {
+    transform: translate(calc(-50% - 50px), calc(-50% - 30px)) scale(1) rotate(-5deg);
+    opacity: 1;
+  }
+  30% {
+    transform: translate(calc(-50% + 40px), calc(-50% - 60px)) scale(1.05) rotate(8deg);
+    opacity: 1;
+  }
+  40% {
+    transform: translate(calc(-50% - 30px), calc(-50% + 40px)) scale(0.95) rotate(-8deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(calc(-50% + 60px), calc(-50% + 20px)) scale(1.1) rotate(10deg);
+    opacity: 1;
+  }
+  60% {
+    transform: translate(calc(-50% - 40px), calc(-50% - 50px)) scale(1) rotate(-10deg);
+    opacity: 1;
+  }
+  70% {
+    transform: translate(calc(-50% + 30px), calc(-50% + 50px)) scale(1.05) rotate(5deg);
+    opacity: 1;
+  }
+  80% {
+    transform: translate(calc(-50% - 20px), calc(-50% - 30px)) scale(1) rotate(-5deg);
+    opacity: 1;
+  }
+  90% {
+    transform: translate(-50%, -50%) scale(1.05) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 0;
+  }
+}
+
+.utopia-presentation-bot {
+  animation: utopiaPresentation 4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.utopia-presentation-text {
+  animation: utopiaPresentation 4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
