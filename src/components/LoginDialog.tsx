@@ -27,6 +27,7 @@ import { OnboardingSurvey } from "./OnboardingSurvey";
 import { EditProfileDialog } from "./EditProfileDialog";
 import { ForgotPasswordDialog } from "./ForgotPasswordDialog";
 import { hasCompletedOnboarding, ensureUserProfile } from "@/services/supabaseUserProfile";
+import { BETA_MODE } from "@/config/constants";
 
 interface LoginDialogProps {
   onLoginSuccess?: () => void;
