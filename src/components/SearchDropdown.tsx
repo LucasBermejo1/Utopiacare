@@ -12,15 +12,9 @@ interface SearchDropdownProps {
   enableTypingEffect?: boolean; // Prop para habilitar el efecto solo en la página de inicio
 }
 
-// Detectar si estamos en producción (Vercel) o desarrollo local
-// Usa la misma lógica que BETA_MODE para consistencia
-const isDevelopment = typeof window !== "undefined" && (
-  import.meta.env.DEV || 
-  window.location.hostname === "localhost" || 
-  window.location.hostname === "127.0.0.1"
-);
-
-const isProduction = !isDevelopment;
+// Usar BETA_MODE para detectar si estamos en producción
+// Si BETA_MODE está activo, significa que estamos en producción (Vercel)
+const isProduction = BETA_MODE;
 
 const defaultPlaceholder = isProduction 
   ? "Esta función estará disponible dentro de poco. Muy pronto abriremos toda la plataforma para vosotr@s..."
