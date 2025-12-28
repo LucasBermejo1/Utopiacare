@@ -416,7 +416,11 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
             >
               {isSignUp ? "¿Ya tienes cuenta? Inicia sesión" : "¿No tienes cuenta? Regístrate"}
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button 
+              type="submit" 
+              disabled={loading || !email.trim() || !password.trim() || password.length < 6}
+              className="min-w-[120px]"
+            >
               {loading ? "Cargando..." : isSignUp ? "Crear cuenta" : "Iniciar sesión"}
             </Button>
           </DialogFooter>
