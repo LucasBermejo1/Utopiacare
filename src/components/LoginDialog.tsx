@@ -105,6 +105,7 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
         clearTimeout(timeoutId);
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, authLoading]);
 
   // Verificación adicional cuando el usuario cambia (por ejemplo, después de confirmar email)

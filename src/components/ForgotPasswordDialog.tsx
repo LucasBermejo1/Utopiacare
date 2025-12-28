@@ -50,8 +50,9 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
           duration: 6000,
         }
       );
-    } catch (error: any) {
-      toast.error(error?.message || "Error al enviar el email de restablecimiento");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Error al enviar el email de restablecimiento";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -101,8 +102,9 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
                     if (error) throw error;
                     setEmailSent(true);
                     toast.success("Email reenviado. Revisa tu bandeja de entrada y spam.");
-                  } catch (error: any) {
-                    toast.error(error?.message || "Error al reenviar el email");
+                  } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : "Error al reenviar el email";
+                    toast.error(errorMessage);
                   } finally {
                     setLoading(false);
                   }

@@ -163,7 +163,8 @@ export function ChatBot() {
         setMessages([getInitialMessage()]);
       }
     }
-  }, [user, authLoading, isOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading, isOpen, messages.length]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;

@@ -46,6 +46,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
     if (open && user) {
       loadUserProfile();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, user]);
 
   const loadUserProfile = async () => {
@@ -95,9 +96,10 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
 
       toast.success("¡Perfil actualizado correctamente! ✨");
       setOpen(false);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error actualizando perfil:", error);
-      toast.error(error?.message || "Error al actualizar tu perfil");
+      const errorMessage = error instanceof Error ? error.message : "Error al actualizar tu perfil";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

@@ -59,6 +59,7 @@ export function AddReviewDialog({ productId, onReviewAdded }: AddReviewDialogPro
     if (open && user) {
       loadUserProfile();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, user]);
 
   const handlePhotosChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
