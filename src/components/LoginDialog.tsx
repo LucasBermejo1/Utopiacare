@@ -286,6 +286,13 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
       // El error ya se maneja arriba con mensajes específicos
       console.error("Error completo en autenticación:", error);
       
+      // Mostrar mensaje de error al usuario
+      if (error?.message) {
+        toast.error(error.message);
+      } else {
+        toast.error("Error al procesar la solicitud. Por favor, intenta de nuevo.");
+      }
+      
       // Si no se ha mostrado un mensaje específico, mostrar uno genérico
       if (!error?.message || error.message === "Failed to fetch" || error.message.includes("Failed to fetch")) {
         toast.error("No se pudo conectar con Supabase. El proyecto puede estar pausado. Verifica en el Dashboard de Supabase.");
