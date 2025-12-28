@@ -17,7 +17,7 @@ interface SearchDropdownProps {
 const isProduction = BETA_MODE;
 
 const defaultPlaceholder = isProduction 
-  ? "Esta función estará disponible dentro de poco. Muy pronto abriremos toda la plataforma para vosotr@s..."
+  ? "Esta función estará disponible dentro de poco..."
   : "Productos, marcas, discusiones...";
 
 export function SearchDropdown({ placeholder = defaultPlaceholder, className = "", enableTypingEffect = false }: SearchDropdownProps) {
@@ -30,7 +30,16 @@ export function SearchDropdown({ placeholder = defaultPlaceholder, className = "
   const dropdownRef = useRef<HTMLDivElement>(null);
   
   // Efecto de escritura automática solo cuando el input está vacío y no está enfocado
-  const typingTexts = [
+  const typingTexts = isProduction ? [
+    "Esta función estará disponible dentro de poco...",
+    "Muy pronto abriremos toda la plataforma para vosotr@s...",
+    "Estamos trabajando para ofrecerte la mejor experiencia...",
+    "Próximamente podrás buscar productos, marcas y discusiones...",
+    "Estamos preparando algo increíble para vosotr@s...",
+    "Muy pronto tendrás acceso completo a la plataforma...",
+    "Estamos finalizando los últimos detalles...",
+    "Próximamente: búsqueda completa de productos y marcas...",
+  ] : [
     "Busca productos de belleza...",
     "Descubre ingredientes naturales...",
     "Explora productos valencianos...",
