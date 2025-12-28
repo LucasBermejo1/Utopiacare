@@ -201,17 +201,17 @@ export function ChatBot() {
   useEffect(() => {
     if (!BETA_MODE) return;
 
-    // Mostrar presentación después de 1 segundo
+    // Mostrar presentación después de 0.5 segundos
     const presentationTimer = setTimeout(() => {
       setShowPresentation(true);
       
-      // Ocultar presentación después de 4 segundos y animar vuelta
+      // Ocultar presentación después de 2 segundos y animar vuelta
       const hideTimer = setTimeout(() => {
         setShowPresentation(false);
-      }, 4000);
+      }, 2000);
 
       return () => clearTimeout(hideTimer);
-    }, 1000);
+    }, 500);
 
     return () => clearTimeout(presentationTimer);
   }, []);

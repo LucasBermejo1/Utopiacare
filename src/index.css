@@ -307,11 +307,11 @@ All colors MUST be HSL.
 }
 
 .utopia-presentation-bot {
-  animation: utopiaPresentation 4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: utopiaPresentation 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @media (max-width: 768px) {
   .utopia-presentation-bot {
-    animation: utopiaPresentationMobile 4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: utopiaPresentationMobile 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 }
