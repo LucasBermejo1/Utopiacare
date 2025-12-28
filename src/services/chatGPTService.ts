@@ -71,30 +71,54 @@ async function getAssistantResponse(
   try {
     const cleanAssistantId = assistantId.trim();
     console.log("Usando Assistant de OpenAI:", cleanAssistantId);
-    console.log("Assistant ID crudo:", JSON.stringify(assistantId));
-    console.log("Assistant ID longitud:", cleanAssistantId.length);
 
-    // 1. Crear un thread vacío
-    // Usando v2 de la API (v1 está deprecada)
-    const threadResponse = await fetch("https://api.openai.com/v1/threads", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-        "OpenAI-Beta": "assistants=v2",
-      },
-      body: JSON.stringify({}),
-    });
-
-    if (!threadResponse.ok) {
-      const errorData = await threadResponse.json().catch(() => ({}));
-      console.error("Error creando thread:", errorData);
-      throw new Error(errorData.error?.message || `Error creando thread: ${threadResponse.status}`);
+    // 1. Intentar recuperar thread ID existente si hay userId
+    let threadId: string | null = null;
+    if (userId) {
+      try {
+        const { getThreadId } = await import("./chatDataService");
+        threadId = await getThreadId(userId);
+        if (threadId) {
+          console.log("Thread ID recuperado:", threadId);
+        }
+      } catch (error) {
+        console.error("Error recuperando thread ID:", error);
+      }
     }
 
-    const threadData = await threadResponse.json();
-    const threadId = threadData.id;
-    console.log("Thread creado:", threadId);
+    // 2. Si no hay thread ID, crear uno nuevo
+    if (!threadId) {
+      const threadResponse = await fetch("https://api.openai.com/v1/threads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+          "OpenAI-Beta": "assistants=v2",
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (!threadResponse.ok) {
+        const errorData = await threadResponse.json().catch(() => ({}));
+        console.error("Error creando thread:", errorData);
+        throw new Error(errorData.error?.message || `Error creando thread: ${threadResponse.status}`);
+      }
+
+      const threadData = await threadResponse.json();
+      threadId = threadData.id;
+      console.log("Thread creado:", threadId);
+
+      // Guardar thread ID para futuras conversaciones
+      if (userId) {
+        try {
+          const { saveThreadId } = await import("./chatDataService");
+          await saveThreadId(userId, threadId);
+        } catch (error) {
+          console.error("Error guardando thread ID:", error);
+          // No lanzar error, es opcional
+        }
+      }
+    }
 
     // 2. Buscar contexto RAG relevante antes de añadir el mensaje
     // Nota: userId se puede obtener del historial de conversación o pasarlo como parámetro
@@ -255,11 +279,17 @@ async function getChatCompletionsResponse(
 ): Promise<string> {
   const systemPrompt: ChatGPTMessage = {
     role: "system",
-    content: `Eres un asesor experto en cuidado de la piel y productos de belleza. 
-    Tu objetivo es ayudar a los usuarios a encontrar los mejores productos para su tipo de piel, 
-    responder preguntas sobre ingredientes, rutinas de cuidado, y recomendar productos según sus necesidades.
-    Responde siempre en español de forma amigable, profesional y con información precisa.
-    Si no estás seguro de algo, admítelo y sugiere consultar con un dermatólogo.`,
+    content: `Eres Utopia, un asesor experto en cuidado de la piel y productos de belleza. Tu objetivo es ayudar a los usuarios a encontrar los mejores productos para su tipo de piel, responder preguntas sobre ingredientes, rutinas de cuidado, y recomendar productos según sus necesidades.
+
+INSTRUCCIONES:
+- Responde siempre en español de forma amigable, profesional y con información precisa
+- Usa emojis de forma moderada para hacer la conversación más amigable (✨ 💕 🧴 🌟)
+- Sé específico y práctico en tus recomendaciones
+- Si mencionas productos, intenta ser específico sobre marcas o ingredientes clave
+- Si no estás seguro de algo, admítelo y sugiere consultar con un dermatólogo
+- Mantén las respuestas concisas pero completas (máximo 300 palabras)
+- Personaliza tus respuestas según el contexto de la conversación
+- Si el usuario menciona preocupaciones específicas (acné, arrugas, manchas, etc.), enfócate en eso`,
   };
 
   const messages: ChatGPTMessage[] = [
@@ -282,7 +312,7 @@ async function getChatCompletionsResponse(
         model: "gpt-4o-mini",
         messages: messages,
         temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: 800,
       }),
     });
 

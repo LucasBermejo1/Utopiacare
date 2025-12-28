@@ -136,6 +136,7 @@ export function ChatBot() {
   const [messages, setMessages] = useState<Message[]>([getInitialMessage()]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -149,12 +150,49 @@ export function ChatBot() {
     }
   }, [messages, isOpen]);
 
+  // Cargar historial de conversaciones cuando se abre el chat
+  useEffect(() => {
+    if (isOpen && user && !authLoading) {
+      setIsLoadingHistory(true);
+      const loadHistory = async () => {
+        try {
+          const { getChatHistory } = await import("@/services/chatDataService");
+          const history = await getChatHistory(user.id, 20);
+          
+          if (history.length > 0) {
+            // Convertir historial a formato Message
+            const historyMessages: Message[] = history.map(msg => ({
+              id: msg.messageId,
+              role: msg.role,
+              content: msg.content,
+              timestamp: msg.timestamp,
+            }));
+            
+            // Combinar con mensaje inicial si no hay mensajes aún
+            setMessages(prev => {
+              if (prev.length === 1 && prev[0].id === "1") {
+                return [...prev, ...historyMessages];
+              }
+              return prev;
+            });
+          }
+        } catch (error) {
+          console.error("Error cargando historial:", error);
+        } finally {
+          setIsLoadingHistory(false);
+        }
+      };
+      
+      loadHistory();
+    }
+  }, [isOpen, user, authLoading]);
+
   // Focus en el input cuando se abre el chat
   useEffect(() => {
-    if (isOpen && inputRef.current) {
+    if (isOpen && inputRef.current && !isLoadingHistory) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [isOpen]);
+  }, [isOpen, isLoadingHistory]);
 
   // Animación de presentación solo en producción
   useEffect(() => {
@@ -431,6 +469,16 @@ export function ChatBot() {
 
           {/* Mensajes */}
           <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 bg-gradient-to-b from-background to-[hsl(var(--terracotta))]/5">
+            {isLoadingHistory && (
+              <div className="flex items-center justify-center py-8">
+                <div className="flex gap-2 items-center text-muted-foreground">
+                  <div className="h-2 w-2 bg-[hsl(var(--terracotta))] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <div className="h-2 w-2 bg-[hsl(var(--terracotta))] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <div className="h-2 w-2 bg-[hsl(var(--terracotta))] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                  <span className="ml-2 text-sm">Cargando historial...</span>
+                </div>
+              </div>
+            )}
             <div className="space-y-4">
               {messages.map((message, index) => (
                 <div

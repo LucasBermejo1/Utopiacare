@@ -302,3 +302,76 @@ export async function getUserChatData(userId: string): Promise<UserChatData | nu
   };
 }
 
+/**
+ * Guarda el thread ID de OpenAI para mantener el historial de conversación
+ */
+export async function saveThreadId(userId: string, threadId: string): Promise<void> {
+  if (!supabase) {
+    throw new Error("Supabase no configurado");
+  }
+
+  const { error } = await supabase
+    .from("user_chat_data")
+    .upsert({
+      user_id: userId,
+      metadata: { openai_thread_id: threadId },
+    }, {
+      onConflict: "user_id",
+    });
+
+  if (error) {
+    console.error("Error guardando thread ID:", error);
+    // No lanzar error, es opcional
+  }
+}
+
+/**
+ * Obtiene el thread ID guardado del usuario
+ */
+export async function getThreadId(userId: string): Promise<string | null> {
+  if (!supabase) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("user_chat_data")
+    .select("metadata")
+    .eq("user_id", userId)
+    .single();
+
+  if (error || !data?.metadata) {
+    return null;
+  }
+
+  return data.metadata.openai_thread_id || null;
+}
+
+/**
+ * Obtiene el historial de conversaciones del usuario
+ */
+export async function getChatHistory(userId: string, limit: number = 20): Promise<ChatMessage[]> {
+  if (!supabase) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("chat_conversations")
+    .select("*")
+    .eq("user_id", userId)
+    .order("timestamp", { ascending: true })
+    .limit(limit);
+
+  if (error) {
+    console.error("Error obteniendo historial:", error);
+    return [];
+  }
+
+  return (data || []).map((msg: any) => ({
+    messageId: msg.message_id,
+    role: msg.role as "user" | "assistant",
+    content: msg.content,
+    timestamp: new Date(msg.timestamp),
+    metadata: msg.metadata || {},
+  }));
+}
+
