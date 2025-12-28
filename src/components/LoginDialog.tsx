@@ -169,12 +169,9 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
         // Registro
         console.log("Intentando registrar usuario:", email);
         
-        // Determinar la URL de redirección según el entorno
-        // SIEMPRE usar el dominio público en producción, incluso si se accede desde localhost
-        const isProduction = !import.meta.env.DEV && (window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1");
-        const redirectUrl = isProduction 
-          ? "https://utopiacare-jwvg.vercel.app/auth/callback" // URL pública en producción
-          : "https://utopiacare-jwvg.vercel.app/auth/callback"; // SIEMPRE usar producción para emails
+        // SIEMPRE usar el dominio público para emails (importante para seguridad)
+        // Esto asegura que los emails siempre redirijan al dominio correcto
+        const redirectUrl = "https://utopiacare-jwvg.vercel.app/auth/callback";
         
         console.log("URL de redirección configurada:", redirectUrl);
         console.log("Hostname actual:", window.location.hostname);
