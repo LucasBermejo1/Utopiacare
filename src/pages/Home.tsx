@@ -126,12 +126,16 @@ export default function Home() {
       {/* Mensaje para invitar a usar el chatbot - Solo visible en modo beta */}
       {BETA_MODE && (
         <section className="relative py-12">
-          <div className="flex flex-col items-center justify-center space-y-6 text-center">
-            <div className="flex items-center gap-4 text-2xl md:text-4xl font-bold text-foreground">
-              <span>Pincha aquí para hablar con tu asistente de cosmética</span>
-              <ArrowRight className="w-8 h-8 md:w-12 md:h-12 text-[hsl(var(--terracotta))] animate-pulse" />
+          <div className="flex flex-col items-end justify-center space-y-4 pr-6 md:pr-20">
+            <div className="flex flex-col items-end gap-2">
+              <div className="text-xl md:text-3xl lg:text-4xl font-bold text-foreground text-right max-w-2xl">
+                Pincha aquí para hablar con tu asistente de cosmética
+              </div>
+              <div className="flex items-center gap-2 text-[hsl(var(--terracotta))]">
+                <ArrowRight className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 animate-pulse rotate-[-45deg]" />
+              </div>
             </div>
-            <div className="text-sm md:text-base text-muted-foreground">
+            <div className="text-sm md:text-base text-muted-foreground text-right">
               Tu asesor personal de belleza está listo para ayudarte ✨
             </div>
           </div>
