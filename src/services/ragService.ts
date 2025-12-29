@@ -21,6 +21,11 @@ interface RAGContext {
     productName: string;
     reviews: Review[];
   }>;
+  conversationHistory: Array<{
+    role: "user" | "assistant";
+    content: string;
+    timestamp: Date;
+  }>;
 }
 
 interface ProductWithScore {
@@ -619,9 +624,8 @@ async function getSimilarProfileReviews(
 
 /**
  * Genera un contexto RAG a partir de la consulta del usuario
- * Busca productos y discusiones relevantes y los formatea como contexto
- * Incluye el perfil del usuario para personalizar las respuestas
- * MEJORADO: Incluye reviews de usuarios con perfil extremadamente similar
+ * Incluye el perfil del usuario y el historial completo de conversación
+ * MEJORADO: Incluye todo el historial de conversación para contexto completo
  */
 export async function getRAGContext(
   userQuery: string,
@@ -641,18 +645,38 @@ export async function getRAGContext(
     }
   }
 
+  // Obtener historial completo de conversación del usuario
+  let conversationHistory: Array<{ role: "user" | "assistant"; content: string; timestamp: Date }> = [];
+  if (userId) {
+    try {
+      const { getChatHistory } = await import("./chatDataService");
+      const history = await getChatHistory(userId, 50); // Obtener hasta 50 mensajes para contexto completo
+      conversationHistory = history.map(msg => ({
+        role: msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp,
+      }));
+      console.log(`💬 Historial de conversación cargado: ${conversationHistory.length} mensajes`);
+    } catch (error) {
+      console.error("Error obteniendo historial de conversación:", error);
+    }
+  }
+
   // NO buscar productos de la base de datos - solo usar perfil del usuario
   // El chatbot hará recomendaciones libres basándose solo en el perfil del usuario
   const products: Product[] = [];
   const discussions: Discussion[] = [];
   const similarReviews: Array<{ productId: string; productName: string; reviews: Review[] }> = [];
 
-  console.log("📋 Usando solo perfil del usuario para recomendaciones libres (sin productos de la base de datos)");
+  console.log("📋 Usando perfil del usuario e historial completo para recomendaciones libres (sin productos de la base de datos)");
 
-  // Generar resumen del contexto (solo perfil del usuario)
+  // Generar resumen del contexto
   let summary = "";
   if (userProfile) {
     summary += "Perfil del usuario cargado para personalización de recomendaciones libres.\n";
+  }
+  if (conversationHistory.length > 0) {
+    summary += `Historial de conversación disponible: ${conversationHistory.length} mensajes previos.\n`;
   }
 
   return {
@@ -661,6 +685,7 @@ export async function getRAGContext(
     userProfile,
     summary: summary.trim(),
     similarReviews: [], // No incluir reviews
+    conversationHistory, // Incluir historial completo
   };
 }
 
@@ -759,6 +784,35 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
     prompt += "6. 🏥 Considera estilo de vida (fumar, sueño, medicamentos) en todos los consejos\n";
     prompt += "7. ✅ Sé ESPECÍFICO: menciona productos concretos de la base de datos que cumplen estos criterios\n";
     prompt += "8. 📊 Si hay varios productos similares, prioriza los mejor valorados (rating > 4.0)\n\n";
+  }
+
+  // Incluir historial completo de conversación si está disponible
+  if (context.conversationHistory && context.conversationHistory.length > 0) {
+    prompt += "\n\n=== HISTORIAL COMPLETO DE CONVERSACIÓN ===\n\n";
+    prompt += "⚠️ IMPORTANTE: Este es el historial completo de la conversación con el usuario.\n";
+    prompt += "ÚSALO para entender el contexto, recordar información previa mencionada, y dar respuestas coherentes.\n";
+    prompt += "Si el usuario mencionó algo antes, tenlo en cuenta. Si preguntó algo similar, referencia la respuesta anterior.\n\n";
+    
+    // Mostrar los últimos mensajes (máximo 20 para no saturar el contexto)
+    const recentHistory = context.conversationHistory.slice(-20);
+    recentHistory.forEach((msg, index) => {
+      const roleLabel = msg.role === "user" ? "👤 USUARIO" : "🤖 ASISTENTE";
+      const dateStr = msg.timestamp.toLocaleDateString("es-ES", { 
+        day: "2-digit", 
+        month: "2-digit", 
+        hour: "2-digit", 
+        minute: "2-digit" 
+      });
+      prompt += `${roleLabel} (${dateStr}):\n`;
+      prompt += `${msg.content}\n\n`;
+    });
+    
+    prompt += "💡 USA ESTE HISTORIAL para:\n";
+    prompt += "- Recordar información que el usuario mencionó anteriormente (productos, ingredientes, preocupaciones, etc.)\n";
+    prompt += "- Dar respuestas coherentes y contextualizadas\n";
+    prompt += "- Evitar repetir información ya mencionada\n";
+    prompt += "- Referenciar conversaciones previas cuando sea relevante\n";
+    prompt += "- Mantener continuidad en la conversación\n\n";
   }
 
   // NO incluir productos, discusiones ni reviews de la base de datos
