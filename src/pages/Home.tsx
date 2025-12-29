@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { SearchDropdown } from "@/components/SearchDropdown";
 import { CategoryIconNav } from "@/components/CategoryIconNav";
 import { TrendingDiscussions } from "@/components/TrendingDiscussions";
-import { Flower2 } from "lucide-react";
+import { Flower2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UtopiaWordmark } from "@/components/UtopiaWordmark";
 import { featuredStores } from "@/data/stores";
@@ -122,6 +122,21 @@ export default function Home() {
 
       {/* Trending Discussions - Solo visible si no está en modo beta */}
       {!BETA_MODE && <TrendingDiscussions />}
+
+      {/* Mensaje para invitar a usar el chatbot - Solo visible en modo beta */}
+      {BETA_MODE && (
+        <section className="relative py-12">
+          <div className="flex flex-col items-center justify-center space-y-6 text-center">
+            <div className="flex items-center gap-4 text-2xl md:text-4xl font-bold text-foreground">
+              <span>Pincha aquí para hablar con tu asistente de cosmética</span>
+              <ArrowRight className="w-8 h-8 md:w-12 md:h-12 text-[hsl(var(--terracotta))] animate-pulse" />
+            </div>
+            <div className="text-sm md:text-base text-muted-foreground">
+              Tu asesor personal de belleza está listo para ayudarte ✨
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
