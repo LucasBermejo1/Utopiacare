@@ -160,7 +160,7 @@ export default function Home() {
           </section>
           
           {/* Versión desktop: a la derecha con flecha horizontal, pegado al final */}
-          <div className="hidden md:flex fixed bottom-6 right-6 lg:right-8 items-center justify-end gap-4 z-40">
+          <div className="hidden md:flex fixed bottom-6 right-28 lg:right-32 xl:right-36 items-center justify-end gap-4 z-40">
             <div className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground text-right">
               <div>Pincha aquí para hablar con tu</div>
               <div>asistente de cosmética</div>
