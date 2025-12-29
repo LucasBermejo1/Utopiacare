@@ -187,18 +187,26 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
         
         // SIEMPRE usar el dominio público para emails (importante para seguridad)
         // Esto asegura que los emails siempre redirijan al dominio correcto
+        // IMPORTANTE: Esta URL debe coincidir con la configurada en Supabase Dashboard
         const redirectUrl = "https://utopiacare-jwvg.vercel.app/auth/callback";
         
-        console.log("URL de redirección configurada:", redirectUrl);
-        console.log("Hostname actual:", window.location.hostname);
+        console.log("🔗 URL de redirección configurada:", redirectUrl);
+        console.log("🌐 Hostname actual:", window.location.hostname);
+        console.log("📍 URL completa de redirección:", redirectUrl);
         
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: redirectUrl,
+            // Forzar que use esta URL incluso si hay configuración en Dashboard
+            data: {
+              redirect_url: redirectUrl
+            }
           },
         });
+        
+        console.log("📧 Email de verificación enviado con URL:", redirectUrl);
 
         if (error) {
           console.error("Error en registro:", error);
@@ -269,8 +277,33 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
                 duration: 6000,
               }
             );
-            // Opcional: ofrecer reenviar email de verificación
-            // Podrías añadir un botón aquí para reenviar
+            // Ofrecer reenviar email de verificación
+            const resendEmail = async () => {
+              try {
+                const redirectUrl = "https://utopiacare-jwvg.vercel.app/auth/callback";
+                const { error: resendError } = await supabase.auth.resend({
+                  type: 'signup',
+                  email: email,
+                  options: {
+                    emailRedirectTo: redirectUrl,
+                  }
+                });
+                if (resendError) throw resendError;
+                toast.success("Email de verificación reenviado. Revisa tu bandeja de entrada y spam.");
+              } catch (resendError: any) {
+                toast.error(resendError?.message || "Error al reenviar el email de verificación");
+              }
+            };
+            // Mostrar botón para reenviar
+            setTimeout(() => {
+              toast.info("¿No recibiste el email? Puedes intentar registrarte de nuevo o contactar con soporte.", {
+                duration: 8000,
+                action: {
+                  label: "Reenviar email",
+                  onClick: resendEmail
+                }
+              });
+            }, 2000);
           } else {
             toast.error(error.message || "Error al iniciar sesión");
           }
