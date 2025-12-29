@@ -153,16 +153,17 @@ export function ChatBot() {
     }
   }, [messages, isOpen]);
 
-  // Cargar historial de conversaciones cuando se abre el chat
+  // Cargar historial de conversaciones cuando el usuario está disponible (al montar o al iniciar sesión)
   useEffect(() => {
-    if (isOpen && user && !authLoading) {
+    if (user && !authLoading) {
       setIsLoadingHistory(true);
       const loadHistory = async () => {
         try {
           const { getChatHistory } = await import("@/services/chatDataService");
-          const history = await getChatHistory(user.id, 20);
+          const history = await getChatHistory(user.id, 50); // Cargar más mensajes para contexto completo
           
           if (history.length > 0) {
+            console.log(`📚 Cargando historial: ${history.length} mensajes`);
             // Convertir historial a formato Message
             const historyMessages: Message[] = history.map(msg => ({
               id: msg.messageId,
@@ -171,13 +172,22 @@ export function ChatBot() {
               timestamp: msg.timestamp,
             }));
             
-            // Combinar con mensaje inicial si no hay mensajes aún
+            // Reemplazar mensajes con historial completo (incluyendo mensaje inicial)
             setMessages(prev => {
+              // Si solo hay el mensaje inicial, reemplazarlo con historial completo
               if (prev.length === 1 && prev[0].id === "1") {
-                return [...prev, ...historyMessages];
+                return [prev[0], ...historyMessages];
+              }
+              // Si ya hay mensajes, verificar si el historial tiene más mensajes
+              const existingIds = new Set(prev.map(m => m.id));
+              const newMessages = historyMessages.filter(m => !existingIds.has(m.id));
+              if (newMessages.length > 0) {
+                return [...prev, ...newMessages];
               }
               return prev;
             });
+          } else {
+            console.log("📚 No hay historial previo");
           }
         } catch (error) {
           console.error("Error cargando historial:", error);
@@ -188,7 +198,7 @@ export function ChatBot() {
       
       loadHistory();
     }
-  }, [isOpen, user, authLoading]);
+  }, [user, authLoading]); // Cargar cuando el usuario esté disponible, no solo cuando se abre el chat
 
   // Focus en el input cuando se abre el chat
   useEffect(() => {
@@ -289,10 +299,43 @@ export function ChatBot() {
 
       // Conectar con ChatGPT
       try {
+        // Asegurarse de que tenemos el historial completo antes de enviar
+        // Si el historial aún se está cargando, esperar un momento
+        if (isLoadingHistory) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
+        // Obtener historial completo desde la BD para asegurar que tenemos todo
+        let fullHistory: Message[] = [...messages];
+        if (user) {
+          try {
+            const { getChatHistory } = await import("@/services/chatDataService");
+            const dbHistory = await getChatHistory(user.id, 50);
+            const dbMessages: Message[] = dbHistory.map(msg => ({
+              id: msg.messageId,
+              role: msg.role,
+              content: msg.content,
+              timestamp: msg.timestamp,
+            }));
+            
+            // Combinar historial de BD con mensajes actuales (evitando duplicados)
+            const existingIds = new Set(fullHistory.map(m => m.id));
+            const newMessages = dbMessages.filter(m => !existingIds.has(m.id));
+            fullHistory = [...fullHistory, ...newMessages].sort((a, b) => 
+              a.timestamp.getTime() - b.timestamp.getTime()
+            );
+          } catch (error) {
+            console.error("Error obteniendo historial completo:", error);
+            // Continuar con el historial del estado si falla
+          }
+        }
+        
         // Convertir historial de mensajes al formato de ChatGPT
         const conversationHistory = convertMessagesToChatGPTFormat(
-          messages.map(msg => ({ role: msg.role, content: msg.content }))
+          fullHistory.map(msg => ({ role: msg.role, content: msg.content }))
         );
+        
+        console.log(`💬 Enviando mensaje con historial de ${conversationHistory.length} mensajes`);
         
         // Obtener respuesta de ChatGPT (pasar userId e imágenes para personalización)
         const response = await getChatGPTResponse(
