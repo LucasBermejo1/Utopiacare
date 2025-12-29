@@ -777,13 +777,16 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
     
     prompt += "\n=== REGLAS DE PERSONALIZACIÓN OBLIGATORIAS ===\n";
     prompt += "1. ⚠️ PRIORIDAD ABSOLUTA: NUNCA recomiendes ingredientes/marcas del historial problemático\n";
-    prompt += "2. 🎯 Prioriza productos que coincidan EXACTAMENTE con el tipo de piel y sensibilidad\n";
+    prompt += "2. 🎯 CRÍTICO: Si el usuario menciona un producto, VERIFICA si es adecuado para su tipo de piel\n";
+    prompt += "   - Si tiene piel GRASA y el producto es para SECA: ADVIÉRTELO y NO lo recomiendes\n";
+    prompt += "   - Si tiene piel SECA y el producto es para GRASA: ADVIÉRTELO y NO lo recomiendes\n";
+    prompt += "   - Si tiene piel SENSIBLE y el producto contiene ingredientes irritantes: ADVIÉRTELO\n";
     prompt += "3. 💡 Enfócate en las preocupaciones principales del usuario\n";
     prompt += "4. 🌍 Adapta recomendaciones según zona climática y exposición solar\n";
     prompt += "5. ⏱️ Ajusta complejidad de rutinas según nivel de compromiso\n";
     prompt += "6. 🏥 Considera estilo de vida (fumar, sueño, medicamentos) en todos los consejos\n";
-    prompt += "7. ✅ Sé ESPECÍFICO: menciona productos concretos de la base de datos que cumplen estos criterios\n";
-    prompt += "8. 📊 Si hay varios productos similares, prioriza los mejor valorados (rating > 4.0)\n\n";
+    prompt += "7. ✅ SIEMPRE personaliza según el tipo de piel del usuario - NUNCA des respuestas genéricas\n";
+    prompt += "8. 📊 Si analizas un producto, SIEMPRE menciona si es adecuado o no para el tipo de piel del usuario\n\n";
   }
 
   // Incluir historial completo de conversación si está disponible
