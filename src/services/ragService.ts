@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { Product, Review } from "@/types/product";
 import { Discussion } from "@/types/discussion";
 import { UserProfile } from "./supabaseUserProfile";
+import { logger } from "@/utils/logger";
 
 interface RAGContext {
   products: Product[];
@@ -292,10 +293,10 @@ async function searchRelevantProducts(
 
     // Log de personalización para debugging
     if (userProfile && productsWithScores.length > 0) {
-      console.log("🎯 Productos personalizados encontrados:");
+      logger.log("🎯 Productos personalizados encontrados:");
       productsWithScores.forEach((item, index) => {
-        console.log(`${index + 1}. ${item.product.name} (score: ${item.score.toFixed(1)})`);
-        item.reasons.forEach((reason) => console.log(`   ${reason}`));
+        logger.log(`${index + 1}. ${item.product.name} (score: ${item.score.toFixed(1)})`);
+        item.reasons.forEach((reason) => logger.log(`   ${reason}`));
       });
     }
 
@@ -606,7 +607,7 @@ async function getSimilarProfileReviews(
             productName,
             reviews: topReviews,
           });
-          console.log(`   ✓ ${productName}: ${topReviews.length} review(s) con perfil similar (similitud >= ${SIMILARITY_THRESHOLD}%)`);
+          logger.log(`   ✓ ${productName}: ${topReviews.length} review(s) con perfil similar (similitud >= ${SIMILARITY_THRESHOLD}%)`);
         }
       } catch (error) {
         console.error(`Error procesando reviews para producto ${productId}:`, error);
@@ -614,7 +615,7 @@ async function getSimilarProfileReviews(
     }
 
     const totalReviews = reviewsByProduct.reduce((sum, p) => sum + p.reviews.length, 0);
-    console.log(`⭐ Total: ${totalReviews} review(s) con perfil similar de ${reviewsByProduct.length} producto(s)`);
+    logger.log(`⭐ Total: ${totalReviews} review(s) con perfil similar de ${reviewsByProduct.length} producto(s)`);
     return reviewsByProduct;
   } catch (error) {
     console.error("Error obteniendo reviews similares:", error);
@@ -631,7 +632,7 @@ export async function getRAGContext(
   userQuery: string,
   userId?: string | null
 ): Promise<RAGContext> {
-  console.log("🔍 Buscando contexto RAG personalizado para:", userQuery);
+  logger.log("🔍 Buscando contexto RAG personalizado para:", userQuery);
 
   // Obtener perfil del usuario si está logueado
   let userProfile: UserProfile | null = null;
@@ -639,7 +640,7 @@ export async function getRAGContext(
     try {
       const { getUserProfile } = await import("./supabaseUserProfile");
       userProfile = await getUserProfile(userId);
-      console.log("👤 Perfil completo del usuario cargado:", userProfile);
+      logger.log("👤 Perfil completo del usuario cargado:", userProfile);
     } catch (error) {
       console.error("Error obteniendo perfil del usuario:", error);
     }
@@ -656,7 +657,7 @@ export async function getRAGContext(
         content: msg.content,
         timestamp: msg.timestamp,
       }));
-      console.log(`💬 Historial de conversación cargado: ${conversationHistory.length} mensajes`);
+      logger.log(`💬 Historial de conversación cargado: ${conversationHistory.length} mensajes`);
     } catch (error) {
       console.error("Error obteniendo historial de conversación:", error);
     }
@@ -668,7 +669,7 @@ export async function getRAGContext(
   const discussions: Discussion[] = [];
   const similarReviews: Array<{ productId: string; productName: string; reviews: Review[] }> = [];
 
-  console.log("📋 Usando perfil del usuario e historial completo para recomendaciones libres (sin productos de la base de datos)");
+  logger.log("📋 Usando perfil del usuario e historial completo para recomendaciones libres (sin productos de la base de datos)");
 
   // Generar resumen del contexto
   let summary = "";

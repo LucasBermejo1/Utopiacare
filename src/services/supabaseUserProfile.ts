@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabaseClient";
 import type { UserProfile } from "@/types/userProfile";
+import { logger } from "@/utils/logger";
 
 // Re-exportar el tipo para compatibilidad
 export type { UserProfile };
@@ -98,7 +99,7 @@ export async function ensureUserProfile(userId: string, userEmail?: string | nul
     
     // Si no existe, crear uno básico
     if (!profile) {
-      console.log("Creando perfil básico para usuario:", userId);
+      logger.log("Creando perfil básico para usuario:", userId);
       
       const { data, error } = await supabase
         .from("user_profiles")
@@ -117,7 +118,7 @@ export async function ensureUserProfile(userId: string, userEmail?: string | nul
       if (error) {
         // Si el error es de conflicto (ya existe), intentar obtenerlo
         if (error.code === "23505" || error.message.includes("duplicate") || error.message.includes("unique")) {
-          console.log("Perfil ya existe, obteniéndolo...");
+          logger.log("Perfil ya existe, obteniéndolo...");
           profile = await getUserProfile(userId);
           if (profile) {
             return profile;
@@ -128,10 +129,10 @@ export async function ensureUserProfile(userId: string, userEmail?: string | nul
       }
 
       profile = data as UserProfile;
-      console.log("Perfil básico creado exitosamente");
+      logger.log("Perfil básico creado exitosamente");
     } else if (email && !profile.email) {
       // Si el perfil existe pero no tiene email, actualizarlo
-      console.log("Actualizando email en perfil existente:", userId);
+      logger.log("Actualizando email en perfil existente:", userId);
       try {
         const { data, error } = await supabase
           .from("user_profiles")

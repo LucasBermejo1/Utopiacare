@@ -16,6 +16,7 @@ import { insertReviewToSupabase } from "@/services/supabaseReviews";
 import { uploadMultipleImages } from "@/services/storageService";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginDialog } from "./LoginDialog";
+import { logger } from "@/utils/logger";
 import { Star, Upload, X, Image as ImageIcon, LogIn } from "lucide-react";
 import { toast } from "sonner";
 
@@ -169,7 +170,7 @@ export function AddReviewDialog({ productId, onReviewAdded }: AddReviewDialogPro
       }
       // Delay para asegurar que Supabase procese la actualización
       setTimeout(() => {
-        console.log("Recargando producto después de añadir reseña...");
+        logger.log("Recargando producto después de añadir reseña...");
         onReviewAdded?.();
       }, 1000);
     } catch (err) {

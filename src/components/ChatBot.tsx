@@ -13,6 +13,7 @@ import {
   updateUserChatData,
 } from "@/services/chatDataService";
 import { getChatGPTResponse, convertMessagesToChatGPTFormat } from "@/services/chatGPTService";
+import { logger } from "@/utils/logger";
 
 // Componente para el botón del chatbot (reutilizable)
 export function ChatBotButton({ 
@@ -204,7 +205,7 @@ export function ChatBot() {
           const history = await getChatHistory(user.id, 50); // Cargar más mensajes para contexto completo
           
           if (history.length > 0) {
-            console.log(`📚 Cargando historial: ${history.length} mensajes`);
+            logger.log(`📚 Cargando historial: ${history.length} mensajes`);
             // Convertir historial a formato Message
             const historyMessages: Message[] = history.map(msg => ({
               id: msg.messageId,
@@ -228,7 +229,7 @@ export function ChatBot() {
               return prev;
             });
           } else {
-            console.log("📚 No hay historial previo");
+            logger.log("📚 No hay historial previo");
           }
         } catch (error) {
           console.error("Error cargando historial:", error);
@@ -357,7 +358,7 @@ export function ChatBot() {
                   product_history: combinedHistory
                 });
                 
-                console.log(`✅ Actualizado product_history con: ${newItems}`);
+                logger.log(`✅ Actualizado product_history con: ${newItems}`);
               }
             } catch (error) {
               console.error("Error actualizando perfil con ingredientes problemáticos:", error);
@@ -407,7 +408,7 @@ export function ChatBot() {
           fullHistory.map(msg => ({ role: msg.role, content: msg.content }))
         );
         
-        console.log(`💬 Enviando mensaje con historial de ${conversationHistory.length} mensajes`);
+        logger.log(`💬 Enviando mensaje con historial de ${conversationHistory.length} mensajes`);
         
         // Obtener respuesta de ChatGPT (pasar userId e imágenes para personalización)
         const response = await getChatGPTResponse(

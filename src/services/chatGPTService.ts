@@ -15,6 +15,8 @@
  * ```
  */
 
+import { logger } from "@/utils/logger";
+
 interface ChatGPTMessage {
   role: "user" | "assistant" | "system";
   content: string;
@@ -56,7 +58,7 @@ export async function getChatGPTResponse(
 
   // Si se especifica un Assistant ID, usar la API de Assistants
   if (assistantId) {
-    console.log("Assistant ID detectado:", assistantId);
+    logger.log("Assistant ID detectado:", assistantId);
     return await getAssistantResponse(apiKey, assistantId, userMessage, conversationHistory, userId);
   }
 
@@ -76,7 +78,7 @@ async function getAssistantResponse(
 ): Promise<string> {
   try {
     const cleanAssistantId = assistantId.trim();
-    console.log("Usando Assistant de OpenAI:", cleanAssistantId);
+    logger.log("Usando Assistant de OpenAI:", cleanAssistantId);
 
     // 1. Intentar recuperar thread ID existente si hay userId
     let threadId: string | null = null;
@@ -85,7 +87,7 @@ async function getAssistantResponse(
         const { getThreadId } = await import("./chatDataService");
         threadId = await getThreadId(userId);
         if (threadId) {
-          console.log("Thread ID recuperado:", threadId);
+          logger.log("Thread ID recuperado:", threadId);
         }
       } catch (error) {
         console.error("Error recuperando thread ID:", error);
@@ -112,7 +114,7 @@ async function getAssistantResponse(
 
       const threadData = await threadResponse.json();
       threadId = threadData.id;
-      console.log("Thread creado:", threadId);
+      logger.log("Thread creado:", threadId);
 
       // Guardar thread ID para futuras conversaciones
       if (userId) {
@@ -135,7 +137,7 @@ async function getAssistantResponse(
       // Obtener contexto RAG con el perfil del usuario
       const ragContext = await getRAGContext(userMessage, userId);
       ragContextText = formatRAGContextForPrompt(ragContext);
-      console.log("📚 Contexto RAG generado:", ragContextText.substring(0, 200) + "...");
+      logger.log("📚 Contexto RAG generado:", ragContextText.substring(0, 200) + "...");
     } catch (error) {
       console.error("Error obteniendo contexto RAG:", error);
       // Continuar sin contexto RAG si hay error
@@ -167,7 +169,7 @@ async function getAssistantResponse(
     }
 
     // 4. Ejecutar el assistant en el thread
-    console.log("Ejecutando assistant con ID:", cleanAssistantId, "Longitud:", cleanAssistantId.length);
+    logger.log("Ejecutando assistant con ID:", cleanAssistantId, "Longitud:", cleanAssistantId.length);
     
     const runResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs`, {
       method: "POST",
@@ -238,7 +240,7 @@ async function getAssistantResponse(
     }
 
     const messagesData = await messagesResponse.json();
-    console.log("Mensajes recibidos:", JSON.stringify(messagesData, null, 2));
+    logger.log("Mensajes recibidos:", JSON.stringify(messagesData, null, 2));
     
     const assistantMessages = messagesData.data
       .filter((msg: any) => msg.role === "assistant")
@@ -267,7 +269,7 @@ async function getAssistantResponse(
 
     // Retornar el último mensaje del assistant
     const lastMessage = assistantMessages[assistantMessages.length - 1];
-    console.log("Mensaje del assistant extraído:", lastMessage);
+    logger.log("Mensaje del assistant extraído:", lastMessage);
     return lastMessage;
   } catch (error) {
     console.error("Error al obtener respuesta del Assistant:", error);
@@ -292,7 +294,7 @@ async function getChatCompletionsResponse(
       const { getRAGContext, formatRAGContextForPrompt } = await import("./ragService");
       const ragContext = await getRAGContext(userMessage, userId);
       ragContextText = formatRAGContextForPrompt(ragContext);
-      console.log("📚 Contexto RAG generado para análisis de imagen:", ragContextText.substring(0, 200) + "...");
+      logger.log("📚 Contexto RAG generado para análisis de imagen:", ragContextText.substring(0, 200) + "...");
     } catch (error) {
       console.error("Error obteniendo contexto RAG para imagen:", error);
       // Continuar sin contexto RAG si hay error
