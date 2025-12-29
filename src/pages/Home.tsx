@@ -161,9 +161,8 @@ export default function Home() {
           
           {/* Versión desktop: a la derecha con flecha horizontal, pegado al final */}
           <div className="hidden md:flex fixed bottom-6 right-28 lg:right-32 xl:right-36 items-center justify-end gap-4 z-40">
-            <div className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground text-right">
-              <div>Pincha aquí para hablar con tu</div>
-              <div>asistente de cosmética</div>
+            <div className="text-lg md:text-xl lg:text-2xl font-bold text-foreground text-right whitespace-nowrap">
+              Pincha aquí para hablar con tu asistente de cosmética
             </div>
             <ArrowRight className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
           </div>
