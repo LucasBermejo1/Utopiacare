@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { SearchDropdown } from "@/components/SearchDropdown";
 import { CategoryIconNav } from "@/components/CategoryIconNav";
 import { TrendingDiscussions } from "@/components/TrendingDiscussions";
-import { Flower2, ArrowRight } from "lucide-react";
+import { Flower2, ArrowRight, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UtopiaWordmark } from "@/components/UtopiaWordmark";
 import { featuredStores } from "@/data/stores";
@@ -56,12 +56,11 @@ export default function Home() {
           )}
         </div>
 
-        {!BETA_MODE && (
-          <div className="max-w-3xl mx-auto space-y-4">
-            <h2 className="text-2xl font-semibold text-left">¿Qué buscas hoy?</h2>
-            <SearchDropdown className="w-full" enableTypingEffect={true} />
-          </div>
-        )}
+        {/* Búsqueda - Visible siempre, pero con animación en modo beta */}
+        <div className="max-w-3xl mx-auto space-y-4">
+          {!BETA_MODE && <h2 className="text-2xl font-semibold text-left">¿Qué buscas hoy?</h2>}
+          <SearchDropdown className="w-full" enableTypingEffect={true} />
+        </div>
         
         {/* Category Navigation - Solo visible si no está en modo beta */}
         {!BETA_MODE && (
@@ -130,11 +129,11 @@ export default function Home() {
       {/* Mensaje para invitar a usar el chatbot - Solo visible en modo beta */}
       {BETA_MODE && (
         <section className="relative py-6 md:py-8">
-          <div className="flex flex-col sm:flex-row items-center sm:items-end justify-end gap-2 sm:gap-4 px-4 sm:pr-6 md:pr-20">
-            <div className="text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold text-foreground text-center sm:text-right">
+          <div className="flex flex-col items-center justify-center gap-3 px-4">
+            <div className="text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold text-foreground text-center">
               Pincha aquí para hablar con tu asistente de cosmética
             </div>
-            <ArrowRight className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 lg:w-16 lg:h-16 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0 rotate-0 sm:rotate-0" />
+            <ArrowDown className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 lg:w-16 lg:h-16 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
           </div>
         </section>
       )}
