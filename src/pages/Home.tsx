@@ -39,26 +39,23 @@ export default function Home() {
   return (
     <div className="space-y-16">
       {/* Hero Section */}
-      <section className={`text-center space-y-4 ${BETA_MODE ? 'py-8 md:py-12' : 'py-16'}`}>
-        <div className={`space-y-4 ${BETA_MODE ? 'space-y-3' : 'space-y-6'}`}>
+      <section className="text-center space-y-8 py-16">
+        <div className="space-y-6">
           <div className="space-y-2">
-            <h1 className={`${BETA_MODE ? 'text-2xl md:text-3xl' : 'text-4xl md:text-5xl'} font-light text-foreground leading-tight tracking-wide`}>
+            <h1 className="text-4xl md:text-5xl font-light text-foreground leading-tight tracking-wide">
               Cuídate con
             </h1>
             {/* Wordmark replicado por tipografía/estilos */}
             <UtopiaWordmark />
           </div>
-          {!BETA_MODE && (
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mt-8 font-light">
-              Descubre productos de belleza locales a través de reviews honestas, foros comunitarios,
-              análisis de ingredientes y mucho más
-            </p>
-          )}
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mt-8 font-light">
+            Descubre productos de belleza locales a través de reviews honestas, foros comunitarios,
+            análisis de ingredientes y mucho más
+          </p>
         </div>
 
-        {/* Búsqueda - Visible siempre, pero con animación en modo beta */}
         <div className="max-w-3xl mx-auto space-y-4">
-          {!BETA_MODE && <h2 className="text-2xl font-semibold text-left">¿Qué buscas hoy?</h2>}
+          <h2 className="text-2xl font-semibold text-left">¿Qué buscas hoy?</h2>
           <SearchDropdown className="w-full" enableTypingEffect={true} />
         </div>
         
