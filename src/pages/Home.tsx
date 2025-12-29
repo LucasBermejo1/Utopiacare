@@ -129,11 +129,20 @@ export default function Home() {
       {/* Mensaje para invitar a usar el chatbot - Solo visible en modo beta */}
       {BETA_MODE && (
         <section className="relative py-6 md:py-8">
-          <div className="flex flex-col items-center justify-center gap-3 px-4">
-            <div className="text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold text-foreground text-center">
+          {/* Versión móvil: centrado con flecha hacia abajo */}
+          <div className="flex flex-col items-center justify-center gap-3 px-4 md:hidden">
+            <div className="text-lg sm:text-xl font-bold text-foreground text-center">
               Pincha aquí para hablar con tu asistente de cosmética
             </div>
-            <ArrowDown className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 lg:w-16 lg:h-16 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
+            <ArrowDown className="w-6 h-6 sm:w-8 sm:h-8 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
+          </div>
+          
+          {/* Versión desktop: a la derecha con flecha horizontal */}
+          <div className="hidden md:flex items-center justify-end gap-4 pr-6 lg:pr-20">
+            <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground text-right">
+              Pincha aquí para hablar con tu asistente de cosmética
+            </div>
+            <ArrowRight className="w-8 h-8 md:w-12 md:h-12 lg:w-16 lg:h-16 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
           </div>
         </section>
       )}
