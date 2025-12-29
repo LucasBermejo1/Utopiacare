@@ -65,7 +65,7 @@ export default function Home() {
             {/* Wordmark replicado por tipografía/estilos */}
             <UtopiaWordmark />
           </div>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mt-8 font-light">
+          <p className="hidden md:block text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mt-8 font-light">
             Descubre productos de belleza locales a través de reviews honestas, foros comunitarios,
             análisis de ingredientes y mucho más
           </p>
@@ -146,7 +146,7 @@ export default function Home() {
           {/* Versión móvil: centrado con flecha hacia abajo y botón inline */}
           <section className="relative py-2 -mt-4 md:hidden">
             <div className="flex flex-col items-center justify-center gap-2 px-4">
-              <div className="text-base sm:text-lg font-bold text-foreground text-center">
+              <div className="text-lg text-muted-foreground max-w-3xl mx-auto font-light text-center">
                 Pincha aquí para hablar con tu asistente de cosmética
               </div>
               <ArrowDown className="w-5 h-5 sm:w-6 sm:h-6 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
