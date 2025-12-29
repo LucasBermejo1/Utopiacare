@@ -164,7 +164,7 @@ export default function Home() {
             <div className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground text-right">
               Pincha aquí para hablar con tu asistente de cosmética
             </div>
-            <ArrowRight className="w-10 h-10 md:w-14 md:h-14 lg:w-18 lg:h-18 xl:w-20 xl:h-20 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
+            <ArrowRight className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
           </div>
         </>
       )}
