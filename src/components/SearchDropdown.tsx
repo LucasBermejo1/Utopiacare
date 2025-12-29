@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Search, ArrowRight } from "lucide-react";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -42,34 +42,43 @@ export function SearchDropdown({ placeholder = defaultPlaceholder, className = "
   }, []);
 
   // Efecto de escritura automática solo cuando el input está vacío y no está enfocado
-  const typingTexts = isProduction ? (
-    isMobile ? [
-      "Muy pronto",
-      "Aún no disponible",
-      "Próximamente",
-      "En desarrollo",
-    ] : [
-      "Esta función estará disponible dentro de poco...",
-      "Muy pronto abriremos toda la plataforma para vosotr@s...",
-      "Estamos trabajando para ofrecerte la mejor experiencia...",
-      "Próximamente podrás buscar productos, marcas y discusiones...",
-      "Estamos preparando algo increíble para vosotr@s...",
-      "Muy pronto tendrás acceso completo a la plataforma...",
-      "Estamos finalizando los últimos detalles...",
-      "Próximamente: búsqueda completa de productos y marcas...",
-    ]
-  ) : [
-    "Busca productos de belleza...",
-    "Descubre ingredientes naturales...",
-    "Explora productos valencianos...",
-    "Encuentra reviews honestas...",
-    "Busca marcas locales...",
-    "Descubre nuevos productos...",
-    "Explora tratamientos faciales...",
-    "Encuentra limpiadores perfectos...",
-    "Busca productos coreanos...",
-    "Descubre mascarillas efectivas...",
-  ];
+  // Usar useMemo para evitar que el array cambie en cada render
+  const typingTexts = useMemo(() => {
+    if (isProduction) {
+      if (isMobile) {
+        return [
+          "Muy pronto",
+          "Aún no disponible",
+          "Próximamente",
+          "En desarrollo",
+        ];
+      } else {
+        return [
+          "Esta función estará disponible dentro de poco...",
+          "Muy pronto abriremos toda la plataforma para vosotr@s...",
+          "Estamos trabajando para ofrecerte la mejor experiencia...",
+          "Próximamente podrás buscar productos, marcas y discusiones...",
+          "Estamos preparando algo increíble para vosotr@s...",
+          "Muy pronto tendrás acceso completo a la plataforma...",
+          "Estamos finalizando los últimos detalles...",
+          "Próximamente: búsqueda completa de productos y marcas...",
+        ];
+      }
+    } else {
+      return [
+        "Busca productos de belleza...",
+        "Descubre ingredientes naturales...",
+        "Explora productos valencianos...",
+        "Encuentra reviews honestas...",
+        "Busca marcas locales...",
+        "Descubre nuevos productos...",
+        "Explora tratamientos faciales...",
+        "Encuentra limpiadores perfectos...",
+        "Busca productos coreanos...",
+        "Descubre mascarillas efectivas...",
+      ];
+    }
+  }, [isProduction, isMobile]);
   
   useEffect(() => {
     // Solo animar si está habilitado, el input está vacío, no está enfocado y no hay query
@@ -81,10 +90,16 @@ export function SearchDropdown({ placeholder = defaultPlaceholder, className = "
     let currentTextIndex = 0;
     let currentCharIndex = 0;
     let isDeleting = false;
-    let typingTimeout: NodeJS.Timeout;
+    let typingTimeout: NodeJS.Timeout | null = null;
     
     const type = () => {
-      if (currentTextIndex >= typingTexts.length || typingTexts.length === 0) {
+      // Validar que tenemos textos disponibles
+      if (typingTexts.length === 0) {
+        return;
+      }
+      
+      // Asegurar que el índice esté dentro de los límites
+      if (currentTextIndex >= typingTexts.length) {
         currentTextIndex = 0;
       }
       
@@ -121,7 +136,9 @@ export function SearchDropdown({ placeholder = defaultPlaceholder, className = "
     typingTimeout = setTimeout(type, 1000);
     
     return () => {
-      if (typingTimeout) clearTimeout(typingTimeout);
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+      }
     };
   }, [query, isFocused, enableTypingEffect, typingTexts]);
 
