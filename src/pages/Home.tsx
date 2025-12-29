@@ -142,29 +142,31 @@ export default function Home() {
 
       {/* Mensaje para invitar a usar el chatbot - Solo visible en modo beta */}
       {BETA_MODE && (
-        <section className="relative py-2 md:py-8 -mt-4 md:mt-0">
+        <>
           {/* Versión móvil: centrado con flecha hacia abajo y botón inline */}
-          <div className="flex flex-col items-center justify-center gap-2 px-4 md:hidden">
-            <div className="text-base sm:text-lg font-bold text-foreground text-center">
-              Pincha aquí para hablar con tu asistente de cosmética
+          <section className="relative py-2 -mt-4 md:hidden">
+            <div className="flex flex-col items-center justify-center gap-2 px-4">
+              <div className="text-base sm:text-lg font-bold text-foreground text-center">
+                Pincha aquí para hablar con tu asistente de cosmética
+              </div>
+              <ArrowDown className="w-5 h-5 sm:w-6 sm:h-6 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
+              {/* Botón del chatbot renderizado directamente aquí en móvil */}
+              <ChatBotButton 
+                onClick={handleOpenChat}
+                showPresentation={showPresentation}
+                size="large"
+              />
             </div>
-            <ArrowDown className="w-5 h-5 sm:w-6 sm:h-6 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
-            {/* Botón del chatbot renderizado directamente aquí en móvil */}
-            <ChatBotButton 
-              onClick={handleOpenChat}
-              showPresentation={showPresentation}
-              size="large"
-            />
-          </div>
+          </section>
           
-          {/* Versión desktop: a la derecha con flecha horizontal */}
-          <div className="hidden md:flex items-center justify-end gap-4 pr-6 lg:pr-20">
-            <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground text-right">
+          {/* Versión desktop: a la derecha con flecha horizontal, pegado al final */}
+          <div className="hidden md:flex fixed bottom-6 right-6 lg:right-8 items-center justify-end gap-4 z-40">
+            <div className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground text-right">
               Pincha aquí para hablar con tu asistente de cosmética
             </div>
-            <ArrowRight className="w-8 h-8 md:w-12 md:h-12 lg:w-16 lg:h-16 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
+            <ArrowRight className="w-10 h-10 md:w-14 md:h-14 lg:w-18 lg:h-18 xl:w-20 xl:h-20 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
           </div>
-        </section>
+        </>
       )}
     </div>
   );
