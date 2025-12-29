@@ -48,10 +48,6 @@ export function SearchDropdown({ placeholder = defaultPlaceholder, className = "
       "Aún no disponible",
       "Próximamente",
       "En desarrollo",
-      "Muy cerca",
-      "Pronto disponible",
-      "Llegando pronto",
-      "Casi listo",
     ] : [
       "Esta función estará disponible dentro de poco...",
       "Muy pronto abriremos toda la plataforma para vosotr@s...",
@@ -77,7 +73,7 @@ export function SearchDropdown({ placeholder = defaultPlaceholder, className = "
   
   useEffect(() => {
     // Solo animar si está habilitado, el input está vacío, no está enfocado y no hay query
-    if (!enableTypingEffect || query.trim() !== "" || isFocused) {
+    if (!enableTypingEffect || query.trim() !== "" || isFocused || typingTexts.length === 0) {
       setAnimatedPlaceholder("");
       return;
     }
@@ -88,7 +84,15 @@ export function SearchDropdown({ placeholder = defaultPlaceholder, className = "
     let typingTimeout: NodeJS.Timeout;
     
     const type = () => {
+      if (currentTextIndex >= typingTexts.length || typingTexts.length === 0) {
+        currentTextIndex = 0;
+      }
+      
       const currentText = typingTexts[currentTextIndex];
+      
+      if (!currentText) {
+        return;
+      }
       
       if (!isDeleting && currentCharIndex < currentText.length) {
         // Escribiendo
