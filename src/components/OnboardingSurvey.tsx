@@ -538,8 +538,13 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
     }
   };
 
+  const handleClose = () => {
+    // Permitir cerrar el cuestionario
+    onComplete();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0">
         {/* Header con progreso */}
         <div className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-accent/5 to-transparent">
