@@ -54,9 +54,9 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="space-y-16">
+    <div className={`${BETA_MODE ? 'space-y-8' : 'space-y-16'}`}>
       {/* Hero Section */}
-      <section className="text-center space-y-8 py-16">
+      <section className={`text-center space-y-8 ${BETA_MODE ? 'py-4 md:py-16' : 'py-16'}`}>
         <div className="space-y-6">
           <div className="space-y-2">
             <h1 className="text-4xl md:text-5xl font-light text-foreground leading-tight tracking-wide">
@@ -142,7 +142,7 @@ export default function Home() {
 
       {/* Mensaje para invitar a usar el chatbot - Solo visible en modo beta */}
       {BETA_MODE && (
-        <section className="relative py-2 md:py-8">
+        <section className="relative py-2 md:py-8 -mt-4 md:mt-0">
           {/* Versión móvil: centrado con flecha hacia abajo y botón inline */}
           <div className="flex flex-col items-center justify-center gap-2 px-4 md:hidden">
             <div className="text-base sm:text-lg font-bold text-foreground text-center">
