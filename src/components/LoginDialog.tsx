@@ -44,6 +44,17 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
   const [checkingOnboarding, setCheckingOnboarding] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
+  // Resetear estado cuando se abre/cierra el diálogo
+  useEffect(() => {
+    if (!open) {
+      // Cuando se cierra el diálogo, resetear todo
+      setIsSignUp(false);
+      setEmail("");
+      setPassword("");
+      setLoading(false);
+    }
+  }, [open]);
+
   // Verificar configuración de Supabase al montar
   useEffect(() => {
     if (!supabase) {
@@ -163,9 +174,14 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
       return;
     }
 
+    console.log("🔐 Modo actual:", isSignUp ? "REGISTRO (Crear cuenta)" : "LOGIN (Iniciar sesión)");
+    console.log("📧 Email:", email);
+    
     setLoading(true);
     try {
       if (isSignUp) {
+        // REGISTRO - Crear cuenta
+        console.log("✅ Ejecutando REGISTRO de nuevo usuario");
         // Registro
         console.log("Intentando registrar usuario:", email);
         
@@ -175,7 +191,6 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
         
         console.log("URL de redirección configurada:", redirectUrl);
         console.log("Hostname actual:", window.location.hostname);
-        console.log("Es producción:", isProduction);
         
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -234,7 +249,8 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
           onLoginSuccess?.();
         }
       } else {
-        // Inicio de sesión
+        // LOGIN - Iniciar sesión
+        console.log("✅ Ejecutando LOGIN de usuario existente");
         console.log("Intentando iniciar sesión:", email);
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
@@ -412,7 +428,13 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
             <Button
               type="button"
               variant="ghost"
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => {
+                console.log("🔄 Cambiando modo de:", isSignUp ? "REGISTRO" : "LOGIN", "a:", !isSignUp ? "REGISTRO" : "LOGIN");
+                setIsSignUp(!isSignUp);
+                // Limpiar errores al cambiar de modo
+                setEmail("");
+                setPassword("");
+              }}
             >
               {isSignUp ? "¿Ya tienes cuenta? Inicia sesión" : "¿No tienes cuenta? Regístrate"}
             </Button>
