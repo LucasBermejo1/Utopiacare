@@ -819,11 +819,31 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
         prompt += `   Ingredientes principales: ${ingredientsList}\n`;
       }
       
-      // Incluir información de CosIng si está disponible
-      if (product.cosingAnalysis && product.cosingAnalysis.summary) {
-        prompt += `   Análisis CosIng: ${product.cosingAnalysis.summary.substring(0, 150)}...\n`;
+      // Incluir información detallada de CosIng si está disponible
+      if (product.cosingAnalysis) {
+        prompt += `   📊 ANÁLISIS COSING:\n`;
+        if (product.cosingAnalysis.summary) {
+          prompt += `      Resumen: ${product.cosingAnalysis.summary}\n`;
+        }
         if (product.cosingAnalysis.concerns && product.cosingAnalysis.concerns.length > 0) {
-          prompt += `   Preocupaciones detectadas: ${product.cosingAnalysis.concerns.join(", ")}\n`;
+          prompt += `      ⚠️ Preocupaciones: ${product.cosingAnalysis.concerns.join(", ")}\n`;
+        }
+        if (product.cosingAnalysis.recommendations && product.cosingAnalysis.recommendations.length > 0) {
+          prompt += `      💡 Recomendaciones: ${product.cosingAnalysis.recommendations.join(", ")}\n`;
+        }
+        // Incluir información de ingredientes problemáticos según CosIng
+        if (product.cosingAnalysis.ingredients && product.cosingAnalysis.ingredients.length > 0) {
+          const problematicIngredients = product.cosingAnalysis.ingredients.filter(
+            (ing: any) => ing.safety_assessment && (
+              ing.safety_assessment.toLowerCase().includes("problemático") ||
+              ing.safety_assessment.toLowerCase().includes("irritante") ||
+              ing.safety_assessment.toLowerCase().includes("alérgeno") ||
+              ing.safety_assessment.toLowerCase().includes("evitar")
+            )
+          );
+          if (problematicIngredients.length > 0) {
+            prompt += `      ⚠️ Ingredientes con advertencias según CosIng: ${problematicIngredients.map((ing: any) => ing.name).join(", ")}\n`;
+          }
         }
       }
       
@@ -880,11 +900,17 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
   prompt += "=== FIN DEL CONTEXTO PERSONALIZADO ===\n\n";
   prompt += "INSTRUCCIONES FINALES:\n";
   prompt += "- Usa esta información para dar respuestas HIPERPERSONALIZADAS al usuario\n";
-  prompt += "- Menciona productos ESPECÍFICOS de la lista que sean perfectos para su perfil\n";
-  prompt += "- Explica POR QUÉ cada recomendación es adecuada para este usuario en particular\n";
-  prompt += "- Si un producto tiene información de CosIng, úsala para justificar tu recomendación\n";
+  prompt += "- Puedes recomendar productos ESPECÍFICOS de la lista que sean perfectos para su perfil\n";
+  prompt += "- PERO TAMBIÉN puedes recomendar productos generales (no solo de la base de datos) basándote en:\n";
+  prompt += "  * El historial completo del usuario (tipo de piel, sensibilidad, preocupaciones, clima, etc.)\n";
+  prompt += "  * La información de CosIng sobre ingredientes (qué ingredientes son seguros, problemáticos, etc.)\n";
+  prompt += "  * Las características que necesita según su perfil\n";
+  prompt += "- Si un producto de la base de datos tiene información de CosIng, úsala para justificar tu recomendación\n";
+  prompt += "- Si no hay productos perfectos en la base de datos, recomienda tipos de productos o ingredientes específicos basándote en CosIng y el perfil del usuario\n";
+  prompt += "- Explica POR QUÉ cada recomendación es adecuada para este usuario en particular usando datos específicos\n";
   prompt += "- Si hay discusiones relevantes, referencialas para dar contexto de la comunidad\n";
   prompt += "- Sé preciso, específico y personalizado en TODAS tus respuestas\n";
+  prompt += "- IMPORTANTE: Puedes recomendar productos generales mencionando marcas conocidas o tipos de productos, no solo los de la base de datos\n";
 
   return prompt;
 }
