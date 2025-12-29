@@ -39,25 +39,29 @@ export default function Home() {
   return (
     <div className="space-y-16">
       {/* Hero Section */}
-      <section className="text-center space-y-8 py-16">
-        <div className="space-y-6">
+      <section className={`text-center space-y-4 ${BETA_MODE ? 'py-8 md:py-12' : 'py-16'}`}>
+        <div className={`space-y-4 ${BETA_MODE ? 'space-y-3' : 'space-y-6'}`}>
           <div className="space-y-2">
-            <h1 className="text-4xl md:text-5xl font-light text-foreground leading-tight tracking-wide">
+            <h1 className={`${BETA_MODE ? 'text-2xl md:text-3xl' : 'text-4xl md:text-5xl'} font-light text-foreground leading-tight tracking-wide`}>
               Cuídate con
             </h1>
             {/* Wordmark replicado por tipografía/estilos */}
             <UtopiaWordmark />
           </div>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mt-8 font-light">
-            Descubre productos de belleza locales a través de reviews honestas, foros comunitarios,
-            análisis de ingredientes y mucho más
-          </p>
+          {!BETA_MODE && (
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mt-8 font-light">
+              Descubre productos de belleza locales a través de reviews honestas, foros comunitarios,
+              análisis de ingredientes y mucho más
+            </p>
+          )}
         </div>
 
-        <div className="max-w-3xl mx-auto space-y-4">
-          <h2 className="text-2xl font-semibold text-left">¿Qué buscas hoy?</h2>
-          <SearchDropdown className="w-full" enableTypingEffect={true} />
-        </div>
+        {!BETA_MODE && (
+          <div className="max-w-3xl mx-auto space-y-4">
+            <h2 className="text-2xl font-semibold text-left">¿Qué buscas hoy?</h2>
+            <SearchDropdown className="w-full" enableTypingEffect={true} />
+          </div>
+        )}
         
         {/* Category Navigation - Solo visible si no está en modo beta */}
         {!BETA_MODE && (
@@ -125,12 +129,12 @@ export default function Home() {
 
       {/* Mensaje para invitar a usar el chatbot - Solo visible en modo beta */}
       {BETA_MODE && (
-        <section className="relative py-8">
-          <div className="flex items-center justify-end gap-4 pr-6 md:pr-20">
-            <div className="text-2xl md:text-4xl lg:text-5xl font-bold text-foreground text-right">
+        <section className="relative py-6 md:py-8">
+          <div className="flex flex-col sm:flex-row items-center sm:items-end justify-end gap-2 sm:gap-4 px-4 sm:pr-6 md:pr-20">
+            <div className="text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold text-foreground text-center sm:text-right">
               Pincha aquí para hablar con tu asistente de cosmética
             </div>
-            <ArrowRight className="w-8 h-8 md:w-12 md:h-12 lg:w-16 lg:h-16 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
+            <ArrowRight className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 lg:w-16 lg:h-16 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0 rotate-0 sm:rotate-0" />
           </div>
         </section>
       )}
