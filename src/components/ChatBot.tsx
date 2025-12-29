@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,40 @@ import {
   updateUserChatData,
 } from "@/services/chatDataService";
 import { getChatGPTResponse, convertMessagesToChatGPTFormat } from "@/services/chatGPTService";
+
+// Componente para el botón del chatbot (reutilizable)
+export function ChatBotButton({ 
+  onClick, 
+  showPresentation = false,
+  size = "default"
+}: { 
+  onClick: () => void;
+  showPresentation?: boolean;
+  size?: "default" | "large";
+}) {
+  const buttonSize = size === "large" ? "h-20 w-20" : "h-16 w-16";
+  
+  return (
+    <div className={`flex items-center justify-center relative transition-all duration-1000 ${
+      showPresentation ? "opacity-0 scale-0" : "opacity-100 scale-100"
+    }`}>
+      {/* Pulso animado de fondo */}
+      <div className={`absolute rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] opacity-30 animate-ping ${buttonSize}`} />
+      <div className={`absolute rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] opacity-20 animate-pulse ${buttonSize}`} />
+      
+      <Button
+        onClick={onClick}
+        className={`relative rounded-full shadow-2xl hover:scale-110 transition-all duration-300 bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] hover:shadow-3xl hover:shadow-[hsl(var(--terracotta))]/50 border-2 border-white/20 ${buttonSize}`}
+        size="lg"
+        aria-label="Hablar con Utopia"
+      >
+        <div className="relative w-full h-full flex items-center justify-center">
+          <UtopiaEyes size="lg" />
+        </div>
+      </Button>
+    </div>
+  );
+}
 
 // Componente para los ojos animados de Utopia
 export function UtopiaEyes({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
@@ -115,6 +149,13 @@ export function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [showPresentation, setShowPresentation] = useState(false);
+  
+  // Escuchar evento personalizado para abrir el chat desde otros componentes
+  useEffect(() => {
+    const handleOpenChat = () => setIsOpen(true);
+    window.addEventListener('openChatBot', handleOpenChat);
+    return () => window.removeEventListener('openChatBot', handleOpenChat);
+  }, []);
   
   // Mensaje inicial adaptado según si el usuario está autenticado
   const getInitialMessage = () => {
@@ -515,27 +556,14 @@ export function ChatBot() {
         </div>
       )}
 
-      {/* Botón flotante para abrir el chat */}
+      {/* Botón flotante para abrir el chat - Solo desktop (fixed) */}
       {!isOpen && (
-        <div className={`fixed bottom-6 right-6 z-50 transition-all duration-1000 ${
-          showPresentation ? "opacity-0 scale-0" : "opacity-100 scale-100"
-        }`}>
-          {/* Pulso animado de fondo - más intenso en producción */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] opacity-30 animate-ping" />
-          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] opacity-20 animate-pulse" />
-          
-          <Button
+        <div className={`${BETA_MODE ? 'hidden md:block' : ''} fixed bottom-6 right-6 z-50`}>
+          <ChatBotButton 
             onClick={() => setIsOpen(true)}
-            className={`relative rounded-full shadow-2xl hover:scale-110 transition-all duration-300 bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] hover:shadow-3xl hover:shadow-[hsl(var(--terracotta))]/50 border-2 border-white/20 ${
-              BETA_MODE ? "h-20 w-20" : "h-16 w-16"
-            }`}
-            size="lg"
-            aria-label="Hablar con Utopia"
-          >
-            <div className="relative w-full h-full flex items-center justify-center">
-              <UtopiaEyes size="lg" />
-            </div>
-          </Button>
+            showPresentation={showPresentation}
+            size={BETA_MODE ? "large" : "default"}
+          />
         </div>
       )}
 

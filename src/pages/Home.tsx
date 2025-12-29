@@ -12,9 +12,26 @@ import { Link } from "react-router-dom";
 import { SafeImage } from "@/components/SafeImage";
 import { AddStoreDialog } from "@/components/AddStoreDialog";
 import { BETA_MODE } from "@/config/constants";
+import { ChatBotButton } from "@/components/ChatBot";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const [stores, setStores] = useState<Store[]>(featuredStores);
+  const [showPresentation, setShowPresentation] = useState(false);
+  
+  // Efecto para la animación de presentación (solo en modo beta)
+  useEffect(() => {
+    if (BETA_MODE) {
+      setShowPresentation(true);
+      const timer = setTimeout(() => setShowPresentation(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+  
+  // Función para abrir el chat desde el botón en móvil
+  const handleOpenChat = () => {
+    window.dispatchEvent(new CustomEvent('openChatBot'));
+  };
 
   useEffect(() => {
     const loadStores = async () => {
@@ -125,13 +142,19 @@ export default function Home() {
 
       {/* Mensaje para invitar a usar el chatbot - Solo visible en modo beta */}
       {BETA_MODE && (
-        <section className="relative py-6 md:py-8">
-          {/* Versión móvil: centrado con flecha hacia abajo */}
-          <div className="flex flex-col items-center justify-center gap-3 px-4 md:hidden">
-            <div className="text-lg sm:text-xl font-bold text-foreground text-center">
+        <section className="relative py-2 md:py-8">
+          {/* Versión móvil: centrado con flecha hacia abajo y botón inline */}
+          <div className="flex flex-col items-center justify-center gap-2 px-4 md:hidden">
+            <div className="text-base sm:text-lg font-bold text-foreground text-center">
               Pincha aquí para hablar con tu asistente de cosmética
             </div>
-            <ArrowDown className="w-6 h-6 sm:w-8 sm:h-8 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
+            <ArrowDown className="w-5 h-5 sm:w-6 sm:h-6 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
+            {/* Botón del chatbot renderizado directamente aquí en móvil */}
+            <ChatBotButton 
+              onClick={handleOpenChat}
+              showPresentation={showPresentation}
+              size="large"
+            />
           </div>
           
           {/* Versión desktop: a la derecha con flecha horizontal */}
