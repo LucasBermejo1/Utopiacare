@@ -641,56 +641,26 @@ export async function getRAGContext(
     }
   }
 
-  // Buscar productos y discusiones relevantes en paralelo (con personalización mejorada)
-  const [products, discussions] = await Promise.all([
-    searchRelevantProducts(userQuery, 5, userProfile),
-    searchRelevantDiscussions(userQuery, 3, userProfile),
-  ]);
+  // NO buscar productos de la base de datos - solo usar perfil del usuario
+  // El chatbot hará recomendaciones libres basándose solo en el perfil del usuario
+  const products: Product[] = [];
+  const discussions: Discussion[] = [];
+  const similarReviews: Array<{ productId: string; productName: string; reviews: Review[] }> = [];
 
-  console.log(`📦 Productos personalizados encontrados: ${products.length}`);
-  console.log(`💬 Discusiones relevantes encontradas: ${discussions.length}`);
+  console.log("📋 Usando solo perfil del usuario para recomendaciones libres (sin productos de la base de datos)");
 
-  // Obtener reviews de usuarios con perfil similar para los productos encontrados
-  let similarReviews: Array<{ productId: string; productName: string; reviews: Review[] }> = [];
-  if (userProfile && products.length > 0) {
-    const productIds = products.map((p) => p.id);
-    similarReviews = await getSimilarProfileReviews(productIds, userProfile, 3);
-    console.log(`⭐ Reviews con perfil similar: ${similarReviews.reduce((sum, p) => sum + p.reviews.length, 0)} reviews de ${similarReviews.length} productos`);
-  }
-
-  // Generar resumen del contexto
+  // Generar resumen del contexto (solo perfil del usuario)
   let summary = "";
-  if (products.length > 0) {
-    summary += `Encontré ${products.length} producto(s) altamente personalizado(s) para el usuario:\n`;
-    products.forEach((p, i) => {
-      summary += `${i + 1}. ${p.brand} - ${p.name} (⭐ ${p.rating.toFixed(1)}, ${p.reviewsCount} reseñas)\n`;
-      if (p.categories.length > 0) {
-        summary += `   Categorías: ${p.categories.join(", ")}\n`;
-      }
-      if (p.concerns.length > 0) {
-        summary += `   Para: ${p.concerns.join(", ")}\n`;
-      }
-    });
-  }
-
-  if (discussions.length > 0) {
-    summary += `\nEncontré ${discussions.length} discusión(es) relevante(s):\n`;
-    discussions.forEach((d, i) => {
-      summary += `${i + 1}. "${d.title}" (${d.upvotes} votos, ${d.comments} comentarios)\n`;
-      summary += `   ${d.excerpt}\n`;
-    });
-  }
-
-  if (similarReviews.length > 0) {
-    summary += `\nEncontré ${similarReviews.reduce((sum, p) => sum + p.reviews.length, 0)} review(s) de usuarios con perfil similar para ${similarReviews.length} producto(s)\n`;
+  if (userProfile) {
+    summary += "Perfil del usuario cargado para personalización de recomendaciones libres.\n";
   }
 
   return {
-    products,
-    discussions,
+    products: [], // No incluir productos de la base de datos
+    discussions: [], // No incluir discusiones
     userProfile,
     summary: summary.trim(),
-    similarReviews,
+    similarReviews: [], // No incluir reviews
   };
 }
 
@@ -791,126 +761,23 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
     prompt += "8. 📊 Si hay varios productos similares, prioriza los mejor valorados (rating > 4.0)\n\n";
   }
 
-  if (context.products.length === 0 && context.discussions.length === 0) {
-    return prompt || "";
-  }
-
-  prompt += "\n\n=== PRODUCTOS ALTAMENTE PERSONALIZADOS DE LA BASE DE DATOS ===\n\n";
-
-  if (context.products.length > 0) {
-    prompt += "Estos productos han sido seleccionados específicamente para este usuario basándose en su perfil completo:\n\n";
-    context.products.forEach((product, index) => {
-      prompt += `${index + 1}. ${product.brand} - ${product.name}\n`;
-      prompt += `   ID: ${product.id}\n`;
-      prompt += `   Valoración: ⭐ ${product.rating.toFixed(1)}/5 (${product.reviewsCount} reseñas)\n`;
-      if (product.categories.length > 0) {
-        prompt += `   Categorías: ${product.categories.join(", ")}\n`;
-      }
-      if (product.attributes.length > 0) {
-        prompt += `   Atributos: ${product.attributes.join(", ")}\n`;
-      }
-      if (product.concerns.length > 0) {
-        prompt += `   Indicado para: ${product.concerns.join(", ")}\n`;
-      }
-      if (product.ingredients.length > 0) {
-        const ingredientsList = product.ingredients.length > 15 
-          ? product.ingredients.slice(0, 15).join(", ") + ` (y ${product.ingredients.length - 15} más)`
-          : product.ingredients.join(", ");
-        prompt += `   Ingredientes principales: ${ingredientsList}\n`;
-      }
-      
-      // Incluir información detallada de CosIng si está disponible
-      if (product.cosingAnalysis) {
-        prompt += `   📊 ANÁLISIS COSING:\n`;
-        if (product.cosingAnalysis.summary) {
-          prompt += `      Resumen: ${product.cosingAnalysis.summary}\n`;
-        }
-        if (product.cosingAnalysis.concerns && product.cosingAnalysis.concerns.length > 0) {
-          prompt += `      ⚠️ Preocupaciones: ${product.cosingAnalysis.concerns.join(", ")}\n`;
-        }
-        if (product.cosingAnalysis.recommendations && product.cosingAnalysis.recommendations.length > 0) {
-          prompt += `      💡 Recomendaciones: ${product.cosingAnalysis.recommendations.join(", ")}\n`;
-        }
-        // Incluir información de ingredientes problemáticos según CosIng
-        if (product.cosingAnalysis.ingredients && product.cosingAnalysis.ingredients.length > 0) {
-          const problematicIngredients = product.cosingAnalysis.ingredients.filter(
-            (ing: any) => ing.safety_assessment && (
-              ing.safety_assessment.toLowerCase().includes("problemático") ||
-              ing.safety_assessment.toLowerCase().includes("irritante") ||
-              ing.safety_assessment.toLowerCase().includes("alérgeno") ||
-              ing.safety_assessment.toLowerCase().includes("evitar")
-            )
-          );
-          if (problematicIngredients.length > 0) {
-            prompt += `      ⚠️ Ingredientes con advertencias según CosIng: ${problematicIngredients.map((ing: any) => ing.name).join(", ")}\n`;
-          }
-        }
-      }
-      
-      prompt += "\n";
-    });
-    prompt += "\n";
-  }
-
-  if (context.discussions.length > 0) {
-    prompt += "DISCUSIONES RELEVANTES DE LA COMUNIDAD:\n\n";
-    context.discussions.forEach((discussion, index) => {
-      prompt += `${index + 1}. "${discussion.title}"\n`;
-      prompt += `   Categoría: ${discussion.category}\n`;
-      prompt += `   ${discussion.excerpt}\n`;
-      if (discussion.author.skinType) {
-        prompt += `   Autor: ${discussion.author.name} (tipo de piel: ${discussion.author.skinType})\n`;
-      } else {
-        prompt += `   Autor: ${discussion.author.name}\n`;
-      }
-      prompt += `   ${discussion.upvotes} votos, ${discussion.comments} comentarios, ${discussion.timeAgo}\n\n`;
-    });
-  }
-
-  // Añadir reviews de usuarios con perfil extremadamente similar
-  if (context.similarReviews && context.similarReviews.length > 0) {
-    prompt += "\n\n=== REVIEWS DE USUARIOS CON PERFIL EXTREMADAMENTE SIMILAR ===\n\n";
-    prompt += "⚠️ IMPORTANTE: Estas reviews son de usuarios con perfil de piel MUY similar al del usuario actual.\n";
-    prompt += "Estas reviews son especialmente relevantes porque provienen de personas con características similares.\n\n";
-    
-    context.similarReviews.forEach((productReviews) => {
-      if (productReviews.reviews.length > 0) {
-        prompt += `📦 ${productReviews.productName}:\n\n`;
-        productReviews.reviews.forEach((review, index) => {
-          prompt += `   Review ${index + 1} (⭐ ${review.rating}/5, ${review.upvotes} útiles):\n`;
-          prompt += `   - Usuario: ${review.user.name} (tipo de piel: ${review.user.skinType || "no especificado"})\n`;
-          prompt += `   - Fecha: ${review.date}\n`;
-          if (review.textFull) {
-            const reviewText = review.textFull.length > 300 
-              ? review.textFull.substring(0, 300) + "..." 
-              : review.textFull;
-            prompt += `   - Comentario: "${reviewText}"\n`;
-          } else if (review.textShort) {
-            prompt += `   - Comentario: "${review.textShort}"\n`;
-          }
-          prompt += "\n";
-        });
-      }
-    });
-    
-    prompt += "💡 USA ESTAS REVIEWS para dar recomendaciones más precisas, ya que provienen de usuarios con perfil similar.\n";
-    prompt += "💡 Si hay reviews positivas de usuarios similares, destácalas. Si hay negativas, tenlas en cuenta.\n\n";
-  }
+  // NO incluir productos, discusiones ni reviews de la base de datos
+  // El chatbot hará recomendaciones totalmente libres basándose solo en el perfil del usuario
 
   prompt += "=== FIN DEL CONTEXTO PERSONALIZADO ===\n\n";
-  prompt += "INSTRUCCIONES FINALES:\n";
-  prompt += "- Usa esta información para dar respuestas HIPERPERSONALIZADAS al usuario\n";
-  prompt += "- Puedes recomendar productos ESPECÍFICOS de la lista que sean perfectos para su perfil\n";
-  prompt += "- PERO TAMBIÉN puedes recomendar productos generales (no solo de la base de datos) basándote en:\n";
+  prompt += "INSTRUCCIONES FINALES (CRÍTICO):\n";
+  prompt += "⚠️ NO HAY PRODUCTOS DE LA BASE DE DATOS EN ESTE CONTEXTO - NO LOS MENCIONES\n";
+  prompt += "⚠️ NO debes mencionar productos específicos de la base de datos de Utopia\n";
+  prompt += "⚠️ Haz recomendaciones TOTALMENTE LIBRES basándote en:\n";
   prompt += "  * El historial completo del usuario (tipo de piel, sensibilidad, preocupaciones, clima, etc.)\n";
-  prompt += "  * La información de CosIng sobre ingredientes (qué ingredientes son seguros, problemáticos, etc.)\n";
+  prompt += "  * Tu conocimiento de CosIng sobre ingredientes (qué ingredientes son seguros, problemáticos, etc.)\n";
   prompt += "  * Las características que necesita según su perfil\n";
-  prompt += "- Si un producto de la base de datos tiene información de CosIng, úsala para justificar tu recomendación\n";
-  prompt += "- Si no hay productos perfectos en la base de datos, recomienda tipos de productos o ingredientes específicos basándote en CosIng y el perfil del usuario\n";
-  prompt += "- Explica POR QUÉ cada recomendación es adecuada para este usuario en particular usando datos específicos\n";
-  prompt += "- Si hay discusiones relevantes, referencialas para dar contexto de la comunidad\n";
+  prompt += "  * Productos y marcas de TODO INTERNET, no solo de la base de datos\n";
+  prompt += "- Usa esta información para dar respuestas HIPERPERSONALIZADAS al usuario\n";
+  prompt += "- Recomienda productos generales mencionando marcas conocidas o tipos de productos de cualquier lugar\n";
+  prompt += "- Explica POR QUÉ cada recomendación es adecuada para este usuario en particular usando datos específicos de su perfil\n";
   prompt += "- Sé preciso, específico y personalizado en TODAS tus respuestas\n";
-  prompt += "- IMPORTANTE: Puedes recomendar productos generales mencionando marcas conocidas o tipos de productos, no solo los de la base de datos\n";
+  prompt += "- IMPORTANTE: Puedes recomendar cualquier producto o marca que conozcas, no estás limitado a una base de datos\n";
 
   return prompt;
 }
