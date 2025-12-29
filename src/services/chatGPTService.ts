@@ -49,9 +49,9 @@ export async function getChatGPTResponse(
     throw new Error("VITE_CHATGPT_API_KEY no está configurada. Por favor, añádela en tu archivo .env.local");
   }
 
-  // Si hay imágenes, usar el modelo con visión (gpt-4o o gpt-4o-mini con visión)
+  // Si hay imágenes, usar el modelo con visión pero incluyendo contexto RAG
   if (images && images.length > 0) {
-    return await getChatCompletionsResponse(apiKey, userMessage, conversationHistory, images);
+    return await getChatCompletionsResponse(apiKey, userMessage, conversationHistory, images, userId);
   }
 
   // Si se especifica un Assistant ID, usar la API de Assistants
@@ -282,31 +282,56 @@ async function getChatCompletionsResponse(
   apiKey: string,
   userMessage: string,
   conversationHistory: ChatGPTMessage[],
-  images?: string[]
+  images?: string[],
+  userId?: string | null
 ): Promise<string> {
+  // Obtener contexto RAG si hay userId (perfil del usuario e historial)
+  let ragContextText = "";
+  if (userId) {
+    try {
+      const { getRAGContext, formatRAGContextForPrompt } = await import("./ragService");
+      const ragContext = await getRAGContext(userMessage, userId);
+      ragContextText = formatRAGContextForPrompt(ragContext);
+      console.log("📚 Contexto RAG generado para análisis de imagen:", ragContextText.substring(0, 200) + "...");
+    } catch (error) {
+      console.error("Error obteniendo contexto RAG para imagen:", error);
+      // Continuar sin contexto RAG si hay error
+    }
+  }
+
   const systemPrompt: ChatGPTMessage = {
     role: "system",
     content: `Eres Utopia, un asesor experto en cuidado de la piel y productos de belleza. Tu objetivo es ayudar a los usuarios a encontrar los mejores productos para su tipo de piel, responder preguntas sobre ingredientes, rutinas de cuidado, y recomendar productos según sus necesidades.
 
-INSTRUCCIONES:
+INSTRUCCIONES CRÍTICAS:
+- ⚠️ SIEMPRE usa el perfil del usuario y el historial que se proporciona en el contexto
+- ⚠️ Si el usuario envía fotos de productos, analiza la imagen PERO SIEMPRE verifica si es adecuado para el tipo de piel del usuario
+- ⚠️ Si el usuario tiene piel GRASA y el producto es para SECA, ADVIÉRTELO claramente
+- ⚠️ Si el usuario tiene piel SECA y el producto es para GRASA, ADVIÉRTELO claramente
+- ⚠️ Si el producto contiene ingredientes del historial problemático del usuario, ADVIÉRTELO y NO lo recomiendes
 - Responde siempre en español de forma amigable, profesional y con información precisa
 - Usa emojis de forma moderada para hacer la conversación más amigable (✨ 💕 🧴 🌟)
 - Sé específico y práctico en tus recomendaciones
 - Si mencionas productos, intenta ser específico sobre marcas o ingredientes clave
 - Si no estás seguro de algo, admítelo y sugiere consultar con un dermatólogo
 - Mantén las respuestas concisas pero completas (máximo 300 palabras)
-- Personaliza tus respuestas según el contexto de la conversación
+- Personaliza tus respuestas según el perfil del usuario y el historial de conversación
 - Si el usuario menciona preocupaciones específicas (acné, arrugas, manchas, etc.), enfócate en eso
-- Si el usuario envía fotos de productos, analiza la imagen y proporciona información sobre el producto, ingredientes visibles, y recomendaciones basadas en lo que ves`,
+- Si el usuario envía fotos de productos, analiza la imagen y proporciona información sobre el producto, ingredientes visibles, y recomendaciones PERSONALIZADAS basadas en su perfil`,
   };
 
-  // Si hay imágenes, construir el mensaje con contenido multimodal
+  // Si hay imágenes, construir el mensaje con contenido multimodal incluyendo contexto RAG
   let userContent: any;
   if (images && images.length > 0) {
+    // Incluir el contexto RAG en el texto del mensaje junto con la imagen
+    const messageWithContext = ragContextText 
+      ? `${userMessage || "¿Puedes analizar este producto de belleza?"}\n\n${ragContextText}`
+      : (userMessage || "¿Puedes analizar este producto de belleza?");
+    
     userContent = [
       {
         type: "text",
-        text: userMessage || "¿Puedes analizar este producto de belleza?"
+        text: messageWithContext
       },
       ...images.map((img) => ({
         type: "image_url",
@@ -316,7 +341,10 @@ INSTRUCCIONES:
       }))
     ];
   } else {
-    userContent = userMessage;
+    // Si no hay imágenes pero hay contexto RAG, incluirlo en el mensaje
+    userContent = ragContextText 
+      ? `${userMessage}\n\n${ragContextText}`
+      : userMessage;
   }
 
   const messages: any[] = [
