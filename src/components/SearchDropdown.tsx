@@ -29,17 +29,40 @@ export function SearchDropdown({ placeholder = defaultPlaceholder, className = "
   const [results, setResults] = useState<{ products: Product[]; brands: string[] }>({ products: [], brands: [] });
   const dropdownRef = useRef<HTMLDivElement>(null);
   
+  // Detectar si estamos en móvil
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // md breakpoint de Tailwind
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Efecto de escritura automática solo cuando el input está vacío y no está enfocado
-  const typingTexts = isProduction ? [
-    "Esta función estará disponible dentro de poco...",
-    "Muy pronto abriremos toda la plataforma para vosotr@s...",
-    "Estamos trabajando para ofrecerte la mejor experiencia...",
-    "Próximamente podrás buscar productos, marcas y discusiones...",
-    "Estamos preparando algo increíble para vosotr@s...",
-    "Muy pronto tendrás acceso completo a la plataforma...",
-    "Estamos finalizando los últimos detalles...",
-    "Próximamente: búsqueda completa de productos y marcas...",
-  ] : [
+  const typingTexts = isProduction ? (
+    isMobile ? [
+      "Muy pronto",
+      "Aún no disponible",
+      "Próximamente",
+      "En desarrollo",
+      "Muy cerca",
+      "Pronto disponible",
+      "Llegando pronto",
+      "Casi listo",
+    ] : [
+      "Esta función estará disponible dentro de poco...",
+      "Muy pronto abriremos toda la plataforma para vosotr@s...",
+      "Estamos trabajando para ofrecerte la mejor experiencia...",
+      "Próximamente podrás buscar productos, marcas y discusiones...",
+      "Estamos preparando algo increíble para vosotr@s...",
+      "Muy pronto tendrás acceso completo a la plataforma...",
+      "Estamos finalizando los últimos detalles...",
+      "Próximamente: búsqueda completa de productos y marcas...",
+    ]
+  ) : [
     "Busca productos de belleza...",
     "Descubre ingredientes naturales...",
     "Explora productos valencianos...",
@@ -96,7 +119,7 @@ export function SearchDropdown({ placeholder = defaultPlaceholder, className = "
     return () => {
       if (typingTimeout) clearTimeout(typingTimeout);
     };
-  }, [query, isFocused, enableTypingEffect]);
+  }, [query, isFocused, enableTypingEffect, typingTexts]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
