@@ -280,7 +280,8 @@ export function ChatBot() {
 
       // Extraer y guardar información relevante del mensaje
       extractRelevantDataFromMessage(userMessage.content)
-        .then((extractedData) => {
+        .then(async (extractedData) => {
+          // Guardar datos de chat
           if (
             extractedData.mentionedProducts?.length ||
             extractedData.mentionedIngredients?.length ||
@@ -289,7 +290,37 @@ export function ChatBot() {
             extractedData.productInterests?.length ||
             extractedData.preferences
           ) {
-            return updateUserChatData(user.id, extractedData);
+            await updateUserChatData(user.id, extractedData);
+          }
+          
+          // Si hay alergias o ingredientes problemáticos, actualizar el perfil del usuario
+          const problematicItems = [
+            ...(extractedData.allergies || []),
+            ...(extractedData.problematicIngredients || [])
+          ];
+          
+          if (problematicItems.length > 0) {
+            try {
+              const { getUserProfile, updateUserProfile } = await import("@/services/supabaseUserProfile");
+              const currentProfile = await getUserProfile(user.id);
+              
+              if (currentProfile) {
+                // Combinar con historial existente
+                const currentHistory = currentProfile.product_history || "";
+                const newItems = problematicItems.join(", ");
+                const combinedHistory = currentHistory 
+                  ? `${currentHistory}, ${newItems}`
+                  : newItems;
+                
+                await updateUserProfile(user.id, {
+                  product_history: combinedHistory
+                });
+                
+                console.log(`✅ Actualizado product_history con: ${newItems}`);
+              }
+            } catch (error) {
+              console.error("Error actualizando perfil con ingredientes problemáticos:", error);
+            }
           }
         })
         .catch((error) => {

@@ -57,6 +57,8 @@ export async function extractRelevantDataFromMessage(
   concerns?: string[];
   skinIssues?: string[];
   productInterests?: string[];
+  allergies?: string[];
+  problematicIngredients?: string[];
   preferences?: Record<string, any>;
 }> {
   const apiKey = import.meta.env.VITE_CHATGPT_API_KEY;
@@ -80,6 +82,8 @@ Extrae SOLO la siguiente información en formato JSON (si existe):
   "concerns": ["preocupación1", "preocupación2"],
   "skinIssues": ["problema1", "problema2"],
   "productInterests": ["interés1", "interés2"],
+  "allergies": ["ingrediente1", "ingrediente2"],
+  "problematicIngredients": ["ingrediente1", "ingrediente2"],
   "preferences": {
     "precio": "rango mencionado",
     "marca": "marca preferida",
@@ -88,6 +92,10 @@ Extrae SOLO la siguiente información en formato JSON (si existe):
 }
 
 IMPORTANTE:
+- Si el usuario menciona que es ALÉRGICO a algo, inclúyelo en "allergies" o "problematicIngredients"
+- Si menciona que algo le ha sentado mal, causado irritación, o que debe evitar, inclúyelo en "problematicIngredients"
+- Ejemplos: "soy alérgico al ácido hialurónico" → {"allergies": ["ácido hialurónico"]}
+- Ejemplos: "el retinol me irrita" → {"problematicIngredients": ["retinol"]}
 - Solo incluye información explícitamente mencionada
 - Si no hay información de un campo, omítelo (no pongas arrays vacíos)
 - Responde SOLO con el JSON, sin texto adicional
