@@ -788,13 +788,20 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
 
   // Incluir historial completo de conversación si está disponible
   if (context.conversationHistory && context.conversationHistory.length > 0) {
-    prompt += "\n\n=== HISTORIAL COMPLETO DE CONVERSACIÓN ===\n\n";
-    prompt += "⚠️ IMPORTANTE: Este es el historial completo de la conversación con el usuario.\n";
-    prompt += "ÚSALO para entender el contexto, recordar información previa mencionada, y dar respuestas coherentes.\n";
-    prompt += "Si el usuario mencionó algo antes, tenlo en cuenta. Si preguntó algo similar, referencia la respuesta anterior.\n\n";
+    prompt += "\n\n=== HISTORIAL COMPLETO DE CONVERSACIÓN (CRÍTICO) ===\n\n";
+    prompt += "⚠️⚠️⚠️ MUY IMPORTANTE: Este es el historial completo de la conversación con el usuario.\n";
+    prompt += "DEBES USAR ESTE HISTORIAL para dar respuestas ESPECÍFICAS y PERSONALIZADAS.\n\n";
+    prompt += "REGLAS OBLIGATORIAS:\n";
+    prompt += "1. Si el usuario menciona un producto específico, BUSCA en el historial si ya lo mencionó antes\n";
+    prompt += "2. Si el usuario pregunta sobre un producto, USA la información del historial sobre ese producto\n";
+    prompt += "3. Si el usuario mencionó alergias, ingredientes problemáticos, o preocupaciones, ÚSALOS en tu respuesta\n";
+    prompt += "4. Si el usuario mencionó productos que le gustan o no le gustan, TENLOS EN CUENTA\n";
+    prompt += "5. NO des respuestas genéricas - SIEMPRE personaliza basándote en el historial\n";
+    prompt += "6. Si el usuario pregunta sobre algo que ya discutiste, referencia la conversación anterior\n\n";
     
-    // Mostrar los últimos mensajes (máximo 20 para no saturar el contexto)
-    const recentHistory = context.conversationHistory.slice(-20);
+    // Mostrar los últimos mensajes (máximo 30 para tener más contexto)
+    const recentHistory = context.conversationHistory.slice(-30);
+    prompt += "HISTORIAL DE MENSAJES (del más antiguo al más reciente):\n\n";
     recentHistory.forEach((msg, index) => {
       const roleLabel = msg.role === "user" ? "👤 USUARIO" : "🤖 ASISTENTE";
       const dateStr = msg.timestamp.toLocaleDateString("es-ES", { 
@@ -803,16 +810,18 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
         hour: "2-digit", 
         minute: "2-digit" 
       });
-      prompt += `${roleLabel} (${dateStr}):\n`;
+      prompt += `[${index + 1}] ${roleLabel} (${dateStr}):\n`;
       prompt += `${msg.content}\n\n`;
     });
     
-    prompt += "💡 USA ESTE HISTORIAL para:\n";
-    prompt += "- Recordar información que el usuario mencionó anteriormente (productos, ingredientes, preocupaciones, etc.)\n";
-    prompt += "- Dar respuestas coherentes y contextualizadas\n";
-    prompt += "- Evitar repetir información ya mencionada\n";
-    prompt += "- Referenciar conversaciones previas cuando sea relevante\n";
-    prompt += "- Mantener continuidad en la conversación\n\n";
+    prompt += "💡 EJEMPLOS DE CÓMO USAR EL HISTORIAL:\n";
+    prompt += "- Si el usuario dice '¿Qué te parece el producto X?' y en el historial mencionó que es alérgico al ácido hialurónico, verifica si X contiene ácido hialurónico y ADVIÉRTELO\n";
+    prompt += "- Si el usuario pregunta sobre un producto que ya mencionó antes, usa la información previa sobre ese producto\n";
+    prompt += "- Si el usuario mencionó preocupaciones específicas (acné, arrugas, etc.), úsalas para personalizar tu respuesta\n";
+    prompt += "- Si el usuario mencionó productos que le gustan, sugiere productos similares\n";
+    prompt += "- Si el usuario mencionó productos que no le gustan, evita recomendar productos similares\n\n";
+    prompt += "⚠️ NUNCA des respuestas genéricas sin revisar el historial primero.\n";
+    prompt += "⚠️ SIEMPRE personaliza tu respuesta basándote en lo que el usuario ha mencionado anteriormente.\n\n";
   }
 
   // NO incluir productos, discusiones ni reviews de la base de datos
