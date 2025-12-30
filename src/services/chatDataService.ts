@@ -116,15 +116,13 @@ IMPORTANTE:
 - Si el usuario menciona que es ALÉRGICO a algo, inclúyelo en "allergies" o "problematicIngredients"
 - Si menciona que algo le ha sentado mal, causado irritación, o que debe evitar, inclúyelo en "problematicIngredients"
 - ⚠️ CRÍTICO: Si el usuario dice que YA NO tiene alergia a algo, que era mentira, o que se equivocó, inclúyelo en "removedAllergies" o "removedProblematicIngredients"
-- ⚠️ Ejemplos de correcciones: "ya no tengo alergia a X", "eso era mentira", "me equivoqué con X", "ya no soy alérgico a X", "X ya no me da alergia", "retiro lo de X", "olvídate de X"
-- ⚠️ Si el usuario corrige información sobre su perfil (ej: "ya no tengo piel grasa", "eso no era cierto"), detecta la corrección
-- Cuando el usuario corrige algo, es MUY IMPORTANTE eliminarlo del perfil para que no se use en futuras recomendaciones
-- Si el usuario menciona su TIPO DE PIEL (ej: "tengo piel grasa", "mi piel es seca", "tengo la piel mixta"), inclúyelo en "skinType"
-- Si menciona SENSIBILIDAD (ej: "mi piel es sensible", "tengo rosácea", "mi piel es resistente"), inclúyelo en "skinSensitivity"
+- Ejemplos de correcciones: "ya no tengo alergia a X", "eso era mentira", "me equivoqué con X", "ya no soy alérgico a X", "X ya no me da alergia", "retiro lo de X", "olvídate de X"
+- Si el usuario menciona su TIPO DE PIEL (ej: "tengo piel grasa", "mi piel es seca"), inclúyelo en "skinType"
+- Si menciona SENSIBILIDAD (ej: "mi piel es sensible", "tengo rosácea"), inclúyelo en "skinSensitivity"
 - Si menciona PREOCUPACIONES principales (ej: "me preocupa el acné", "quiero prevenir arrugas"), inclúyelas en "concerns"
-- Si menciona ZONA CLIMÁTICA (ej: "vivo en un clima seco", "donde vivo hace mucho calor"), inclúyelo en "climateZone"
-- Si menciona EXPOSICIÓN SOLAR (ej: "me expongo mucho al sol", "no me expongo al sol"), inclúyelo en "sunExposure"
-- Si menciona COMPROMISO CON RUTINA (ej: "soy minimalista", "quiero una rutina avanzada"), inclúyelo en "routineCommitment"
+- Si menciona ZONA CLIMÁTICA (ej: "vivo en un clima seco"), inclúyelo en "climateZone"
+- Si menciona EXPOSICIÓN SOLAR (ej: "me expongo mucho al sol"), inclúyelo en "sunExposure"
+- Si menciona COMPROMISO CON RUTINA (ej: "soy minimalista"), inclúyelo en "routineCommitment"
 - Si menciona que FUMA, inclúyelo en "lifestyleSmoking" (true)
 - Si menciona que DUERME MENOS DE 7H, inclúyelo en "lifestyleSleepLessThan7h" (true)
 - Si menciona MEDICAMENTOS que toma, inclúyelos en "lifestyleMedications"
@@ -139,12 +137,10 @@ IMPORTANTE:
       const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/) || response.match(/\{[\s\S]*\}/);
       const jsonString = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : response;
       return JSON.parse(jsonString);
-    } catch (parseError) {
-      console.error("Error parseando respuesta de ChatGPT:", parseError);
+    } catch {
       return extractBasicData(userMessage);
     }
-  } catch (error) {
-    console.error("Error extrayendo datos con ChatGPT:", error);
+  } catch {
     return extractBasicData(userMessage);
   }
 }
@@ -360,7 +356,6 @@ export async function saveThreadId(userId: string, threadId: string): Promise<vo
     });
 
   if (error) {
-    console.error("Error guardando thread ID:", error);
     // No lanzar error, es opcional
   }
 }
@@ -395,7 +390,6 @@ export async function updateUserProfileFromChat(
     const currentProfile = await getUserProfile(userId);
     
     if (!currentProfile) {
-      console.warn("No se encontró perfil para actualizar");
       return;
     }
 
@@ -445,8 +439,7 @@ export async function updateUserProfileFromChat(
       updates.lifestyle_medications = extractedData.lifestyleMedications;
     }
 
-    // Actualizar historial de productos (ingredientes problemáticos y alergias)
-    // PRIMERO eliminar ingredientes si el usuario dice que ya no los tiene
+    // Actualizar historial de productos: primero eliminar, luego añadir
     let updatedHistory = currentProfile.product_history || "";
     
     const itemsToRemove = [
@@ -455,63 +448,48 @@ export async function updateUserProfileFromChat(
     ];
     
     if (itemsToRemove.length > 0) {
-      // Convertir el historial en un array de items individuales
       const historyItems = updatedHistory
         .split(',')
         .map(item => item.trim())
         .filter(Boolean);
       
-      // Eliminar cada ingrediente del historial (case insensitive, coincidencia parcial o exacta)
       const itemsToRemoveLower = itemsToRemove.map(item => item.toLowerCase().trim());
       
       const filteredItems = historyItems.filter(item => {
         const itemLower = item.toLowerCase();
-        // Verificar si el item coincide con alguno de los items a eliminar
-        // Buscar coincidencia exacta o si contiene el item a eliminar
-        const shouldRemove = itemsToRemoveLower.some(removeItem => {
-          // Coincidencia exacta
-          if (itemLower === removeItem) return true;
-          // Si el item del historial contiene el item a eliminar
-          if (itemLower.includes(removeItem)) return true;
-          // Si el item a eliminar contiene el item del historial (para casos como "vitamina C" vs "vitamina c")
-          if (removeItem.includes(itemLower) && itemLower.length > 2) return true;
-          return false;
-        });
-        return !shouldRemove;
+        return !itemsToRemoveLower.some(removeItem => 
+          itemLower === removeItem || 
+          itemLower.includes(removeItem) || 
+          (removeItem.includes(itemLower) && itemLower.length > 2)
+        );
       });
       
       updatedHistory = filteredItems.join(', ').trim();
-      
-      console.log(`🗑️ Eliminando del historial: ${itemsToRemove.join(', ')}`);
-      console.log(`📝 Historial actualizado: ${updatedHistory || '(vacío)'}`);
     }
     
-    // LUEGO añadir nuevos ingredientes problemáticos si hay
     const problematicItems = [
       ...(extractedData.problematicIngredients || []),
       ...(extractedData.allergies || [])
     ];
     
     if (problematicItems.length > 0) {
-      // Obtener lista actual sin los que vamos a eliminar
       const currentItems = updatedHistory
         .split(',')
         .map(item => item.trim())
         .filter(Boolean);
       
-      // Añadir nuevos items sin duplicados (case insensitive)
       const currentItemsLower = currentItems.map(item => item.toLowerCase());
       const newItemsToAdd = problematicItems.filter(item => {
         const itemLower = item.toLowerCase().trim();
         return !currentItemsLower.some(current => 
-          current === itemLower || current.includes(itemLower) || itemLower.includes(current)
+          current === itemLower || 
+          current.includes(itemLower) || 
+          itemLower.includes(current)
         );
       });
       
       if (newItemsToAdd.length > 0) {
-        const allItems = [...currentItems, ...newItemsToAdd];
-        updatedHistory = allItems.join(', ').trim();
-        console.log(`➕ Añadiendo al historial: ${newItemsToAdd.join(', ')}`);
+        updatedHistory = [...currentItems, ...newItemsToAdd].join(', ').trim();
       }
     }
     
@@ -519,13 +497,8 @@ export async function updateUserProfileFromChat(
       updates.product_history = updatedHistory || null;
     }
 
-    // Solo actualizar si hay cambios
     if (Object.keys(updates).length > 0) {
       await updateUserProfile(userId, updates);
-      console.log("✅ Perfil actualizado con información del chat:", Object.keys(updates));
-      if (itemsToRemove.length > 0) {
-        console.log(`🗑️ Ingredientes eliminados del perfil: ${itemsToRemove.join(', ')}`);
-      }
     }
   } catch (error) {
     console.error("Error actualizando perfil desde chat:", error);

@@ -353,7 +353,6 @@ export function ChatBot() {
               removedProblematicIngredients: extractedData.removedProblematicIngredients,
               removedAllergies: extractedData.removedAllergies,
             });
-            logger.log("✅ Perfil actualizado con información del chat");
           } catch (error) {
             console.error("Error actualizando perfil desde chat:", error);
           }
