@@ -749,10 +749,6 @@ export function ChatBot() {
                 <Send className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-2 text-center flex items-center justify-center gap-1">
-              <Sparkles className="h-3 w-3" />
-              Conectado con ChatGPT
-            </p>
           </div>
         </Card>
       )}
