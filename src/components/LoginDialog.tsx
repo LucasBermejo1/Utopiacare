@@ -360,14 +360,19 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
     );
   }
 
-  // Si no está logueado, mostrar diálogo de login (solo icono)
+  // Si no está logueado, mostrar diálogo de login
   return (
     <>
       {onboardingComponent}
       <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-2">
+        <Button 
+          variant={BETA_MODE ? "default" : "ghost"} 
+          size="sm" 
+          className={BETA_MODE ? "gap-2 bg-primary text-primary-foreground hover:bg-primary/90 font-medium" : "gap-2"}
+        >
           <User className="w-4 h-4" />
+          {BETA_MODE && <span>Iniciar sesión</span>}
         </Button>
       </DialogTrigger>
       <DialogContent>

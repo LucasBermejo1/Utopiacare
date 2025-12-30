@@ -23,34 +23,7 @@ export function Header() {
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/">Inicio</Link>
               </Button>
-              {BETA_MODE ? (
-                <>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={cn("cursor-not-allowed opacity-50")}
-                    disabled
-                  >
-                    Productos
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={cn("cursor-not-allowed opacity-50")}
-                    disabled
-                  >
-                    Tiendas
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={cn("cursor-not-allowed opacity-50")}
-                    disabled
-                  >
-                    Discusiones
-                  </Button>
-                </>
-              ) : (
+              {!BETA_MODE && (
                 <>
                   <Button variant="ghost" size="sm" asChild>
                     <Link to="/products">Productos</Link>
@@ -68,11 +41,7 @@ export function Header() {
           <div className="flex items-center gap-2">
             {!BETA_MODE && <SearchDropdown className="hidden sm:block w-64" />}
             <LoginDialog />
-            {BETA_MODE ? (
-              <Button size="sm" disabled className="opacity-50 cursor-not-allowed">
-                Próximamente
-              </Button>
-            ) : (
+            {!BETA_MODE && (
               <Button size="sm" asChild>
                 <Link to="/products">Únete a Utopia+</Link>
               </Button>
