@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, X, Send, Sparkles, Heart, Image as ImageIcon } from "lucide-react";
+import { MessageCircle, X, Send, Sparkles, Heart, Image as ImageIcon, Maximize2, Minimize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { BETA_MODE } from "@/config/constants";
@@ -147,6 +147,7 @@ interface Message {
 export function ChatBot() {
   const { user, loading: authLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [showPresentation, setShowPresentation] = useState(false);
   
@@ -566,7 +567,12 @@ export function ChatBot() {
 
       {/* Ventana del chat */}
       {isOpen && (
-        <Card className="fixed bottom-6 right-6 w-[calc(100vw-3rem)] h-[calc(100vh-8rem)] max-w-[400px] max-h-[600px] shadow-2xl z-50 flex flex-col border-2 border-[hsl(var(--terracotta))]/20 overflow-hidden md:w-[400px] md:h-[600px] animate-in slide-in-from-bottom-4 fade-in duration-300">
+        <Card className={cn(
+          "fixed bottom-6 right-6 shadow-2xl z-50 flex flex-col border-2 border-[hsl(var(--terracotta))]/20 overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-300",
+          isExpanded 
+            ? "top-6 left-6 w-[calc(100vw-3rem)] h-[calc(100vh-3rem)] md:w-[calc(100vw-3rem)] md:h-[calc(100vh-3rem)]"
+            : "w-[calc(100vw-3rem)] h-[calc(100vh-8rem)] max-w-[400px] max-h-[600px] md:w-[400px] md:h-[600px]"
+        )}>
           {/* Header con gradiente cute */}
           <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-[hsl(var(--terracotta))]/10 via-[hsl(var(--accent))]/10 to-[hsl(var(--terracotta))]/10 backdrop-blur-sm">
             <div className="flex items-center gap-3">
@@ -590,15 +596,26 @@ export function ChatBot() {
                 </p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(false)}
-              className="h-8 w-8 rounded-full hover:bg-[hsl(var(--terracotta))]/10 transition-colors"
-              aria-label="Cerrar chat"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="h-8 w-8 rounded-full hover:bg-[hsl(var(--terracotta))]/10 transition-colors"
+                aria-label={isExpanded ? "Contraer chat" : "Expandir chat"}
+              >
+                {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(false)}
+                className="h-8 w-8 rounded-full hover:bg-[hsl(var(--terracotta))]/10 transition-colors"
+                aria-label="Cerrar chat"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           {/* Mensajes */}
