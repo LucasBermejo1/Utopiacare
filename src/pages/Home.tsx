@@ -94,13 +94,13 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Imágenes en pantallas grandes - Fixed positioning a 30px del centro, 40px del texto */}
+        {/* Imágenes en pantallas grandes - Fixed positioning a 30px del centro */}
         <div className="hidden md:block">
-          {/* Imagen izquierda */}
+          {/* Imagen izquierda - borde derecho a 30px del centro */}
           <div 
             className="fixed flex flex-col gap-4 z-50" 
             style={{ 
-              left: 'calc(50% - 190px - 30px)',
+              left: 'calc(50% - 380px - 30px)',
               bottom: 'calc(4rem + 30px)',
               width: '380px'
             }}
@@ -116,11 +116,11 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Imagen derecha */}
+          {/* Imagen derecha - borde izquierdo a 30px del centro */}
           <div 
             className="fixed flex flex-col gap-4 z-50" 
             style={{ 
-              right: 'calc(50% - 190px - 30px)',
+              left: 'calc(50% + 30px)',
               bottom: 'calc(4rem + 30px)',
               width: '380px'
             }}
