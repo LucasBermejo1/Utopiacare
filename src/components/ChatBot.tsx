@@ -31,8 +31,7 @@ export function ChatBotButton({
     <div className={`flex items-center justify-center relative transition-all duration-1000 ${
       showPresentation ? "opacity-0 scale-0" : "opacity-100 scale-100"
     }`}>
-      {/* Pulso animado de fondo */}
-      <div className={`absolute rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] opacity-30 animate-ping ${buttonSize}`} />
+      {/* Pulso animado de fondo - más sutil */}
       <div className={`absolute rounded-full bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] opacity-20 animate-pulse ${buttonSize}`} />
       
       <Button

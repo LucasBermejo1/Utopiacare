@@ -214,104 +214,40 @@ All colors MUST be HSL.
 
 @keyframes utopiaPresentation {
   0% {
-    transform: scale(0.5) rotate(0deg);
+    transform: scale(0.8);
     opacity: 0;
   }
-  10% {
-    transform: translateX(-50px) translateY(-30px) scale(1.1) rotate(5deg);
-    opacity: 1;
-  }
-  20% {
-    transform: translateX(40px) translateY(-60px) scale(1) rotate(-5deg);
-    opacity: 1;
-  }
-  30% {
-    transform: translateX(-30px) translateY(40px) scale(1.05) rotate(8deg);
-    opacity: 1;
-  }
-  40% {
-    transform: translateX(60px) translateY(20px) scale(0.95) rotate(-8deg);
-    opacity: 1;
-  }
   50% {
-    transform: translateX(-40px) translateY(-50px) scale(1.1) rotate(10deg);
-    opacity: 1;
-  }
-  60% {
-    transform: translateX(30px) translateY(50px) scale(1) rotate(-10deg);
-    opacity: 1;
-  }
-  70% {
-    transform: translateX(-20px) translateY(-30px) scale(1.05) rotate(5deg);
-    opacity: 1;
-  }
-  80% {
-    transform: translateX(10px) translateY(20px) scale(1) rotate(-5deg);
-    opacity: 1;
-  }
-  90% {
-    transform: translateX(0) translateY(0) scale(1.05) rotate(0deg);
+    transform: scale(1.05);
     opacity: 1;
   }
   100% {
-    transform: translateX(0) translateY(0) scale(1) rotate(0deg);
+    transform: scale(1);
     opacity: 0;
   }
 }
 
 @keyframes utopiaPresentationMobile {
   0% {
-    transform: scale(0.5) rotate(0deg);
+    transform: scale(0.8);
     opacity: 0;
   }
-  10% {
-    transform: translateX(-20px) translateY(-15px) scale(1.1) rotate(5deg);
-    opacity: 1;
-  }
-  20% {
-    transform: translateX(15px) translateY(-25px) scale(1) rotate(-5deg);
-    opacity: 1;
-  }
-  30% {
-    transform: translateX(-15px) translateY(20px) scale(1.05) rotate(8deg);
-    opacity: 1;
-  }
-  40% {
-    transform: translateX(25px) translateY(10px) scale(0.95) rotate(-8deg);
-    opacity: 1;
-  }
   50% {
-    transform: translateX(-20px) translateY(-20px) scale(1.1) rotate(10deg);
-    opacity: 1;
-  }
-  60% {
-    transform: translateX(15px) translateY(25px) scale(1) rotate(-10deg);
-    opacity: 1;
-  }
-  70% {
-    transform: translateX(-10px) translateY(-15px) scale(1.05) rotate(5deg);
-    opacity: 1;
-  }
-  80% {
-    transform: translateX(5px) translateY(10px) scale(1) rotate(-5deg);
-    opacity: 1;
-  }
-  90% {
-    transform: translateX(0) translateY(0) scale(1.05) rotate(0deg);
+    transform: scale(1.05);
     opacity: 1;
   }
   100% {
-    transform: translateX(0) translateY(0) scale(1) rotate(0deg);
+    transform: scale(1);
     opacity: 0;
   }
 }
 
 .utopia-presentation-bot {
-  animation: utopiaPresentation 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: utopiaPresentation 1.5s ease-in-out forwards;
 }
 
 @media (max-width: 768px) {
   .utopia-presentation-bot {
-    animation: utopiaPresentationMobile 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: utopiaPresentationMobile 1.5s ease-in-out forwards;
   }
 }

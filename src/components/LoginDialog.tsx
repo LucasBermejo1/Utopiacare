@@ -369,13 +369,10 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
         <Button 
           variant={BETA_MODE ? "default" : "ghost"} 
           size={BETA_MODE ? "lg" : "sm"}
-          className={BETA_MODE ? "relative gap-3 bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] text-white hover:from-[hsl(var(--terracotta))]/90 hover:to-[hsl(var(--accent))]/90 font-bold text-lg px-8 py-7 shadow-2xl hover:shadow-[hsl(var(--terracotta))]/50 hover:scale-105 transition-all duration-300 border-2 border-white/30 rounded-xl ring-4 ring-[hsl(var(--terracotta))]/20 hover:ring-[hsl(var(--terracotta))]/40" : "gap-2"}
+          className={BETA_MODE ? "relative gap-3 bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] text-white hover:from-[hsl(var(--terracotta))]/90 hover:to-[hsl(var(--accent))]/90 font-bold text-lg px-8 py-7 shadow-2xl hover:shadow-[hsl(var(--terracotta))]/50 hover:scale-105 transition-all duration-300 border-2 border-white/30 rounded-xl ring-2 ring-[hsl(var(--terracotta))]/10 hover:ring-[hsl(var(--terracotta))]/20" : "gap-2"}
         >
           {BETA_MODE && (
-            <>
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/30 via-white/10 to-transparent" />
-              <div className="absolute -inset-1 rounded-xl bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] opacity-20 blur-md -z-10 animate-pulse" />
-            </>
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 via-white/5 to-transparent" />
           )}
           <User className={`${BETA_MODE ? "w-6 h-6 relative z-10" : "w-4 h-4"} ${BETA_MODE ? "drop-shadow-lg" : ""}`} />
           {BETA_MODE && <span className="relative z-10 drop-shadow-md tracking-wide">Iniciar sesión</span>}
