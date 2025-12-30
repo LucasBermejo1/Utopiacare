@@ -60,6 +60,15 @@ export async function extractRelevantDataFromMessage(
   allergies?: string[];
   problematicIngredients?: string[];
   preferences?: Record<string, any>;
+  // Información del perfil
+  skinType?: "normal" | "dry" | "oily" | "combination" | "sensitive";
+  skinSensitivity?: "resistant" | "sensitive" | "rosacea";
+  climateZone?: "dry" | "humid" | "extreme";
+  sunExposure?: "low" | "medium" | "high";
+  routineCommitment?: "minimalist" | "intermediate" | "advanced";
+  lifestyleSmoking?: boolean;
+  lifestyleSleepLessThan7h?: boolean;
+  lifestyleMedications?: string;
 }> {
   const apiKey = import.meta.env.VITE_CHATGPT_API_KEY;
 
@@ -88,18 +97,33 @@ Extrae SOLO la siguiente información en formato JSON (si existe):
     "precio": "rango mencionado",
     "marca": "marca preferida",
     "tipo": "tipo de producto"
-  }
+  },
+  "skinType": "normal" | "dry" | "oily" | "combination" | "sensitive" | null,
+  "skinSensitivity": "resistant" | "sensitive" | "rosacea" | null,
+  "climateZone": "dry" | "humid" | "extreme" | null,
+  "sunExposure": "low" | "medium" | "high" | null,
+  "routineCommitment": "minimalist" | "intermediate" | "advanced" | null,
+  "lifestyleSmoking": true | false | null,
+  "lifestyleSleepLessThan7h": true | false | null,
+  "lifestyleMedications": "texto libre" | null
 }
 
 IMPORTANTE:
 - Si el usuario menciona que es ALÉRGICO a algo, inclúyelo en "allergies" o "problematicIngredients"
 - Si menciona que algo le ha sentado mal, causado irritación, o que debe evitar, inclúyelo en "problematicIngredients"
-- Ejemplos: "soy alérgico al ácido hialurónico" → {"allergies": ["ácido hialurónico"]}
-- Ejemplos: "el retinol me irrita" → {"problematicIngredients": ["retinol"]}
+- Si el usuario menciona su TIPO DE PIEL (ej: "tengo piel grasa", "mi piel es seca", "tengo la piel mixta"), inclúyelo en "skinType"
+- Si menciona SENSIBILIDAD (ej: "mi piel es sensible", "tengo rosácea", "mi piel es resistente"), inclúyelo en "skinSensitivity"
+- Si menciona PREOCUPACIONES principales (ej: "me preocupa el acné", "quiero prevenir arrugas"), inclúyelas en "concerns"
+- Si menciona ZONA CLIMÁTICA (ej: "vivo en un clima seco", "donde vivo hace mucho calor"), inclúyelo en "climateZone"
+- Si menciona EXPOSICIÓN SOLAR (ej: "me expongo mucho al sol", "no me expongo al sol"), inclúyelo en "sunExposure"
+- Si menciona COMPROMISO CON RUTINA (ej: "soy minimalista", "quiero una rutina avanzada"), inclúyelo en "routineCommitment"
+- Si menciona que FUMA, inclúyelo en "lifestyleSmoking" (true)
+- Si menciona que DUERME MENOS DE 7H, inclúyelo en "lifestyleSleepLessThan7h" (true)
+- Si menciona MEDICAMENTOS que toma, inclúyelos en "lifestyleMedications"
 - Solo incluye información explícitamente mencionada
-- Si no hay información de un campo, omítelo (no pongas arrays vacíos)
+- Si no hay información de un campo, omítelo o usa null (no pongas arrays vacíos ni valores falsos)
 - Responde SOLO con el JSON, sin texto adicional
-- Usa español para los valores`;
+- Usa español para los valores de texto`;
 
     const response = await getChatGPTResponse(prompt);
     
@@ -329,6 +353,109 @@ export async function saveThreadId(userId: string, threadId: string): Promise<vo
 
   if (error) {
     console.error("Error guardando thread ID:", error);
+    // No lanzar error, es opcional
+  }
+}
+
+/**
+ * Actualiza el perfil del usuario con información extraída de las conversaciones
+ */
+export async function updateUserProfileFromChat(
+  userId: string,
+  extractedData: {
+    skinType?: "normal" | "dry" | "oily" | "combination" | "sensitive";
+    skinSensitivity?: "resistant" | "sensitive" | "rosacea";
+    concerns?: string[];
+    climateZone?: "dry" | "humid" | "extreme";
+    sunExposure?: "low" | "medium" | "high";
+    routineCommitment?: "minimalist" | "intermediate" | "advanced";
+    lifestyleSmoking?: boolean;
+    lifestyleSleepLessThan7h?: boolean;
+    lifestyleMedications?: string;
+    problematicIngredients?: string[];
+    allergies?: string[];
+  }
+): Promise<void> {
+  if (!supabase) {
+    throw new Error("Supabase no configurado");
+  }
+
+  try {
+    const { getUserProfile, updateUserProfile } = await import("./supabaseUserProfile");
+    const currentProfile = await getUserProfile(userId);
+    
+    if (!currentProfile) {
+      console.warn("No se encontró perfil para actualizar");
+      return;
+    }
+
+    const updates: Partial<typeof currentProfile> = {};
+
+    // Actualizar tipo de piel si se menciona
+    if (extractedData.skinType) {
+      updates.skin_type = extractedData.skinType;
+    }
+
+    // Actualizar sensibilidad si se menciona
+    if (extractedData.skinSensitivity) {
+      updates.skin_sensitivity = extractedData.skinSensitivity;
+    }
+
+    // Actualizar preocupaciones (combinar con las existentes, máximo 2)
+    if (extractedData.concerns && extractedData.concerns.length > 0) {
+      const currentConcerns = currentProfile.concerns || [];
+      const newConcerns = [...new Set([...currentConcerns, ...extractedData.concerns])];
+      // Limitar a 2 preocupaciones principales como en el cuestionario
+      updates.concerns = newConcerns.slice(0, 2);
+    }
+
+    // Actualizar zona climática
+    if (extractedData.climateZone) {
+      updates.climate_zone = extractedData.climateZone;
+    }
+
+    // Actualizar exposición solar
+    if (extractedData.sunExposure) {
+      updates.sun_exposure = extractedData.sunExposure;
+    }
+
+    // Actualizar compromiso con rutina
+    if (extractedData.routineCommitment) {
+      updates.routine_commitment = extractedData.routineCommitment;
+    }
+
+    // Actualizar estilo de vida
+    if (extractedData.lifestyleSmoking !== undefined) {
+      updates.lifestyle_smoking = extractedData.lifestyleSmoking;
+    }
+    if (extractedData.lifestyleSleepLessThan7h !== undefined) {
+      updates.lifestyle_sleep_less_than_7h = extractedData.lifestyleSleepLessThan7h;
+    }
+    if (extractedData.lifestyleMedications) {
+      updates.lifestyle_medications = extractedData.lifestyleMedications;
+    }
+
+    // Actualizar historial de productos (ingredientes problemáticos y alergias)
+    const problematicItems = [
+      ...(extractedData.problematicIngredients || []),
+      ...(extractedData.allergies || [])
+    ];
+    
+    if (problematicItems.length > 0) {
+      const currentHistory = currentProfile.product_history || "";
+      const newItems = problematicItems.join(", ");
+      updates.product_history = currentHistory 
+        ? `${currentHistory}, ${newItems}`
+        : newItems;
+    }
+
+    // Solo actualizar si hay cambios
+    if (Object.keys(updates).length > 0) {
+      await updateUserProfile(userId, updates);
+      console.log("✅ Perfil actualizado con información del chat:", Object.keys(updates));
+    }
+  } catch (error) {
+    console.error("Error actualizando perfil desde chat:", error);
     // No lanzar error, es opcional
   }
 }

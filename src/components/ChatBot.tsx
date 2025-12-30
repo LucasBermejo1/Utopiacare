@@ -335,34 +335,25 @@ export function ChatBot() {
             await updateUserChatData(user.id, extractedData);
           }
           
-          // Si hay alergias o ingredientes problemáticos, actualizar el perfil del usuario
-          const problematicItems = [
-            ...(extractedData.allergies || []),
-            ...(extractedData.problematicIngredients || [])
-          ];
-          
-          if (problematicItems.length > 0) {
-            try {
-              const { getUserProfile, updateUserProfile } = await import("@/services/supabaseUserProfile");
-              const currentProfile = await getUserProfile(user.id);
-              
-              if (currentProfile) {
-                // Combinar con historial existente
-                const currentHistory = currentProfile.product_history || "";
-                const newItems = problematicItems.join(", ");
-                const combinedHistory = currentHistory 
-                  ? `${currentHistory}, ${newItems}`
-                  : newItems;
-                
-                await updateUserProfile(user.id, {
-                  product_history: combinedHistory
-                });
-                
-                logger.log(`✅ Actualizado product_history con: ${newItems}`);
-              }
-            } catch (error) {
-              console.error("Error actualizando perfil con ingredientes problemáticos:", error);
-            }
+          // Actualizar perfil del usuario con información importante extraída del chat
+          try {
+            const { updateUserProfileFromChat } = await import("@/services/chatDataService");
+            await updateUserProfileFromChat(user.id, {
+              skinType: extractedData.skinType,
+              skinSensitivity: extractedData.skinSensitivity,
+              concerns: extractedData.concerns,
+              climateZone: extractedData.climateZone,
+              sunExposure: extractedData.sunExposure,
+              routineCommitment: extractedData.routineCommitment,
+              lifestyleSmoking: extractedData.lifestyleSmoking,
+              lifestyleSleepLessThan7h: extractedData.lifestyleSleepLessThan7h,
+              lifestyleMedications: extractedData.lifestyleMedications,
+              problematicIngredients: extractedData.problematicIngredients,
+              allergies: extractedData.allergies,
+            });
+            logger.log("✅ Perfil actualizado con información del chat");
+          } catch (error) {
+            console.error("Error actualizando perfil desde chat:", error);
           }
         })
         .catch((error) => {
