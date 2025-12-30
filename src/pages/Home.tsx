@@ -66,7 +66,8 @@ export default function Home() {
             </div>
           </section>
         </div>
-        {/* Imágenes en la parte inferior izquierda - Solo en producción */}
+        {/* Imágenes en la parte inferior - Solo en producción */}
+        {/* Imagen izquierda */}
         <div className="fixed bottom-[calc(4rem+30px)] z-50 flex flex-col gap-4" style={{ zIndex: 50, left: 'calc(50% - 35px)', transform: 'translateX(-100%)' }}>
           <img 
             src="/imagenes-web/imagen-inferior.png" 
@@ -80,6 +81,22 @@ export default function Home() {
           />
           <p className="text-sm md:text-base font-medium text-foreground text-center w-[300px] md:w-[380px]">
             1. Crea tu cuenta o inicia sesión
+          </p>
+        </div>
+        {/* Imagen derecha */}
+        <div className="fixed bottom-[calc(4rem+30px)] z-50 flex flex-col gap-4" style={{ zIndex: 50, right: 'calc(50% - 35px)', transform: 'translateX(100%)' }}>
+          <img 
+            src="/imagenes-web/imagen-inferior-2.png" 
+            alt="" 
+            className="w-[300px] md:w-[380px] h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
+            style={{ display: 'block' }}
+            onError={(e) => {
+              console.error("Error cargando imagen:", e);
+            }}
+            onLoad={() => console.log("Imagen cargada correctamente")}
+          />
+          <p className="text-sm md:text-base font-medium text-foreground text-center w-[300px] md:w-[380px]">
+            2. Habla con Utopia
           </p>
         </div>
       </>
