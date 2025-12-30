@@ -55,16 +55,26 @@ export default function Home() {
   // Versión limpia para producción (modo beta)
   if (BETA_MODE) {
     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-        <section className="text-center">
-          <div className="space-y-2">
-            <h1 className="text-4xl md:text-5xl font-light text-foreground leading-tight tracking-wide">
-              Cuídate con
-            </h1>
-            <UtopiaWordmark />
-          </div>
-        </section>
-      </div>
+      <>
+        <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+          <section className="text-center">
+            <div className="space-y-2">
+              <h1 className="text-4xl md:text-5xl font-light text-foreground leading-tight tracking-wide">
+                Cuídate con
+              </h1>
+              <UtopiaWordmark />
+            </div>
+          </section>
+        </div>
+        {/* Imagen en la parte inferior izquierda - Solo en producción */}
+        <div className="fixed bottom-6 left-6 z-30">
+          <img 
+            src="/Imagenes web/PNG image 3.png" 
+            alt="" 
+            className="max-w-[200px] md:max-w-[250px] h-auto opacity-90 hover:opacity-100 transition-opacity"
+          />
+        </div>
+      </>
     );
   }
 
