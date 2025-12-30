@@ -67,7 +67,7 @@ export default function Home() {
           </section>
         </div>
         {/* Imágenes en la parte inferior izquierda - Solo en producción */}
-        <div className="fixed bottom-[calc(4rem+30px)] z-50 flex flex-col gap-6" style={{ zIndex: 50, left: 'calc(50% - 20px)', transform: 'translateX(-100%)' }}>
+        <div className="fixed bottom-[calc(4rem+30px)] z-50 flex flex-col gap-6" style={{ zIndex: 50, left: 'calc(50% - 35px)', transform: 'translateX(-100%)' }}>
           <img 
             src="/imagenes-web/imagen-inferior.png" 
             alt="" 
