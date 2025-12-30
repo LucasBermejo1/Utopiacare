@@ -67,11 +67,11 @@ export default function Home() {
           </section>
         </div>
         {/* Imágenes en la parte inferior izquierda - Solo en producción */}
-        <div className="fixed bottom-16 left-4 z-50 flex flex-col gap-6" style={{ zIndex: 50 }}>
+        <div className="fixed bottom-[calc(4rem+30px)] z-50 flex flex-col gap-6" style={{ zIndex: 50, left: 'calc(50% - 20px)', transform: 'translateX(-100%)' }}>
           <img 
             src="/imagenes-web/imagen-inferior.png" 
             alt="" 
-            className="w-[300px] md:w-[380px] h-auto opacity-90 hover:opacity-100 transition-opacity"
+            className="w-[300px] md:w-[380px] h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
             style={{ display: 'block' }}
             onError={(e) => {
               console.error("Error cargando imagen:", e);
