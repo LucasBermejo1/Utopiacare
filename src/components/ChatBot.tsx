@@ -585,7 +585,7 @@ export function ChatBot() {
         <Card className={cn(
           "fixed bottom-6 right-6 shadow-2xl z-50 flex flex-col border-2 border-[hsl(var(--terracotta))]/20 overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-300",
           isExpanded 
-            ? "top-6 left-6 w-[calc(100vw-3rem)] h-[calc(100vh-3rem)] md:w-[calc(100vw-3rem)] md:h-[calc(100vh-3rem)]"
+            ? "bottom-6 left-6 top-6 md:top-6 md:left-6 w-[calc(100vw-3rem)] h-[calc(100vh-3rem)] md:w-[calc(100vw-3rem)] md:h-[calc(100vh-3rem)]"
             : "w-[calc(100vw-3rem)] h-[calc(100vh-8rem)] max-w-[400px] max-h-[600px] md:w-[400px] md:h-[600px]"
         )}>
           {/* Header con gradiente cute */}
