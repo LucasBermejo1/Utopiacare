@@ -85,18 +85,22 @@ export default function Home() {
         </div>
         {/* Imagen derecha */}
         <div className="fixed bottom-[calc(4rem+30px)] z-50 flex flex-col gap-4" style={{ zIndex: 50, right: 'calc(50% - 35px)', transform: 'translateX(100%)' }}>
-          <div className="border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl overflow-hidden w-[300px] md:w-[380px]">
-            <img 
-              src="/imagenes-web/imagen-inferior-2.png" 
-              alt="" 
-              className="w-full h-auto opacity-90 hover:opacity-100 transition-opacity"
-              style={{ display: 'block' }}
-              onError={(e) => {
-                console.error("Error cargando imagen-inferior-2.png:", e);
-              }}
-              onLoad={() => console.log("Imagen imagen-inferior-2.png cargada correctamente")}
-            />
-          </div>
+          <img 
+            src="/imagenes-web/imagen-inferior-2.png" 
+            alt="" 
+            className="w-[300px] md:w-[380px] h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
+            style={{ display: 'block' }}
+            onError={(e) => {
+              console.error("Error cargando imagen-inferior-2.png:", e);
+              const target = e.target as HTMLImageElement;
+              console.error("Ruta completa:", window.location.origin + target.src);
+            }}
+            onLoad={(e) => {
+              console.log("Imagen imagen-inferior-2.png cargada correctamente");
+              const target = e.target as HTMLImageElement;
+              console.log("Dimensiones:", target.naturalWidth, "x", target.naturalHeight);
+            }}
+          />
           <p className="text-sm md:text-base font-medium text-foreground text-center w-[300px] md:w-[380px]">
             2. Habla con Utopia
           </p>
