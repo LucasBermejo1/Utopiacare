@@ -368,14 +368,11 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
       <DialogTrigger asChild>
         <Button 
           variant={BETA_MODE ? "default" : "ghost"} 
-          size={BETA_MODE ? "lg" : "sm"}
-          className={BETA_MODE ? "relative gap-3 bg-gradient-to-br from-[hsl(var(--terracotta))] to-[hsl(var(--accent))] text-white hover:from-[hsl(var(--terracotta))]/90 hover:to-[hsl(var(--accent))]/90 font-bold text-lg px-8 py-7 shadow-2xl hover:shadow-[hsl(var(--terracotta))]/50 hover:scale-105 transition-all duration-300 border-2 border-white/30 rounded-xl ring-2 ring-[hsl(var(--terracotta))]/10 hover:ring-[hsl(var(--terracotta))]/20" : "gap-2"}
+          size={BETA_MODE ? "sm" : "sm"}
+          className={BETA_MODE ? "gap-2 bg-[hsl(var(--terracotta))]/90 hover:bg-[hsl(var(--terracotta))] text-white font-medium text-sm px-4 py-2 transition-colors" : "gap-2"}
         >
-          {BETA_MODE && (
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 via-white/5 to-transparent" />
-          )}
-          <User className={`${BETA_MODE ? "w-6 h-6 relative z-10" : "w-4 h-4"} ${BETA_MODE ? "drop-shadow-lg" : ""}`} />
-          {BETA_MODE && <span className="relative z-10 drop-shadow-md tracking-wide">Iniciar sesión</span>}
+          <User className="w-4 h-4" />
+          {BETA_MODE && <span>Iniciar sesión</span>}
         </Button>
       </DialogTrigger>
       <DialogContent>
