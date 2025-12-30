@@ -248,24 +248,24 @@ export function ChatBot() {
     }
   }, [isOpen, isLoadingHistory]);
 
-  // Animación de presentación solo en producción
-  useEffect(() => {
-    if (!BETA_MODE) return;
+  // Animación de presentación desactivada
+  // useEffect(() => {
+  //   if (!BETA_MODE) return;
 
-    // Mostrar presentación después de 0.5 segundos
-    const presentationTimer = setTimeout(() => {
-      setShowPresentation(true);
+  //   // Mostrar presentación después de 0.5 segundos
+  //   const presentationTimer = setTimeout(() => {
+  //     setShowPresentation(true);
       
-      // Ocultar presentación después de 2 segundos y animar vuelta
-      const hideTimer = setTimeout(() => {
-        setShowPresentation(false);
-      }, 2000);
+  //     // Ocultar presentación después de 2 segundos y animar vuelta
+  //     const hideTimer = setTimeout(() => {
+  //       setShowPresentation(false);
+  //     }, 2000);
 
-      return () => clearTimeout(hideTimer);
-    }, 500);
+  //     return () => clearTimeout(hideTimer);
+  //   }, 500);
 
-    return () => clearTimeout(presentationTimer);
-  }, []);
+  //   return () => clearTimeout(presentationTimer);
+  // }, []);
 
   // Actualizar mensaje inicial cuando el usuario inicia sesión
   useEffect(() => {
