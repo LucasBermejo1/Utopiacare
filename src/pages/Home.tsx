@@ -69,7 +69,7 @@ export default function Home() {
         </div>
 
         {/* Imágenes en móviles - Optimizado para móvil */}
-        <div className="md:hidden w-full px-4 pb-8 pt-4">
+        <div className="md:hidden w-full px-4 pb-8 -mt-20">
           <div className="flex flex-col gap-8 items-center max-w-full">
             <div className="flex flex-col gap-3 items-center w-full">
               <img 

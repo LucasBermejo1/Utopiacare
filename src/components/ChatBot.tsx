@@ -546,9 +546,9 @@ export function ChatBot() {
         </div>
       )}
 
-      {/* Botón flotante para abrir el chat - Solo desktop (fixed) */}
+      {/* Botón flotante para abrir el chat */}
       {!isOpen && (
-        <div className={`${BETA_MODE ? 'hidden md:block' : ''} fixed bottom-6 right-6 z-50`}>
+        <div className="fixed bottom-6 right-6 z-50">
           <ChatBotButton 
             onClick={() => setIsOpen(true)}
             showPresentation={showPresentation}
