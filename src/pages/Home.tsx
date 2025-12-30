@@ -85,16 +85,14 @@ export default function Home() {
         </div>
         {/* Imagen derecha */}
         <div className="fixed bottom-[calc(4rem+30px)] z-50 flex flex-col gap-4" style={{ zIndex: 50, right: 'calc(50% - 35px)', transform: 'translateX(100%)' }}>
-          <img 
-            src="/imagenes-web/imagen-inferior-2.png" 
-            alt="" 
-            className="w-[300px] md:w-[380px] h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
-            style={{ display: 'block' }}
-            onError={(e) => {
-              console.error("Error cargando imagen:", e);
-            }}
-            onLoad={() => console.log("Imagen cargada correctamente")}
-          />
+          <div className="border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl overflow-hidden w-[300px] md:w-[380px]">
+            <SafeImage 
+              src="/imagenes-web/imagen-inferior-2.png" 
+              alt="" 
+              className="w-full h-auto opacity-90 hover:opacity-100 transition-opacity"
+              fallbackSrc="/imagenes-web/imagen-inferior.png"
+            />
+          </div>
           <p className="text-sm md:text-base font-medium text-foreground text-center w-[300px] md:w-[380px]">
             2. Habla con Utopia
           </p>
