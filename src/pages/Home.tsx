@@ -67,7 +67,7 @@ export default function Home() {
           </section>
         </div>
         {/* Imágenes en la parte inferior izquierda - Solo en producción */}
-        <div className="fixed bottom-[calc(4rem+30px)] z-50 flex flex-col gap-6" style={{ zIndex: 50, left: 'calc(50% - 35px)', transform: 'translateX(-100%)' }}>
+        <div className="fixed bottom-[calc(4rem+30px)] z-50 flex flex-col gap-4" style={{ zIndex: 50, left: 'calc(50% - 35px)', transform: 'translateX(-100%)' }}>
           <img 
             src="/imagenes-web/imagen-inferior.png" 
             alt="" 
@@ -78,6 +78,9 @@ export default function Home() {
             }}
             onLoad={() => console.log("Imagen cargada correctamente")}
           />
+          <p className="text-sm md:text-base font-medium text-foreground text-center w-[300px] md:w-[380px]">
+            1. Crea tu cuenta o inicia sesión
+          </p>
         </div>
       </>
     );
