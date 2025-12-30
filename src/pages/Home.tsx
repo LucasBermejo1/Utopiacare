@@ -56,7 +56,7 @@ export default function Home() {
   if (BETA_MODE) {
     return (
       <>
-        <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+        <div className="flex items-center justify-center min-h-[calc(100vh-200px)] -mt-20 md:-mt-24">
           <section className="text-center">
             <div className="space-y-2">
               <h1 className="text-4xl md:text-5xl font-light text-foreground leading-tight tracking-wide">
@@ -67,11 +67,11 @@ export default function Home() {
           </section>
         </div>
         {/* Imágenes en la parte inferior izquierda - Solo en producción */}
-        <div className="fixed bottom-6 left-4 z-50 flex flex-col gap-4" style={{ zIndex: 50 }}>
+        <div className="fixed bottom-16 left-4 z-50 flex flex-col gap-6" style={{ zIndex: 50 }}>
           <img 
             src="/imagenes-web/imagen-inferior.png" 
             alt="" 
-            className="w-[280px] md:w-[320px] h-auto opacity-90 hover:opacity-100 transition-opacity"
+            className="w-[300px] md:w-[380px] h-auto opacity-90 hover:opacity-100 transition-opacity"
             style={{ display: 'block' }}
             onError={(e) => {
               console.error("Error cargando imagen:", e);
