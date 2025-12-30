@@ -13,7 +13,6 @@ import { SafeImage } from "@/components/SafeImage";
 import { AddStoreDialog } from "@/components/AddStoreDialog";
 import { BETA_MODE } from "@/config/constants";
 import { ChatBotButton } from "@/components/ChatBot";
-import { useState, useEffect } from "react";
 
 export default function Home() {
   const [stores, setStores] = useState<Store[]>(featuredStores);
@@ -53,16 +52,32 @@ export default function Home() {
     loadStores();
   }, []);
 
+  // Versión limpia para producción (modo beta)
+  if (BETA_MODE) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+        <section className="text-center">
+          <div className="space-y-2">
+            <h1 className="text-4xl md:text-5xl font-light text-foreground leading-tight tracking-wide">
+              Cuídate con
+            </h1>
+            <UtopiaWordmark />
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  // Versión completa para desarrollo local
   return (
-    <div className={`${BETA_MODE ? 'space-y-8' : 'space-y-16'}`}>
+    <div className="space-y-16">
       {/* Hero Section */}
-      <section className={`text-center space-y-8 ${BETA_MODE ? 'py-4 md:py-16' : 'py-16'}`}>
+      <section className="text-center space-y-8 py-16">
         <div className="space-y-6">
           <div className="space-y-2">
             <h1 className="text-4xl md:text-5xl font-light text-foreground leading-tight tracking-wide">
               Cuídate con
             </h1>
-            {/* Wordmark replicado por tipografía/estilos */}
             <UtopiaWordmark />
           </div>
           <p className="hidden md:block text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mt-8 font-light">
@@ -76,16 +91,12 @@ export default function Home() {
           <SearchDropdown className="w-full" enableTypingEffect={true} />
         </div>
         
-        {/* Category Navigation - Solo visible si no está en modo beta */}
-        {!BETA_MODE && (
-          <div className="max-w-full mx-auto mt-6">
-            <CategoryIconNav />
-          </div>
-        )}
+        <div className="max-w-full mx-auto mt-6">
+          <CategoryIconNav />
+        </div>
       </section>
 
-      {/* Featured Valencia Stores - Solo visible si no está en modo beta */}
-      {!BETA_MODE && (
+      {/* Featured Valencia Stores */}
       <section className="space-y-6">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -135,39 +146,9 @@ export default function Home() {
           ))}
         </div>
       </section>
-      )}
 
-      {/* Trending Discussions - Solo visible si no está en modo beta */}
-      {!BETA_MODE && <TrendingDiscussions />}
-
-      {/* Mensaje para invitar a usar el chatbot - Solo visible en modo beta */}
-      {BETA_MODE && (
-        <>
-          {/* Versión móvil: centrado con flecha hacia abajo y botón inline */}
-          <section className="relative py-2 -mt-4 md:hidden">
-            <div className="flex flex-col items-center justify-center gap-2 px-4">
-              <div className="text-lg text-muted-foreground max-w-3xl mx-auto font-light text-center">
-                Pincha aquí para hablar con tu asistente de cosmética
-              </div>
-              <ArrowDown className="w-5 h-5 sm:w-6 sm:h-6 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
-              {/* Botón del chatbot renderizado directamente aquí en móvil */}
-              <ChatBotButton 
-                onClick={handleOpenChat}
-                showPresentation={showPresentation}
-                size="large"
-              />
-            </div>
-          </section>
-          
-          {/* Versión desktop: a la derecha con flecha horizontal, pegado al final */}
-          <div className="hidden md:flex fixed bottom-6 right-28 lg:right-32 xl:right-36 items-center justify-end gap-4 z-40">
-            <div className="text-lg md:text-xl lg:text-2xl font-bold text-foreground text-right whitespace-nowrap">
-              Pincha aquí para hablar con tu asistente de cosmética
-            </div>
-            <ArrowRight className="w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 text-[hsl(var(--terracotta))] animate-pulse flex-shrink-0" />
-          </div>
-        </>
-      )}
+      {/* Trending Discussions */}
+      <TrendingDiscussions />
     </div>
   );
 }
