@@ -548,9 +548,6 @@ export function ChatBot() {
               <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
                 Tu asistente de Utopiacare
               </p>
-              <p className="text-sm sm:text-base text-muted-foreground/80">
-                Estoy disponible para ayudarte ✨
-              </p>
             </div>
           </div>
         </div>
