@@ -101,7 +101,7 @@ export default function Home() {
             className="fixed flex flex-col gap-4 z-50" 
             style={{ 
               left: 'calc(50% - 380px - 30px)',
-              bottom: 'calc(4rem + 30px)',
+              bottom: 'calc(4rem - 15px)',
               width: '380px'
             }}
           >
@@ -121,7 +121,7 @@ export default function Home() {
             className="fixed flex flex-col gap-4 z-50" 
             style={{ 
               left: 'calc(50% + 30px)',
-              bottom: 'calc(4rem + 30px)',
+              bottom: 'calc(4rem - 15px)',
               width: '380px'
             }}
           >
