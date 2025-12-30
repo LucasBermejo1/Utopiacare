@@ -350,6 +350,8 @@ export function ChatBot() {
               lifestyleMedications: extractedData.lifestyleMedications,
               problematicIngredients: extractedData.problematicIngredients,
               allergies: extractedData.allergies,
+              removedProblematicIngredients: extractedData.removedProblematicIngredients,
+              removedAllergies: extractedData.removedAllergies,
             });
             logger.log("✅ Perfil actualizado con información del chat");
           } catch (error) {
