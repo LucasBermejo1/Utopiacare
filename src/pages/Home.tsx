@@ -69,15 +69,12 @@ export default function Home() {
         {/* Imagen en la parte inferior izquierda - Solo en producción */}
         <div className="fixed bottom-6 left-6 z-50" style={{ zIndex: 50 }}>
           <img 
-            src="/Imagenes web/PNG image 3.png" 
+            src="/imagenes-web/imagen-inferior.png" 
             alt="" 
             className="max-w-[200px] md:max-w-[250px] h-auto opacity-90 hover:opacity-100 transition-opacity"
             style={{ display: 'block' }}
             onError={(e) => {
               console.error("Error cargando imagen:", e);
-              // Intentar con ruta codificada como fallback
-              const target = e.target as HTMLImageElement;
-              target.src = encodeURI("/Imagenes web/PNG image 3.png");
             }}
             onLoad={() => console.log("Imagen cargada correctamente")}
           />
