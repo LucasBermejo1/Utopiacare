@@ -157,6 +157,29 @@ export function ChatBot() {
     window.addEventListener('openChatBot', handleOpenChat);
     return () => window.removeEventListener('openChatBot', handleOpenChat);
   }, []);
+
+  // Prevenir scroll del body cuando el chat está abierto (especialmente en móvil)
+  useEffect(() => {
+    if (isOpen) {
+      // Guardar la posición actual del scroll
+      const scrollY = window.scrollY;
+      
+      // Bloquear el scroll del body
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        // Restaurar el scroll cuando se cierra
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isOpen]);
   
   // Mensaje inicial adaptado según si el usuario está autenticado
   const getInitialMessage = () => {
