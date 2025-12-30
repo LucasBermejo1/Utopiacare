@@ -68,26 +68,26 @@ export default function Home() {
           </section>
         </div>
 
-        {/* Imágenes en móviles - Grid responsive */}
-        <div className="md:hidden container mx-auto px-4 pb-6">
-          <div className="grid grid-cols-1 gap-6 max-w-md mx-auto">
-            <div className="flex flex-col gap-4 items-center">
+        {/* Imágenes en móviles - Optimizado para móvil */}
+        <div className="md:hidden w-full px-4 pb-8 pt-4">
+          <div className="flex flex-col gap-8 items-center max-w-full">
+            <div className="flex flex-col gap-3 items-center w-full">
               <img 
                 src="/imagenes-web/imagen-inferior.png" 
                 alt="" 
-                className="w-full max-w-[300px] h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
+                className="w-full max-w-[280px] h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
               />
-              <p className="text-sm font-medium text-foreground text-center w-full max-w-[300px]">
+              <p className="text-sm font-medium text-foreground text-center w-full max-w-[280px] px-2">
                 1. Crea tu cuenta o inicia sesión
               </p>
             </div>
-            <div className="flex flex-col gap-4 items-center">
+            <div className="flex flex-col gap-3 items-center w-full">
               <img 
                 src="/imagenes-web/imagen-inferior-2.png" 
                 alt="" 
-                className="w-full max-w-[300px] h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
+                className="w-full max-w-[280px] h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
               />
-              <p className="text-sm font-medium text-foreground text-center w-full max-w-[300px]">
+              <p className="text-sm font-medium text-foreground text-center w-full max-w-[280px] px-2">
                 2. Habla con Utopia
               </p>
             </div>
