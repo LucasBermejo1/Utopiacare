@@ -55,9 +55,9 @@ export default function Home() {
   // Versión limpia para producción (modo beta)
   if (BETA_MODE) {
     return (
-      <div className="flex flex-col min-h-[calc(100vh-200px)]">
+      <>
         {/* Hero Section */}
-        <div className="flex items-center justify-center flex-1 -mt-20 md:-mt-24 px-4">
+        <div className="flex items-center justify-center min-h-[calc(100vh-200px)] -mt-20 md:-mt-24 px-4">
           <section className="text-center">
             <div className="space-y-2">
               <h1 className="text-4xl md:text-5xl font-light text-foreground leading-tight tracking-wide">
@@ -68,35 +68,73 @@ export default function Home() {
           </section>
         </div>
 
-        {/* Imágenes en la parte inferior - Responsive */}
-        <div className="container mx-auto px-4 pb-6 md:pb-8 lg:pb-12 mt-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 lg:gap-12 max-w-6xl mx-auto">
-            {/* Imagen izquierda - Paso 1 */}
-            <div className="flex flex-col gap-4 items-center md:items-start">
+        {/* Imágenes en móviles - Grid responsive */}
+        <div className="md:hidden container mx-auto px-4 pb-6">
+          <div className="grid grid-cols-1 gap-6 max-w-md mx-auto">
+            <div className="flex flex-col gap-4 items-center">
               <img 
                 src="/imagenes-web/imagen-inferior.png" 
                 alt="" 
-                className="w-full max-w-[300px] sm:max-w-[350px] md:max-w-[380px] h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
+                className="w-full max-w-[300px] h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
               />
-              <p className="text-sm md:text-base font-medium text-foreground text-center md:text-left w-full max-w-[300px] sm:max-w-[350px] md:max-w-[380px]">
+              <p className="text-sm font-medium text-foreground text-center w-full max-w-[300px]">
                 1. Crea tu cuenta o inicia sesión
               </p>
             </div>
-
-            {/* Imagen derecha - Paso 2 */}
-            <div className="flex flex-col gap-4 items-center md:items-start">
+            <div className="flex flex-col gap-4 items-center">
               <img 
                 src="/imagenes-web/imagen-inferior-2.png" 
                 alt="" 
-                className="w-full max-w-[300px] sm:max-w-[350px] md:max-w-[380px] h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
+                className="w-full max-w-[300px] h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
               />
-              <p className="text-sm md:text-base font-medium text-foreground text-center md:text-left w-full max-w-[300px] sm:max-w-[350px] md:max-w-[380px]">
+              <p className="text-sm font-medium text-foreground text-center w-full max-w-[300px]">
                 2. Habla con Utopia
               </p>
             </div>
           </div>
         </div>
-      </div>
+
+        {/* Imágenes en pantallas grandes - Fixed positioning a 30px del centro, 40px del texto */}
+        <div className="hidden md:block">
+          {/* Imagen izquierda */}
+          <div 
+            className="fixed flex flex-col gap-4 z-50" 
+            style={{ 
+              left: 'calc(50% - 190px - 30px)',
+              top: 'calc(50vh + 40px)',
+              width: '380px'
+            }}
+          >
+            <img 
+              src="/imagenes-web/imagen-inferior.png" 
+              alt="" 
+              className="w-full h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
+            />
+            <p className="text-base font-medium text-foreground text-left">
+              1. Crea tu cuenta o inicia sesión
+            </p>
+          </div>
+
+          {/* Imagen derecha */}
+          <div 
+            className="fixed flex flex-col gap-4 z-50" 
+            style={{ 
+              right: 'calc(50% - 190px - 30px)',
+              top: 'calc(50vh + 40px)',
+              width: '380px'
+            }}
+          >
+            <img 
+              src="/imagenes-web/imagen-inferior-2.png" 
+              alt="" 
+              className="w-full h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
+            />
+            <p className="text-base font-medium text-foreground text-left">
+              2. Habla con Utopia
+            </p>
+          </div>
+        </div>
+      </>
     );
   }
 
