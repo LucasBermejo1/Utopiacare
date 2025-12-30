@@ -101,7 +101,7 @@ export default function Home() {
             className="fixed flex flex-col gap-4 z-50" 
             style={{ 
               left: 'calc(50% - 190px - 30px)',
-              top: 'calc(50vh + 40px)',
+              bottom: 'calc(4rem + 30px)',
               width: '380px'
             }}
           >
@@ -109,6 +109,7 @@ export default function Home() {
               src="/imagenes-web/imagen-inferior.png" 
               alt="" 
               className="w-full h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
+              style={{ display: 'block' }}
             />
             <p className="text-base font-medium text-foreground text-left">
               1. Crea tu cuenta o inicia sesión
@@ -120,7 +121,7 @@ export default function Home() {
             className="fixed flex flex-col gap-4 z-50" 
             style={{ 
               right: 'calc(50% - 190px - 30px)',
-              top: 'calc(50vh + 40px)',
+              bottom: 'calc(4rem + 30px)',
               width: '380px'
             }}
           >
@@ -128,6 +129,7 @@ export default function Home() {
               src="/imagenes-web/imagen-inferior-2.png" 
               alt="" 
               className="w-full h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
+              style={{ display: 'block' }}
             />
             <p className="text-base font-medium text-foreground text-left">
               2. Habla con Utopia
