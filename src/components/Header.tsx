@@ -19,27 +19,26 @@ export function Header() {
               <img src={logo} alt="Utopiacare" className="w-10 h-10" />
               <span className="text-xl font-bold text-primary">utopiacare</span>
             </Link>
-            <nav className="hidden md:flex items-center gap-2">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/">Inicio</Link>
-              </Button>
-              {!BETA_MODE && (
-                <>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to="/products">Productos</Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to="/stores">Tiendas</Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to="/discussions">Discusiones</Link>
-                  </Button>
-                </>
-              )}
-            </nav>
+            {!BETA_MODE && (
+              <nav className="hidden md:flex items-center gap-2">
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/">Inicio</Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/products">Productos</Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/stores">Tiendas</Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/discussions">Discusiones</Link>
+                </Button>
+              </nav>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {!BETA_MODE && <SearchDropdown className="hidden sm:block w-64" />}
+            {BETA_MODE && <div className="flex-1" />}
             <LoginDialog />
             {!BETA_MODE && (
               <Button size="sm" asChild>

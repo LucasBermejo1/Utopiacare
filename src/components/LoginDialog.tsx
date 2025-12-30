@@ -368,11 +368,11 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
       <DialogTrigger asChild>
         <Button 
           variant={BETA_MODE ? "default" : "ghost"} 
-          size="sm" 
-          className={BETA_MODE ? "gap-2 bg-primary text-primary-foreground hover:bg-primary/90 font-medium" : "gap-2"}
+          size={BETA_MODE ? "default" : "sm"}
+          className={BETA_MODE ? "gap-2 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-base px-6 py-6 shadow-lg hover:shadow-xl transition-all" : "gap-2"}
         >
-          <User className="w-4 h-4" />
-          {BETA_MODE && <span>Iniciar sesión</span>}
+          <User className={BETA_MODE ? "w-5 h-5" : "w-4 h-4"} />
+          {BETA_MODE && <span className="text-base">Iniciar sesión</span>}
         </Button>
       </DialogTrigger>
       <DialogContent>
