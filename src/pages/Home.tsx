@@ -55,8 +55,9 @@ export default function Home() {
   // Versión limpia para producción (modo beta)
   if (BETA_MODE) {
     return (
-      <>
-        <div className="flex items-center justify-center min-h-[calc(100vh-200px)] -mt-20 md:-mt-24">
+      <div className="flex flex-col min-h-[calc(100vh-200px)]">
+        {/* Hero Section */}
+        <div className="flex items-center justify-center flex-1 -mt-20 md:-mt-24 px-4">
           <section className="text-center">
             <div className="space-y-2">
               <h1 className="text-4xl md:text-5xl font-light text-foreground leading-tight tracking-wide">
@@ -66,46 +67,36 @@ export default function Home() {
             </div>
           </section>
         </div>
-        {/* Imágenes en la parte inferior - Solo en producción */}
-        {/* Imagen izquierda */}
-        <div className="fixed bottom-[calc(4rem+30px)] z-50 flex flex-col gap-4" style={{ zIndex: 50, left: 'calc(50% - 35px)', transform: 'translateX(-100%)' }}>
-          <img 
-            src="/imagenes-web/imagen-inferior.png" 
-            alt="" 
-            className="w-[300px] md:w-[380px] h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
-            style={{ display: 'block' }}
-            onError={(e) => {
-              console.error("Error cargando imagen:", e);
-            }}
-            onLoad={() => console.log("Imagen cargada correctamente")}
-          />
-          <p className="text-sm md:text-base font-medium text-foreground text-center w-[300px] md:w-[380px]">
-            1. Crea tu cuenta o inicia sesión
-          </p>
+
+        {/* Imágenes en la parte inferior - Responsive */}
+        <div className="container mx-auto px-4 pb-6 md:pb-8 lg:pb-12 mt-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 lg:gap-12 max-w-6xl mx-auto">
+            {/* Imagen izquierda - Paso 1 */}
+            <div className="flex flex-col gap-4 items-center md:items-start">
+              <img 
+                src="/imagenes-web/imagen-inferior.png" 
+                alt="" 
+                className="w-full max-w-[300px] sm:max-w-[350px] md:max-w-[380px] h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
+              />
+              <p className="text-sm md:text-base font-medium text-foreground text-center md:text-left w-full max-w-[300px] sm:max-w-[350px] md:max-w-[380px]">
+                1. Crea tu cuenta o inicia sesión
+              </p>
+            </div>
+
+            {/* Imagen derecha - Paso 2 */}
+            <div className="flex flex-col gap-4 items-center md:items-start">
+              <img 
+                src="/imagenes-web/imagen-inferior-2.png" 
+                alt="" 
+                className="w-full max-w-[300px] sm:max-w-[350px] md:max-w-[380px] h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
+              />
+              <p className="text-sm md:text-base font-medium text-foreground text-center md:text-left w-full max-w-[300px] sm:max-w-[350px] md:max-w-[380px]">
+                2. Habla con Utopia
+              </p>
+            </div>
+          </div>
         </div>
-        {/* Imagen derecha */}
-        <div className="fixed bottom-[calc(4rem+30px)] z-50 flex flex-col gap-4" style={{ zIndex: 50, right: 'calc(50% - 35px)', transform: 'translateX(100%)' }}>
-          <img 
-            src="/imagenes-web/imagen-inferior-2.png" 
-            alt="" 
-            className="w-[300px] md:w-[380px] h-auto opacity-90 hover:opacity-100 transition-opacity border-4 border-[hsl(var(--terracotta))] rounded-lg shadow-xl"
-            style={{ display: 'block' }}
-            onError={(e) => {
-              console.error("Error cargando imagen-inferior-2.png:", e);
-              const target = e.target as HTMLImageElement;
-              console.error("Ruta completa:", window.location.origin + target.src);
-            }}
-            onLoad={(e) => {
-              console.log("Imagen imagen-inferior-2.png cargada correctamente");
-              const target = e.target as HTMLImageElement;
-              console.log("Dimensiones:", target.naturalWidth, "x", target.naturalHeight);
-            }}
-          />
-          <p className="text-sm md:text-base font-medium text-foreground text-center w-[300px] md:w-[380px]">
-            2. Habla con Utopia
-          </p>
-        </div>
-      </>
+      </div>
     );
   }
 
