@@ -102,7 +102,7 @@ Extrae SOLO la siguiente información en formato JSON (si existe):
     "marca": "marca preferida",
     "tipo": "tipo de producto"
   },
-  "name": string | null,
+  "name": "nombre del usuario" | null,
   "skinType": "normal" | "dry" | "oily" | "combination" | "sensitive" | null,
   "skinSensitivity": "resistant" | "sensitive" | "rosacea" | null,
   "climateZone": "dry" | "humid" | "extreme" | null,
