@@ -701,6 +701,12 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
   if (context.userProfile) {
     prompt += "\n\n=== PERFIL COMPLETO DEL USUARIO ===\n\n";
     
+    // Nombre del usuario
+    if (context.userProfile.name) {
+      prompt += `NOMBRE DEL USUARIO: ${context.userProfile.name}\n`;
+      prompt += "⚠️ IMPORTANTE: Usa el nombre del usuario al dirigirte a él/ella en tus respuestas. Sé amigable y personal.\n\n";
+    }
+    
     // Información básica de la piel
     prompt += "INFORMACIÓN DE LA PIEL:\n";
     prompt += `- Tipo de piel: ${context.userProfile.skin_type || "No especificado"}\n`;

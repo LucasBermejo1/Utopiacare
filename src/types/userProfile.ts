@@ -5,6 +5,7 @@
 export interface UserProfile {
   user_id: string;
   email?: string;
+  name?: string | null;
   
   // Tipo de piel
   skin_type: "normal" | "dry" | "oily" | "combination" | "sensitive";
@@ -39,6 +40,9 @@ export interface UserProfile {
 }
 
 export interface OnboardingData {
+  // Paso 0: Nombre
+  name: string;
+  
   // Paso 1: Tipo de piel
   skinType: "normal" | "dry" | "oily" | "combination" | "sensitive";
   

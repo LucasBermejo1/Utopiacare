@@ -102,6 +102,7 @@ Extrae SOLO la siguiente información en formato JSON (si existe):
     "marca": "marca preferida",
     "tipo": "tipo de producto"
   },
+  "name": string | null,
   "skinType": "normal" | "dry" | "oily" | "combination" | "sensitive" | null,
   "skinSensitivity": "resistant" | "sensitive" | "rosacea" | null,
   "climateZone": "dry" | "humid" | "extreme" | null,
@@ -126,6 +127,7 @@ IMPORTANTE:
 - Si menciona que FUMA, inclúyelo en "lifestyleSmoking" (true)
 - Si menciona que DUERME MENOS DE 7H, inclúyelo en "lifestyleSleepLessThan7h" (true)
 - Si menciona MEDICAMENTOS que toma, inclúyelos en "lifestyleMedications"
+- Si el usuario menciona su NOMBRE (ej: "me llamo X", "soy X", "mi nombre es X"), inclúyelo en "name"
 - Solo incluye información explícitamente mencionada
 - Si no hay información de un campo, omítelo o usa null (no pongas arrays vacíos ni valores falsos)
 - Responde SOLO con el JSON, sin texto adicional
@@ -366,6 +368,7 @@ export async function saveThreadId(userId: string, threadId: string): Promise<vo
 export async function updateUserProfileFromChat(
   userId: string,
   extractedData: {
+    name?: string;
     skinType?: "normal" | "dry" | "oily" | "combination" | "sensitive";
     skinSensitivity?: "resistant" | "sensitive" | "rosacea";
     concerns?: string[];
@@ -394,6 +397,11 @@ export async function updateUserProfileFromChat(
     }
 
     const updates: Partial<typeof currentProfile> = {};
+
+    // Actualizar nombre si se menciona
+    if (extractedData.name) {
+      updates.name = extractedData.name.trim();
+    }
 
     // Actualizar tipo de piel si se menciona
     if (extractedData.skinType) {

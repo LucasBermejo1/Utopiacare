@@ -362,6 +362,7 @@ export function ChatBot() {
           try {
             const { updateUserProfileFromChat } = await import("@/services/chatDataService");
             await updateUserProfileFromChat(user.id, {
+              name: extractedData.name,
               skinType: extractedData.skinType,
               skinSensitivity: extractedData.skinSensitivity,
               concerns: extractedData.concerns,
