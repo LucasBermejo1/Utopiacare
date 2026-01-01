@@ -22,6 +22,7 @@ export interface UserChatData {
 
 /**
  * Guarda un mensaje de conversación en la base de datos
+ * Guarda tanto mensajes del usuario como respuestas del asistente
  */
 export async function saveChatMessage(
   userId: string,
@@ -31,18 +32,26 @@ export async function saveChatMessage(
     throw new Error("Supabase no configurado");
   }
 
-  const { error } = await supabase.from("chat_conversations").insert({
-    user_id: userId,
-    message_id: message.messageId,
-    role: message.role,
-    content: message.content,
-    timestamp: message.timestamp.toISOString(),
-    metadata: message.metadata || {},
-  });
+  try {
+    const { error } = await supabase.from("chat_conversations").insert({
+      user_id: userId,
+      message_id: message.messageId,
+      role: message.role,
+      content: message.content,
+      timestamp: message.timestamp.toISOString(),
+      metadata: message.metadata || {},
+    });
 
-  if (error) {
-    console.error("Error guardando mensaje:", error);
-    throw new Error(`Error al guardar mensaje: ${error.message}`);
+    if (error) {
+      console.error("Error guardando mensaje:", error);
+      throw new Error(`Error al guardar mensaje: ${error.message}`);
+    }
+
+    // Log para confirmar que se guardó correctamente
+    console.log(`✅ Mensaje guardado en BD: ${message.role} - ${message.content.substring(0, 50)}...`);
+  } catch (error) {
+    console.error("Error en saveChatMessage:", error);
+    throw error;
   }
 }
 
