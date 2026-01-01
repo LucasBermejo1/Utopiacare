@@ -82,6 +82,29 @@ export async function extractRelevantDataFromMessage(
   lifestyleSmoking?: boolean;
   lifestyleSleepLessThan7h?: boolean;
   lifestyleMedications?: string;
+  // Rutina actual
+  routine?: {
+    moments?: Array<{
+      timeOfDay: string;
+      products?: Array<{
+        name: string;
+        brand?: string;
+        category?: string;
+        step?: number;
+      }>;
+      steps?: string[];
+      order?: number;
+    }>;
+    products?: Array<{
+      name: string;
+      brand?: string;
+      category?: string;
+      timeOfDay?: string;
+      step?: number;
+    }>;
+    frequency?: string;
+    notes?: string;
+  };
 }> {
   const apiKey = import.meta.env.VITE_CHATGPT_API_KEY;
 
@@ -122,7 +145,35 @@ Extrae SOLO la siguiente información en formato JSON (si existe):
   "routineCommitment": "minimalist" | "intermediate" | "advanced" | null,
   "lifestyleSmoking": true | false | null,
   "lifestyleSleepLessThan7h": true | false | null,
-  "lifestyleMedications": "texto libre" | null
+  "lifestyleMedications": "texto libre" | null,
+  "routine": {
+    "moments": [
+      {
+        "timeOfDay": "morning" | "afternoon" | "evening" | "night" | "midday" | string,
+        "products": [
+          {
+            "name": "nombre del producto",
+            "brand": "marca (opcional)",
+            "category": "categoría (opcional): cleanser, toner, serum, moisturizer, sunscreen, etc.",
+            "step": número (orden de aplicación, opcional)
+          }
+        ],
+        "steps": ["paso1", "paso2"],
+        "order": número (orden del momento, opcional)
+      }
+    ],
+    "products": [
+      {
+        "name": "nombre del producto",
+        "brand": "marca (opcional)",
+        "category": "categoría (opcional)",
+        "timeOfDay": "momento del día (opcional)",
+        "step": número (opcional)
+      }
+    ],
+    "frequency": "frecuencia de uso (ej: diaria, semanal, etc.)",
+    "notes": "notas adicionales sobre la rutina"
+  } | null
 }
 
 IMPORTANTE:
@@ -141,6 +192,12 @@ IMPORTANTE:
 - Si menciona MEDICAMENTOS que toma, inclúyelos en "lifestyleMedications"
 - Si el usuario menciona su NOMBRE (ej: "me llamo X", "soy X", "mi nombre es X"), inclúyelo en "name"
 - Si el usuario menciona su EDAD (ej: "tengo X años", "soy de X años", "tengo X"), inclúyela en "age" como número
+- ⚠️ RUTINA ACTUAL: Si el usuario COMPARTE su rutina actual (ej: "uso X por la mañana", "mi rutina incluye Y", "tengo esta rutina", "uso limpiador, sérum y crema", "por la mañana uso... por la noche uso..."), extrae la información en "routine":
+  * Detecta productos mencionados y sus momentos del día (morning, evening, night, etc.)
+  * Estructura en "moments" si menciona diferentes momentos, o en "products" si es más simple
+  * Incluye pasos si los menciona (ej: "primero limpio, luego hidrato")
+  * Incluye frecuencia si la menciona (ej: "lo uso todos los días", "3 veces por semana")
+  * Incluye notas si hay información adicional
 - Solo incluye información explícitamente mencionada
 - Si no hay información de un campo, omítelo o usa null (no pongas arrays vacíos ni valores falsos)
 - Responde SOLO con el JSON, sin texto adicional
@@ -396,6 +453,28 @@ export async function updateUserProfileFromChat(
     allergies?: string[];
     removedProblematicIngredients?: string[];
     removedAllergies?: string[];
+    routine?: {
+      moments?: Array<{
+        timeOfDay: string;
+        products?: Array<{
+          name: string;
+          brand?: string;
+          category?: string;
+          step?: number;
+        }>;
+        steps?: string[];
+        order?: number;
+      }>;
+      products?: Array<{
+        name: string;
+        brand?: string;
+        category?: string;
+        timeOfDay?: string;
+        step?: number;
+      }>;
+      frequency?: string;
+      notes?: string;
+    };
   }
 ): Promise<void> {
   if (!supabase) {
@@ -522,6 +601,15 @@ export async function updateUserProfileFromChat(
     
     if (itemsToRemove.length > 0 || problematicItems.length > 0) {
       updates.product_history = updatedHistory || null;
+    }
+
+    // Actualizar rutina si se menciona
+    if (extractedData.routine) {
+      const routineToSave = {
+        ...extractedData.routine,
+        lastUpdated: new Date().toISOString(),
+      };
+      updates.routine = routineToSave;
     }
 
     if (Object.keys(updates).length > 0) {

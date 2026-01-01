@@ -422,6 +422,7 @@ export function ChatBot() {
               allergies: extractedData.allergies,
               removedProblematicIngredients: extractedData.removedProblematicIngredients,
               removedAllergies: extractedData.removedAllergies,
+              routine: extractedData.routine,
             });
           } catch (error) {
             console.error("Error actualizando perfil desde chat:", error);
