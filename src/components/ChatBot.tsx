@@ -181,7 +181,29 @@ export function ChatBot() {
     }
   }, [isOpen]);
   
-  // Mensaje inicial adaptado según si el usuario está autenticado
+  const [userName, setUserName] = useState<string | null>(null);
+
+  // Cargar nombre del usuario cuando esté disponible
+  useEffect(() => {
+    if (user && !authLoading) {
+      const loadUserName = async () => {
+        try {
+          const { getUserProfile } = await import("@/services/supabaseUserProfile");
+          const profile = await getUserProfile(user.id);
+          if (profile?.name) {
+            setUserName(profile.name);
+          }
+        } catch (error) {
+          console.error("Error cargando nombre del usuario:", error);
+        }
+      };
+      loadUserName();
+    } else {
+      setUserName(null);
+    }
+  }, [user, authLoading]);
+
+  // Mensaje inicial adaptado según si el usuario está autenticado y su nombre
   const getInitialMessage = () => {
     if (!user && !authLoading) {
       return {
@@ -191,15 +213,27 @@ export function ChatBot() {
         timestamp: new Date(),
       };
     }
+    
+    const greeting = userName 
+      ? `¡Hola ${userName}! 👋 ¿En qué puedo ayudarte hoy?`
+      : "¡Hola! 👋 ¿En qué puedo ayudarte hoy?";
+    
     return {
       id: "1",
       role: "assistant" as const,
-      content: "¡Hola! 👋 Soy Utopia, tu asesor de belleza personal ✨\n\n¿En qué puedo ayudarte hoy? Puedo ayudarte a encontrar productos perfectos para tu tipo de piel o explicarte ingredientes. 💕",
+      content: greeting,
       timestamp: new Date(),
     };
   };
 
   const [messages, setMessages] = useState<Message[]>([getInitialMessage()]);
+  
+  // Actualizar mensaje inicial cuando se carga el nombre del usuario
+  useEffect(() => {
+    if (user && !authLoading && userName !== null && messages.length === 1 && messages[0].id === "1") {
+      setMessages([getInitialMessage()]);
+    }
+  }, [userName, user, authLoading]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
