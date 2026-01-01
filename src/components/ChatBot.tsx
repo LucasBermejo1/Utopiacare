@@ -218,59 +218,16 @@ export function ChatBot() {
     }
   }, [messages, isOpen]);
 
-  // Cargar historial de conversaciones cuando el usuario está disponible (al montar o al iniciar sesión)
-  useEffect(() => {
-    if (user && !authLoading) {
-      setIsLoadingHistory(true);
-      const loadHistory = async () => {
-        try {
-          const { getChatHistory } = await import("@/services/chatDataService");
-          const history = await getChatHistory(user.id, 50); // Cargar más mensajes para contexto completo
-          
-          if (history.length > 0) {
-            logger.log(`📚 Cargando historial: ${history.length} mensajes`);
-            // Convertir historial a formato Message
-            const historyMessages: Message[] = history.map(msg => ({
-              id: msg.messageId,
-              role: msg.role,
-              content: msg.content,
-              timestamp: msg.timestamp,
-            }));
-            
-            // Reemplazar mensajes con historial completo (incluyendo mensaje inicial)
-            setMessages(prev => {
-              // Si solo hay el mensaje inicial, reemplazarlo con historial completo
-              if (prev.length === 1 && prev[0].id === "1") {
-                return [prev[0], ...historyMessages];
-              }
-              // Si ya hay mensajes, verificar si el historial tiene más mensajes
-              const existingIds = new Set(prev.map(m => m.id));
-              const newMessages = historyMessages.filter(m => !existingIds.has(m.id));
-              if (newMessages.length > 0) {
-                return [...prev, ...newMessages];
-              }
-              return prev;
-            });
-          } else {
-            logger.log("📚 No hay historial previo");
-          }
-        } catch (error) {
-          console.error("Error cargando historial:", error);
-        } finally {
-          setIsLoadingHistory(false);
-        }
-      };
-      
-      loadHistory();
-    }
-  }, [user, authLoading]); // Cargar cuando el usuario esté disponible, no solo cuando se abre el chat
+  // No cargar historial visual al iniciar - cada sesión empieza limpia
+  // Los datos siguen guardándose en la BD pero no se muestran en el chat
+  // El historial se usa internamente para contexto del bot pero no se muestra visualmente
 
   // Focus en el input cuando se abre el chat
   useEffect(() => {
-    if (isOpen && inputRef.current && !isLoadingHistory) {
+    if (isOpen && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [isOpen, isLoadingHistory]);
+  }, [isOpen]);
 
   // Animación de presentación desactivada
   // useEffect(() => {
