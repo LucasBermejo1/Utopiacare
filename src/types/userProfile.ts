@@ -44,7 +44,10 @@ export interface UserProfile {
   
   // Rutina actual del usuario
   routine?: {
-    morning?: {
+    // Momentos del día: puede incluir "morning", "afternoon", "evening", "night", "midday", etc.
+    // Estructura flexible que permite múltiples momentos del día
+    moments?: Array<{
+      timeOfDay: string; // "morning", "afternoon", "evening", "night", "midday", "after-workout", etc.
       products?: Array<{
         name: string;
         brand?: string;
@@ -52,16 +55,16 @@ export interface UserProfile {
         step?: number;
       }>;
       steps?: string[];
-    };
-    evening?: {
-      products?: Array<{
-        name: string;
-        brand?: string;
-        category?: string;
-        step?: number;
-      }>;
-      steps?: string[];
-    };
+      order?: number; // Orden de aplicación dentro del momento del día
+    }>;
+    // Para compatibilidad, mantener también estructura simple si se prefiere
+    products?: Array<{
+      name: string;
+      brand?: string;
+      category?: string;
+      timeOfDay?: string; // Opcional: momento del día
+      step?: number;
+    }>;
     frequency?: string;
     notes?: string;
     lastUpdated?: string;
