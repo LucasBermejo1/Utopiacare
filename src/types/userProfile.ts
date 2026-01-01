@@ -34,6 +34,14 @@ export interface UserProfile {
   lifestyle_sleep_less_than_7h?: boolean;
   lifestyle_medications?: string | null;
   
+  // Preferencias de conversación
+  conversation_preferences?: {
+    tone?: "amigable" | "formal" | "profesional";
+    length?: "corto" | "medio" | "detallado";
+    emojis?: boolean;
+    technicalLevel?: "simple" | "medio" | "avanzado";
+  } | null;
+  
   // Estado
   onboarding_completed: boolean;
   created_at?: string;

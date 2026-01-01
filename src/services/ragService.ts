@@ -789,6 +789,40 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
       }
     }
     
+    // Preferencias de conversación
+    if (context.userProfile.conversation_preferences) {
+      const prefs = context.userProfile.conversation_preferences;
+      prompt += "\nPREFERENCIAS DE CONVERSACIÓN DEL USUARIO:\n";
+      if (prefs.tone) {
+        const toneMap: Record<string, string> = {
+          amigable: "Amigable - Usa un tono cercano y conversacional, como hablar con un amigo",
+          formal: "Formal - Usa un tono más profesional y respetuoso",
+          profesional: "Profesional - Usa un tono equilibrado, profesional pero accesible"
+        };
+        prompt += `- Tono preferido: ${toneMap[prefs.tone] || prefs.tone}\n`;
+      }
+      if (prefs.length) {
+        const lengthMap: Record<string, string> = {
+          corto: "Corto - Respuestas concisas y directas (máximo 80 palabras)",
+          medio: "Medio - Respuestas balanceadas (100-120 palabras)",
+          detallado: "Detallado - Respuestas más extensas con explicaciones completas (hasta 150 palabras)"
+        };
+        prompt += `- Longitud preferida: ${lengthMap[prefs.length] || prefs.length}\n`;
+      }
+      if (prefs.emojis !== undefined) {
+        prompt += `- Uso de emojis: ${prefs.emojis ? "Sí - Puedes usar emojis moderadamente" : "No - Evita usar emojis"}\n`;
+      }
+      if (prefs.technicalLevel) {
+        const techMap: Record<string, string> = {
+          simple: "Simple - Usa lenguaje sencillo, evita términos técnicos complejos",
+          medio: "Medio - Puedes usar algunos términos técnicos pero explica los conceptos complejos",
+          avanzado: "Avanzado - Puedes usar terminología técnica especializada sin necesidad de explicaciones básicas"
+        };
+        prompt += `- Nivel técnico: ${techMap[prefs.technicalLevel] || prefs.technicalLevel}\n`;
+      }
+      prompt += "⚠️ IMPORTANTE: Adapta tu estilo de comunicación según estas preferencias del usuario.\n";
+    }
+    
     prompt += "\n=== REGLAS DE PERSONALIZACIÓN OBLIGATORIAS ===\n";
     prompt += "1. ⚠️ PRIORIDAD ABSOLUTA: NUNCA recomiendes ingredientes/marcas del historial problemático\n";
     prompt += "2. 🎯 CRÍTICO: Si el usuario menciona un producto, VERIFICA si es adecuado para su tipo de piel\n";

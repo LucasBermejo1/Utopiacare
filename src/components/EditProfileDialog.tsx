@@ -79,6 +79,10 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
   const [lifestyleSmoking, setLifestyleSmoking] = useState<boolean>(false);
   const [lifestyleSleepLessThan7h, setLifestyleSleepLessThan7h] = useState<boolean>(false);
   const [lifestyleMedications, setLifestyleMedications] = useState<string>("");
+  const [conversationTone, setConversationTone] = useState<string>("");
+  const [conversationLength, setConversationLength] = useState<string>("");
+  const [conversationEmojis, setConversationEmojis] = useState<boolean | null>(null);
+  const [conversationTechnicalLevel, setConversationTechnicalLevel] = useState<string>("");
 
   // Cargar perfil del usuario cuando se abre el diálogo
   useEffect(() => {
@@ -107,6 +111,10 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
         setLifestyleSmoking(profile.lifestyle_smoking || false);
         setLifestyleSleepLessThan7h(profile.lifestyle_sleep_less_than_7h || false);
         setLifestyleMedications(profile.lifestyle_medications || "");
+        setConversationTone(profile.conversation_preferences?.tone || "");
+        setConversationLength(profile.conversation_preferences?.length || "");
+        setConversationEmojis(profile.conversation_preferences?.emojis ?? null);
+        setConversationTechnicalLevel(profile.conversation_preferences?.technicalLevel || "");
       }
     } catch (error) {
       console.error("Error cargando perfil:", error);
@@ -144,6 +152,14 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
 
     setLoading(true);
     try {
+      const conversationPreferences: any = {};
+      if (conversationTone || conversationLength || conversationEmojis !== null || conversationTechnicalLevel) {
+        if (conversationTone) conversationPreferences.tone = conversationTone;
+        if (conversationLength) conversationPreferences.length = conversationLength;
+        if (conversationEmojis !== null) conversationPreferences.emojis = conversationEmojis;
+        if (conversationTechnicalLevel) conversationPreferences.technicalLevel = conversationTechnicalLevel;
+      }
+      
       await updateUserProfile(user.id, {
         name: name.trim() || null,
         age: age || null,
@@ -157,6 +173,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
         lifestyle_smoking: lifestyleSmoking,
         lifestyle_sleep_less_than_7h: lifestyleSleepLessThan7h,
         lifestyle_medications: lifestyleMedications || null,
+        conversation_preferences: Object.keys(conversationPreferences).length > 0 ? conversationPreferences : null,
         onboarding_completed: true,
       });
 
@@ -444,6 +461,122 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
                     ))}
                   </div>
                 </RadioGroup>
+              </div>
+
+              {/* Preferencias de conversación */}
+              <div className="space-y-4">
+                <Label className="text-lg font-semibold">
+                  Preferencias de conversación
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  Personaliza cómo quieres que el bot te hable
+                </p>
+                
+                <div className="space-y-4">
+                  {/* Tono */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Tono de conversación</Label>
+                    <RadioGroup value={conversationTone} onValueChange={setConversationTone}>
+                      <div className="grid grid-cols-1 gap-2">
+                        <label className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer">
+                          <RadioGroupItem value="amigable" id="tone-amigable" />
+                          <Label htmlFor="tone-amigable" className="cursor-pointer font-normal flex-1 ml-2">
+                            Amigable - Cercano y conversacional
+                          </Label>
+                        </label>
+                        <label className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer">
+                          <RadioGroupItem value="formal" id="tone-formal" />
+                          <Label htmlFor="tone-formal" className="cursor-pointer font-normal flex-1 ml-2">
+                            Formal - Profesional y respetuoso
+                          </Label>
+                        </label>
+                        <label className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer">
+                          <RadioGroupItem value="profesional" id="tone-profesional" />
+                          <Label htmlFor="tone-profesional" className="cursor-pointer font-normal flex-1 ml-2">
+                            Profesional - Equilibrado y accesible
+                          </Label>
+                        </label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* Longitud */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Longitud de respuestas</Label>
+                    <RadioGroup value={conversationLength} onValueChange={setConversationLength}>
+                      <div className="grid grid-cols-1 gap-2">
+                        <label className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer">
+                          <RadioGroupItem value="corto" id="length-corto" />
+                          <Label htmlFor="length-corto" className="cursor-pointer font-normal flex-1 ml-2">
+                            Corto - Respuestas concisas y directas
+                          </Label>
+                        </label>
+                        <label className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer">
+                          <RadioGroupItem value="medio" id="length-medio" />
+                          <Label htmlFor="length-medio" className="cursor-pointer font-normal flex-1 ml-2">
+                            Medio - Respuestas balanceadas
+                          </Label>
+                        </label>
+                        <label className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer">
+                          <RadioGroupItem value="detallado" id="length-detallado" />
+                          <Label htmlFor="length-detallado" className="cursor-pointer font-normal flex-1 ml-2">
+                            Detallado - Respuestas extensas y completas
+                          </Label>
+                        </label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* Emojis */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Uso de emojis</Label>
+                    <div className="flex gap-3">
+                      <Button
+                        type="button"
+                        variant={conversationEmojis === true ? "default" : "outline"}
+                        onClick={() => setConversationEmojis(true)}
+                        className="flex-1"
+                      >
+                        Sí
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={conversationEmojis === false ? "default" : "outline"}
+                        onClick={() => setConversationEmojis(false)}
+                        className="flex-1"
+                      >
+                        No
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Nivel técnico */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Nivel técnico</Label>
+                    <RadioGroup value={conversationTechnicalLevel} onValueChange={setConversationTechnicalLevel}>
+                      <div className="grid grid-cols-1 gap-2">
+                        <label className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer">
+                          <RadioGroupItem value="simple" id="tech-simple" />
+                          <Label htmlFor="tech-simple" className="cursor-pointer font-normal flex-1 ml-2">
+                            Simple - Lenguaje sencillo, sin términos técnicos complejos
+                          </Label>
+                        </label>
+                        <label className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer">
+                          <RadioGroupItem value="medio" id="tech-medio" />
+                          <Label htmlFor="tech-medio" className="cursor-pointer font-normal flex-1 ml-2">
+                            Medio - Algunos términos técnicos con explicaciones
+                          </Label>
+                        </label>
+                        <label className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer">
+                          <RadioGroupItem value="avanzado" id="tech-avanzado" />
+                          <Label htmlFor="tech-avanzado" className="cursor-pointer font-normal flex-1 ml-2">
+                            Avanzado - Terminología técnica especializada
+                          </Label>
+                        </label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </div>
               </div>
 
               {/* Estilo de vida */}
