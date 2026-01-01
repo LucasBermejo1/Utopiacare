@@ -100,9 +100,9 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
         // Si está seleccionado, lo deseleccionamos
         return { ...prev, mainConcerns: current.filter((c) => c !== concern) };
       }
-      // Si ya hay 2 seleccionadas, reemplazamos la primera por la nueva
+      // Si ya hay 2 seleccionadas, no permitir seleccionar más
       if (current.length >= 2) {
-        return { ...prev, mainConcerns: [current[1], concern] };
+        return prev; // No hacer cambios
       }
       // Si hay menos de 2, añadimos la nueva
       return { ...prev, mainConcerns: [...current, concern] };

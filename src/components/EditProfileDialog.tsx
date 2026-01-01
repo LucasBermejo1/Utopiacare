@@ -122,9 +122,9 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
         // Si está seleccionado, lo deseleccionamos
         return prev.filter((c) => c !== concern);
       }
-      // Si ya hay 2 seleccionadas, reemplazamos la primera por la nueva
+      // Si ya hay 2 seleccionadas, no permitir seleccionar más
       if (prev.length >= 2) {
-        return [prev[1], concern];
+        return prev; // No hacer cambios
       }
       // Si hay menos de 2, añadimos la nueva
       return [...prev, concern];
