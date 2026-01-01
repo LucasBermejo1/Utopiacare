@@ -346,10 +346,43 @@ export function ChatBot() {
       // Si hay imágenes, analizar productos y guardarlos en la BD
       if (userMessage.images && userMessage.images.length > 0) {
         try {
-          const { analyzeProductsFromImages } = await import("@/services/productImageAnalyzer");
-          const results = await analyzeProductsFromImages(userMessage.images, userMessage.content);
+          // Obtener historial de conversación para contextualizar mejor
+          let conversationHistory: Array<{ role: "user" | "assistant"; content: string }> = [];
+          if (user) {
+            try {
+              const { getChatHistory } = await import("@/services/chatDataService");
+              const dbHistory = await getChatHistory(user.id, 10); // Últimos 10 mensajes para contexto
+              conversationHistory = dbHistory.map(msg => ({
+                role: msg.role,
+                content: msg.content
+              }));
+            } catch (error) {
+              console.error("Error obteniendo historial para análisis de imagen:", error);
+            }
+          }
           
-          logger.log(`📸 ${results.length} producto(s) analizado(s) desde imagen(es)`);
+          // También incluir mensajes actuales en la conversación para tener contexto completo
+          const currentMessages: Array<{ role: "user" | "assistant"; content: string }> = messages
+            .slice(-5) // Últimos 5 mensajes del estado actual
+            .map(msg => ({
+              role: msg.role,
+              content: msg.content
+            }));
+          
+          // Combinar historial de BD con mensajes actuales (evitando duplicados)
+          const allHistoryIds = new Set(conversationHistory.map((_, idx) => idx));
+          const combinedHistory = [...conversationHistory, ...currentMessages.filter(msg => 
+            !conversationHistory.some(h => h.content === msg.content && h.role === msg.role)
+          )].slice(-10); // Mantener máximo 10 mensajes para contexto
+          
+          const { analyzeProductsFromImages } = await import("@/services/productImageAnalyzer");
+          const results = await analyzeProductsFromImages(
+            userMessage.images, 
+            userMessage.content,
+            combinedHistory
+          );
+          
+          logger.log(`📸 ${results.length} producto(s) analizado(s) desde imagen(es) con contexto del historial`);
           
           // Construir información de productos para incluir en el mensaje al bot
           if (results.length > 0) {

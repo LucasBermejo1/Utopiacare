@@ -22,10 +22,12 @@ interface ProductAnalysis {
 /**
  * Analiza una imagen de producto usando ChatGPT Vision
  * Extrae información del producto y detecta el contexto de uso
+ * Considera el historial de conversación para determinar mejor el contexto
  */
 export async function analyzeProductFromImage(
   imageBase64: string,
-  userMessage?: string
+  userMessage?: string,
+  conversationHistory?: Array<{ role: "user" | "assistant"; content: string }>
 ): Promise<ProductAnalysis | null> {
   const apiKey = import.meta.env.VITE_CHATGPT_API_KEY;
 
@@ -34,6 +36,14 @@ export async function analyzeProductFromImage(
   }
 
   try {
+    // Construir contexto del historial de conversación si está disponible
+    let historyContext = "";
+    if (conversationHistory && conversationHistory.length > 0) {
+      // Incluir los últimos 5 mensajes del historial para tener contexto
+      const recentHistory = conversationHistory.slice(-5);
+      historyContext = `\n\nHISTORIAL DE CONVERSACIÓN RECIENTE (para contexto):\n${recentHistory.map((msg, idx) => `${msg.role === "user" ? "Usuario" : "Asistente"}: ${msg.content}`).join("\n\n")}`;
+    }
+
     const prompt = `Analiza esta imagen de un producto de belleza/cuidado de la piel y extrae la siguiente información en formato JSON:
 
 {
@@ -48,22 +58,26 @@ export async function analyzeProductFromImage(
 }
 
 IMPORTANTE sobre el CONTEXTO:
-- "using": El usuario está usando actualmente este producto (ej: "estoy usando esto", "llevo tiempo con este", "mi producto actual")
-- "consulting": El usuario solo está consultando información sobre el producto (ej: "qué opinas de este", "es bueno este", "qué te parece")
-- "considering": El usuario está considerando comprarlo/usarlo (ej: "estoy pensando en comprar", "me lo han recomendado", "debería usarlo")
-- "reviewing": El usuario está dando su opinión o reseña (ej: "no me funciona", "me encanta", "me ha dado alergia")
+- "using": El usuario está usando actualmente este producto (ej: "estoy usando esto", "llevo tiempo con este", "mi producto actual", "lo uso desde hace X", "mi rutina incluye esto")
+- "consulting": El usuario solo está consultando información sobre el producto (ej: "qué opinas de este", "es bueno este", "qué te parece", "qué sabes de este")
+- "considering": El usuario está considerando comprarlo/usarlo (ej: "estoy pensando en comprar", "me lo han recomendado", "debería usarlo", "quiero probarlo")
+- "reviewing": El usuario está dando su opinión o reseña sobre el producto (ej: "no me funciona", "me encanta", "me ha dado alergia", "no me gusta", "es genial")
 - "unknown": No se puede determinar el contexto
 
-Analiza el mensaje del usuario si está disponible para determinar el contexto. Si no hay mensaje, usa "consulting" por defecto.
+Para determinar el CONTEXTO, analiza:
+1. El mensaje actual del usuario (si está disponible)
+2. El historial de conversación reciente (mensajes anteriores pueden indicar si ya lo está usando o mencionó algo relacionado)
+3. Busca indicadores clave en el lenguaje usado en mensajes anteriores y posteriores
+
+Si el usuario mencionó en mensajes anteriores que está usando un producto o tiene una rutina establecida, es más probable que esté "using" el producto.
+Si solo pregunta sin mencionar uso previo, probablemente está "consulting" o "considering".
 
 Responde SOLO con el JSON, sin texto adicional.`;
 
     const userContent = [
       {
         type: "text",
-        text: userMessage 
-          ? `${prompt}\n\nMENSAJE DEL USUARIO: "${userMessage}"`
-          : prompt
+        text: `${prompt}${historyContext}${userMessage ? `\n\nMENSAJE ACTUAL DEL USUARIO: "${userMessage}"` : ""}`
       },
       {
         type: "image_url",
@@ -170,10 +184,11 @@ export async function saveProductIfNotExists(
  */
 export async function analyzeProductsFromImages(
   images: string[],
-  userMessage?: string
+  userMessage?: string,
+  conversationHistory?: Array<{ role: "user" | "assistant"; content: string }>
 ): Promise<Array<{ analysis: ProductAnalysis; product: Product | null }>> {
   const results = await Promise.allSettled(
-    images.map(img => analyzeProductFromImage(img, userMessage))
+    images.map(img => analyzeProductFromImage(img, userMessage, conversationHistory))
   );
 
   const analyses: ProductAnalysis[] = [];
