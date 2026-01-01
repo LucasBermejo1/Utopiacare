@@ -343,6 +343,29 @@ export function ChatBot() {
         console.error("Error guardando mensaje:", error);
       });
 
+      // Si hay imágenes, analizar productos y guardarlos en la BD
+      if (userMessage.images && userMessage.images.length > 0) {
+        try {
+          const { analyzeProductsFromImages } = await import("@/services/productImageAnalyzer");
+          const results = await analyzeProductsFromImages(userMessage.images, userMessage.content);
+          
+          logger.log(`📸 ${results.length} producto(s) analizado(s) desde imagen(es)`);
+          
+          // Construir información de productos para incluir en el mensaje al bot
+          if (results.length > 0) {
+            const productsInfo = results.map(({ analysis, product }) => {
+              return `Producto detectado: ${analysis.brand} - ${analysis.name} (Contexto: ${analysis.context}). ${product ? 'Guardado en BD' : 'Error al guardar'}`;
+            }).join('\n');
+            
+            // Añadir información de productos al mensaje para que el bot la tenga en cuenta
+            userMessage.content = `${userMessage.content}\n\n[INFORMACIÓN DE PRODUCTOS DETECTADOS EN IMÁGENES]\n${productsInfo}`;
+          }
+        } catch (error) {
+          console.error("Error analizando productos desde imágenes:", error);
+          // Continuar sin bloquear el flujo
+        }
+      }
+
       // Extraer y guardar información relevante del mensaje
       extractRelevantDataFromMessage(userMessage.content)
         .then(async (extractedData) => {
