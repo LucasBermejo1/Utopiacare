@@ -25,34 +25,34 @@ interface OnboardingSurveyProps {
 }
 
 const SKIN_TYPES = [
-  { value: "dry", label: "Seca", icon: "💧" },
-  { value: "combination", label: "Mixta", icon: "⚖️" },
-  { value: "oily", label: "Grasa", icon: "✨" },
-  { value: "normal", label: "Normal", icon: "🌟" },
+  { value: "dry", label: "Seca" },
+  { value: "combination", label: "Mixta" },
+  { value: "oily", label: "Grasa" },
+  { value: "normal", label: "Normal" },
 ];
 
 const SKIN_SENSITIVITY = [
-  { value: "resistant", label: "Resistente (aguanta todo)", icon: "🛡️" },
-  { value: "sensitive", label: "Sensible / Reactiva", icon: "🌿" },
-  { value: "rosacea", label: "Con tendencia a rojeces (Rosácea/Cuperosis)", icon: "🌹" },
+  { value: "resistant", label: "Resistente (aguanta todo)" },
+  { value: "sensitive", label: "Sensible / Reactiva" },
+  { value: "rosacea", label: "Con tendencia a rojeces (Rosácea/Cuperosis)" },
 ];
 
 const CLIMATE_ZONES = [
-  { value: "dry", label: "Clima Seco", sublabel: "Madrid, Castilla", icon: "🏜️" },
-  { value: "humid", label: "Clima Húmedo / Costa", sublabel: "Barcelona, Valencia, Galicia", icon: "🌊" },
-  { value: "extreme", label: "Clima Extremo", sublabel: "Montaña o Canarias", icon: "⛰️" },
+  { value: "dry", label: "Clima Seco", sublabel: "Madrid, Castilla" },
+  { value: "humid", label: "Clima Húmedo / Costa", sublabel: "Barcelona, Valencia, Galicia" },
+  { value: "extreme", label: "Clima Extremo", sublabel: "Montaña o Canarias" },
 ];
 
 const SUN_EXPOSURE = [
-  { value: "low", label: "Baja", sublabel: "Trabajo en oficina, salgo poco", icon: "🏢" },
-  { value: "medium", label: "Media", sublabel: "Camino al trabajo, salgo a pasear", icon: "🚶" },
-  { value: "high", label: "Alta", sublabel: "Trabajo al aire libre o hago deporte exterior", icon: "☀️" },
+  { value: "low", label: "Baja", sublabel: "Trabajo en oficina, salgo poco" },
+  { value: "medium", label: "Media", sublabel: "Camino al trabajo, salgo a pasear" },
+  { value: "high", label: "Alta", sublabel: "Trabajo al aire libre o hago deporte exterior" },
 ];
 
 const ROUTINE_COMMITMENT = [
-  { value: "minimalist", label: "Minimalista", sublabel: "Limpieza, hidratación y sol (2-3 min)", icon: "🧴" },
-  { value: "intermediate", label: "Intermedio", sublabel: "Quiero añadir algún tratamiento específico (sérum) (5 min)", icon: "💆" },
-  { value: "advanced", label: "Avanzado", sublabel: "Me encanta el skincare y quiero todos los pasos necesarios (10+ min)", icon: "✨" },
+  { value: "minimalist", label: "Minimalista", sublabel: "Limpieza, hidratación y sol (2-3 min)" },
+  { value: "intermediate", label: "Intermedio", sublabel: "Quiero añadir algún tratamiento específico (sérum) (5 min)" },
+  { value: "advanced", label: "Avanzado", sublabel: "Me encanta el skincare y quiero todos los pasos necesarios (10+ min)" },
 ];
 
 const TOTAL_STEPS = 10;
@@ -172,7 +172,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
 
       if (error) throw error;
 
-      toast.success("¡Perfil guardado! Bienvenido a Utopia ✨");
+      toast.success("¡Perfil guardado! Bienvenido a Utopia");
       onComplete();
     } catch (error: any) {
       console.error("Error guardando perfil:", error);
@@ -282,10 +282,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
                     )}
                   >
                     <RadioGroupItem value={type.value} id={type.value} className="mt-0.5" />
-                    <div className="flex items-center gap-3 flex-1">
-                      <span className="text-2xl">{type.icon}</span>
-                      <span className="font-medium text-base">{type.label}</span>
-                    </div>
+                    <span className="font-medium text-base ml-3 flex-1">{type.label}</span>
                     {data.skinType === type.value && (
                       <CheckCircle2 className="h-5 w-5 text-accent absolute top-3 right-3" />
                     )}
@@ -323,10 +320,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
                     )}
                   >
                     <RadioGroupItem value={sensitivity.value} id={sensitivity.value} className="mt-0.5" />
-                    <div className="flex items-center gap-3 flex-1">
-                      <span className="text-2xl">{sensitivity.icon}</span>
-                      <span className="font-medium text-base">{sensitivity.label}</span>
-                    </div>
+                    <span className="font-medium text-base ml-3 flex-1">{sensitivity.label}</span>
                     {data.skinSensitivity === sensitivity.value && (
                       <CheckCircle2 className="h-5 w-5 text-accent absolute top-3 right-3" />
                     )}
@@ -411,8 +405,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
                     )}
                   >
                     <RadioGroupItem value={zone.value} id={zone.value} className="mt-1" />
-                    <div className="flex items-start gap-3 flex-1">
-                      <span className="text-2xl">{zone.icon}</span>
+                    <div className="flex items-start gap-3 flex-1 ml-3">
                       <div>
                         <div className="font-medium text-base">{zone.label}</div>
                         <div className="text-sm text-muted-foreground mt-0.5">{zone.sublabel}</div>
@@ -450,8 +443,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
                     )}
                   >
                     <RadioGroupItem value={exposure.value} id={exposure.value} className="mt-1" />
-                    <div className="flex items-start gap-3 flex-1">
-                      <span className="text-2xl">{exposure.icon}</span>
+                    <div className="flex items-start gap-3 flex-1 ml-3">
                       <div>
                         <div className="font-medium text-base">{exposure.label}</div>
                         <div className="text-sm text-muted-foreground mt-0.5">{exposure.sublabel}</div>
@@ -512,8 +504,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
                     )}
                   >
                     <RadioGroupItem value={routine.value} id={routine.value} className="mt-1" />
-                    <div className="flex items-start gap-3 flex-1">
-                      <span className="text-2xl">{routine.icon}</span>
+                    <div className="flex items-start gap-3 flex-1 ml-3">
                       <div>
                         <div className="font-medium text-base">{routine.label}</div>
                         <div className="text-sm text-muted-foreground mt-0.5">{routine.sublabel}</div>
