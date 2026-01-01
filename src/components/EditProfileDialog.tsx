@@ -21,35 +21,35 @@ import { MAIN_CONCERNS } from "@/config/constants";
 import { cn } from "@/lib/utils";
 
 const SKIN_TYPES = [
-  { value: "normal", label: "Normal", icon: "🌟" },
-  { value: "dry", label: "Seca", icon: "💧" },
-  { value: "oily", label: "Grasa", icon: "✨" },
-  { value: "combination", label: "Mixta", icon: "⚖️" },
-  { value: "sensitive", label: "Sensible", icon: "🌿" },
+  { value: "normal", label: "Normal" },
+  { value: "dry", label: "Seca" },
+  { value: "oily", label: "Grasa" },
+  { value: "combination", label: "Mixta" },
+  { value: "sensitive", label: "Sensible" },
 ];
 
 const SKIN_SENSITIVITY = [
-  { value: "resistant", label: "Resistente (aguanta todo)", icon: "🛡️" },
-  { value: "sensitive", label: "Sensible / Reactiva", icon: "🌿" },
-  { value: "rosacea", label: "Con tendencia a rojeces (Rosácea/Cuperosis)", icon: "🌹" },
+  { value: "resistant", label: "Resistente (aguanta todo)" },
+  { value: "sensitive", label: "Sensible / Reactiva" },
+  { value: "rosacea", label: "Con tendencia a rojeces (Rosácea/Cuperosis)" },
 ];
 
 const CLIMATE_ZONES = [
-  { value: "dry", label: "Clima Seco", sublabel: "Madrid, Castilla", icon: "🏜️" },
-  { value: "humid", label: "Clima Húmedo / Costa", sublabel: "Barcelona, Valencia, Galicia", icon: "🌊" },
-  { value: "extreme", label: "Clima Extremo", sublabel: "Montaña o Canarias", icon: "⛰️" },
+  { value: "dry", label: "Clima Seco", sublabel: "Madrid, Castilla" },
+  { value: "humid", label: "Clima Húmedo / Costa", sublabel: "Barcelona, Valencia, Galicia" },
+  { value: "extreme", label: "Clima Extremo", sublabel: "Montaña o Canarias" },
 ];
 
 const SUN_EXPOSURE = [
-  { value: "low", label: "Baja", sublabel: "Trabajo en oficina, salgo poco", icon: "🏢" },
-  { value: "medium", label: "Media", sublabel: "Camino al trabajo, salgo a pasear", icon: "🚶" },
-  { value: "high", label: "Alta", sublabel: "Trabajo al aire libre o hago deporte exterior", icon: "☀️" },
+  { value: "low", label: "Baja", sublabel: "Trabajo en oficina, salgo poco" },
+  { value: "medium", label: "Media", sublabel: "Camino al trabajo, salgo a pasear" },
+  { value: "high", label: "Alta", sublabel: "Trabajo al aire libre o hago deporte exterior" },
 ];
 
 const ROUTINE_COMMITMENT = [
-  { value: "minimalist", label: "Minimalista", sublabel: "Limpieza, hidratación y sol (2-3 min)", icon: "🧴" },
-  { value: "intermediate", label: "Intermedio", sublabel: "Quiero añadir algún tratamiento específico (sérum) (5 min)", icon: "💆" },
-  { value: "advanced", label: "Avanzado", sublabel: "Me encanta el skincare y quiero todos los pasos necesarios (10+ min)", icon: "✨" },
+  { value: "minimalist", label: "Minimalista", sublabel: "Limpieza, hidratación y sol (2-3 min)" },
+  { value: "intermediate", label: "Intermedio", sublabel: "Quiero añadir algún tratamiento específico (sérum) (5 min)" },
+  { value: "advanced", label: "Avanzado", sublabel: "Me encanta el skincare y quiero todos los pasos necesarios (10+ min)" },
 ];
 
 interface EditProfileDialogProps {
@@ -67,6 +67,8 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
   const [loadingProfile, setLoadingProfile] = useState(false);
   
   // Estados para todos los campos
+  const [name, setName] = useState<string>("");
+  const [age, setAge] = useState<number | null>(null);
   const [skinType, setSkinType] = useState<string>("normal");
   const [skinSensitivity, setSkinSensitivity] = useState<string>("");
   const [concerns, setConcerns] = useState<string[]>([]);
@@ -93,6 +95,8 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
     try {
       const profile = await getUserProfile(user.id);
       if (profile) {
+        setName(profile.name || "");
+        setAge(profile.age || null);
         setSkinType(profile.skin_type || "normal");
         setSkinSensitivity(profile.skin_sensitivity || "");
         setConcerns(profile.concerns || []);
@@ -139,6 +143,8 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
     setLoading(true);
     try {
       await updateUserProfile(user.id, {
+        name: name.trim() || null,
+        age: age || null,
         skin_type: skinType as any,
         skin_sensitivity: skinSensitivity || null,
         concerns: concerns,
@@ -152,7 +158,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
         onboarding_completed: true,
       });
 
-      toast.success("¡Perfil actualizado correctamente! ✨");
+      toast.success("¡Perfil actualizado correctamente!");
       setOpen(false);
     } catch (error) {
       console.error("Error actualizando perfil:", error);
@@ -195,6 +201,46 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
             </div>
           ) : (
             <div className="space-y-8 py-4">
+              {/* Nombre */}
+              <div className="space-y-4">
+                <Label htmlFor="name" className="text-lg font-semibold">
+                  Nombre
+                </Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Tu nombre"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="text-base"
+                  maxLength={50}
+                />
+              </div>
+
+              {/* Edad */}
+              <div className="space-y-4">
+                <Label htmlFor="age" className="text-lg font-semibold">
+                  Edad
+                </Label>
+                <Input
+                  id="age"
+                  type="number"
+                  placeholder="Tu edad"
+                  value={age || ""}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    if (!isNaN(value) && value > 0 && value <= 120) {
+                      setAge(value);
+                    } else if (e.target.value === "") {
+                      setAge(null);
+                    }
+                  }}
+                  className="text-base"
+                  min={1}
+                  max={120}
+                />
+              </div>
+
               {/* Tipo de piel */}
               <div className="space-y-4">
                 <Label className="text-lg font-semibold">
@@ -213,8 +259,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
                         )}
                       >
                         <RadioGroupItem value={type.value} id={type.value} />
-                        <span className="text-xl">{type.icon}</span>
-                        <Label htmlFor={type.value} className="cursor-pointer flex-1 font-normal">
+                        <Label htmlFor={type.value} className="cursor-pointer flex-1 font-normal ml-3">
                           {type.label}
                         </Label>
                       </label>
@@ -241,8 +286,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
                         )}
                       >
                         <RadioGroupItem value={sensitivity.value} id={sensitivity.value} />
-                        <span className="text-xl">{sensitivity.icon}</span>
-                        <Label htmlFor={sensitivity.value} className="cursor-pointer flex-1 font-normal">
+                        <Label htmlFor={sensitivity.value} className="cursor-pointer flex-1 font-normal ml-3">
                           {sensitivity.label}
                         </Label>
                       </label>
@@ -310,8 +354,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
                         )}
                       >
                         <RadioGroupItem value={zone.value} id={zone.value} className="mt-1" />
-                        <span className="text-xl">{zone.icon}</span>
-                        <div className="flex-1">
+                        <div className="flex-1 ml-3">
                           <Label htmlFor={zone.value} className="cursor-pointer font-normal">
                             {zone.label}
                           </Label>
@@ -341,8 +384,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
                         )}
                       >
                         <RadioGroupItem value={exposure.value} id={exposure.value} className="mt-1" />
-                        <span className="text-xl">{exposure.icon}</span>
-                        <div className="flex-1">
+                        <div className="flex-1 ml-3">
                           <Label htmlFor={exposure.value} className="cursor-pointer font-normal">
                             {exposure.label}
                           </Label>
@@ -390,8 +432,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
                         )}
                       >
                         <RadioGroupItem value={routine.value} id={routine.value} className="mt-1" />
-                        <span className="text-xl">{routine.icon}</span>
-                        <div className="flex-1">
+                        <div className="flex-1 ml-3">
                           <Label htmlFor={routine.value} className="cursor-pointer font-normal">
                             {routine.label}
                           </Label>
