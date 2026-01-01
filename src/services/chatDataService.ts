@@ -63,6 +63,8 @@ export async function extractRelevantDataFromMessage(
   removedProblematicIngredients?: string[];
   preferences?: Record<string, any>;
   // Información del perfil
+  name?: string;
+  age?: number;
   skinType?: "normal" | "dry" | "oily" | "combination" | "sensitive";
   skinSensitivity?: "resistant" | "sensitive" | "rosacea";
   climateZone?: "dry" | "humid" | "extreme";
@@ -103,6 +105,7 @@ Extrae SOLO la siguiente información en formato JSON (si existe):
     "tipo": "tipo de producto"
   },
   "name": "nombre del usuario" | null,
+  "age": número (edad) | null,
   "skinType": "normal" | "dry" | "oily" | "combination" | "sensitive" | null,
   "skinSensitivity": "resistant" | "sensitive" | "rosacea" | null,
   "climateZone": "dry" | "humid" | "extreme" | null,
@@ -128,6 +131,7 @@ IMPORTANTE:
 - Si menciona que DUERME MENOS DE 7H, inclúyelo en "lifestyleSleepLessThan7h" (true)
 - Si menciona MEDICAMENTOS que toma, inclúyelos en "lifestyleMedications"
 - Si el usuario menciona su NOMBRE (ej: "me llamo X", "soy X", "mi nombre es X"), inclúyelo en "name"
+- Si el usuario menciona su EDAD (ej: "tengo X años", "soy de X años", "tengo X"), inclúyela en "age" como número
 - Solo incluye información explícitamente mencionada
 - Si no hay información de un campo, omítelo o usa null (no pongas arrays vacíos ni valores falsos)
 - Responde SOLO con el JSON, sin texto adicional
@@ -369,6 +373,7 @@ export async function updateUserProfileFromChat(
   userId: string,
   extractedData: {
     name?: string;
+    age?: number;
     skinType?: "normal" | "dry" | "oily" | "combination" | "sensitive";
     skinSensitivity?: "resistant" | "sensitive" | "rosacea";
     concerns?: string[];
@@ -401,6 +406,11 @@ export async function updateUserProfileFromChat(
     // Actualizar nombre si se menciona
     if (extractedData.name) {
       updates.name = extractedData.name.trim();
+    }
+
+    // Actualizar edad si se menciona
+    if (extractedData.age) {
+      updates.age = extractedData.age;
     }
 
     // Actualizar tipo de piel si se menciona

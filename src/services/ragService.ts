@@ -701,10 +701,17 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
   if (context.userProfile) {
     prompt += "\n\n=== PERFIL COMPLETO DEL USUARIO ===\n\n";
     
-    // Nombre del usuario
+    // Nombre y edad del usuario
     if (context.userProfile.name) {
       prompt += `NOMBRE DEL USUARIO: ${context.userProfile.name}\n`;
-      prompt += "⚠️ IMPORTANTE: Usa el nombre del usuario al dirigirte a él/ella en tus respuestas. Sé amigable y personal.\n\n";
+      prompt += "⚠️ IMPORTANTE: Usa el nombre del usuario al dirigirte a él/ella en tus respuestas. Sé amigable y personal.\n";
+    }
+    if (context.userProfile.age) {
+      prompt += `EDAD DEL USUARIO: ${context.userProfile.age} años\n`;
+      prompt += "⚠️ IMPORTANTE: Ten en cuenta la edad del usuario para personalizar las recomendaciones. Las necesidades de la piel cambian con la edad (hidratación, anti-edad, etc.).\n";
+    }
+    if (context.userProfile.name || context.userProfile.age) {
+      prompt += "\n";
     }
     
     // Información básica de la piel

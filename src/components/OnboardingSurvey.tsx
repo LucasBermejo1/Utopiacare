@@ -55,10 +55,11 @@ const ROUTINE_COMMITMENT = [
   { value: "advanced", label: "Avanzado", sublabel: "Me encanta el skincare y quiero todos los pasos necesarios (10+ min)", icon: "✨" },
 ];
 
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 10;
 
 const STEP_TITLES = [
   "Tu nombre",
+  "Tu edad",
   "Tipo de piel",
   "Sensibilidad",
   "Preocupaciones",
@@ -111,20 +112,22 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
       case 1:
         return !!data.name && data.name.trim().length > 0;
       case 2:
-        return !!data.skinType;
+        return !!data.age && data.age > 0 && data.age <= 120;
       case 3:
-        return !!data.skinSensitivity;
+        return !!data.skinType;
       case 4:
-        return (data.mainConcerns?.length || 0) > 0 && (data.mainConcerns?.length || 0) <= 2;
+        return !!data.skinSensitivity;
       case 5:
-        return !!data.climateZone;
+        return (data.mainConcerns?.length || 0) > 0 && (data.mainConcerns?.length || 0) <= 2;
       case 6:
-        return !!data.sunExposure;
+        return !!data.climateZone;
       case 7:
-        return true; // Opcional
+        return !!data.sunExposure;
       case 8:
-        return !!data.routineCommitment;
+        return true; // Opcional
       case 9:
+        return !!data.routineCommitment;
+      case 10:
         return true; // Opcional
       default:
         return false;
@@ -152,6 +155,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
       const { error } = await supabase.from("user_profiles").upsert({
         user_id: user.id,
         name: data.name || null,
+        age: data.age || null,
         skin_type: data.skinType,
         skin_sensitivity: data.skinSensitivity,
         concerns: data.mainConcerns || [],
@@ -221,6 +225,36 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           <div className="space-y-6">
             <div>
               <Label className="text-xl font-semibold text-foreground">
+                ¿Cuántos años tienes? *
+              </Label>
+              <p className="text-sm text-muted-foreground mt-2">
+                Tu edad es importante para personalizar las recomendaciones según las necesidades de tu piel.
+              </p>
+            </div>
+            <Input
+              type="number"
+              placeholder="Escribe tu edad"
+              value={data.age || ""}
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                if (!isNaN(value) && value > 0 && value <= 120) {
+                  updateData("age", value);
+                } else if (e.target.value === "") {
+                  updateData("age", undefined);
+                }
+              }}
+              className="text-lg py-6"
+              min={1}
+              max={120}
+            />
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-6">
+            <div>
+              <Label className="text-xl font-semibold text-foreground">
                 ¿Cuál es tu tipo de piel predominante? *
               </Label>
               <p className="text-sm text-muted-foreground mt-2">
@@ -262,7 +296,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           </div>
         );
 
-      case 3:
+      case 4:
         return (
           <div className="space-y-6">
             <div>
@@ -303,7 +337,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           </div>
         );
 
-      case 4:
+      case 5:
         return (
           <div className="space-y-6">
             <div>
@@ -350,7 +384,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           </div>
         );
 
-      case 5:
+      case 6:
         return (
           <div className="space-y-6">
             <div>
@@ -394,7 +428,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           </div>
         );
 
-      case 6:
+      case 7:
         return (
           <div className="space-y-6">
             <Label className="text-xl font-semibold text-foreground">
@@ -433,7 +467,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           </div>
         );
 
-      case 7:
+      case 8:
         return (
           <div className="space-y-6">
             <div>
@@ -456,7 +490,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           </div>
         );
 
-      case 8:
+      case 9:
         return (
           <div className="space-y-6">
             <Label className="text-xl font-semibold text-foreground">
@@ -495,7 +529,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           </div>
         );
 
-      case 9:
+      case 10:
         return (
           <div className="space-y-6">
             <Label className="text-xl font-semibold text-foreground">Estilo de vida</Label>
