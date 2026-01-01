@@ -369,10 +369,10 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
         <Button 
           variant={BETA_MODE ? "default" : "ghost"} 
           size={BETA_MODE ? "sm" : "sm"}
-          className={BETA_MODE ? "gap-2 bg-[hsl(var(--terracotta))]/90 hover:bg-[hsl(var(--terracotta))] text-white font-medium text-sm px-4 py-2 transition-colors" : "gap-2"}
+          className={BETA_MODE ? "gap-2 bg-[hsl(var(--terracotta))]/90 hover:bg-[hsl(var(--terracotta))] text-white font-medium text-xs px-4 py-2 transition-colors" : "gap-2"}
         >
           <User className="w-4 h-4" />
-          {BETA_MODE && <span>Iniciar sesión</span>}
+          {BETA_MODE && <span>Iniciar sesión / Crear cuenta</span>}
         </Button>
       </DialogTrigger>
       <DialogContent>
