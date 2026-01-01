@@ -42,6 +42,31 @@ export interface UserProfile {
     technicalLevel?: "simple" | "medio" | "avanzado";
   } | null;
   
+  // Rutina actual del usuario
+  routine?: {
+    morning?: {
+      products?: Array<{
+        name: string;
+        brand?: string;
+        category?: string;
+        step?: number;
+      }>;
+      steps?: string[];
+    };
+    evening?: {
+      products?: Array<{
+        name: string;
+        brand?: string;
+        category?: string;
+        step?: number;
+      }>;
+      steps?: string[];
+    };
+    frequency?: string;
+    notes?: string;
+    lastUpdated?: string;
+  } | null;
+  
   // Estado
   onboarding_completed: boolean;
   created_at?: string;
