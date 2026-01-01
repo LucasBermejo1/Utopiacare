@@ -444,36 +444,9 @@ export function ChatBot() {
 
       // Conectar con ChatGPT
       try {
-        // Asegurarse de que tenemos el historial completo antes de enviar
-        // Si el historial aún se está cargando, esperar un momento
-        if (isLoadingHistory) {
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-        
-        // Obtener historial completo desde la BD para asegurar que tenemos todo
-        let fullHistory: Message[] = [...messages];
-        if (user) {
-          try {
-            const { getChatHistory } = await import("@/services/chatDataService");
-            const dbHistory = await getChatHistory(user.id, 50);
-            const dbMessages: Message[] = dbHistory.map(msg => ({
-              id: msg.messageId,
-              role: msg.role,
-              content: msg.content,
-              timestamp: msg.timestamp,
-            }));
-            
-            // Combinar historial de BD con mensajes actuales (evitando duplicados)
-            const existingIds = new Set(fullHistory.map(m => m.id));
-            const newMessages = dbMessages.filter(m => !existingIds.has(m.id));
-            fullHistory = [...fullHistory, ...newMessages].sort((a, b) => 
-              a.timestamp.getTime() - b.timestamp.getTime()
-            );
-          } catch (error) {
-            console.error("Error obteniendo historial completo:", error);
-            // Continuar con el historial del estado si falla
-          }
-        }
+        // Usar solo los mensajes actuales de la sesión (no cargar historial previo)
+        // Los datos del usuario siguen guardados en la BD pero no se muestran visualmente
+        const fullHistory: Message[] = [...messages];
         
         // Convertir historial de mensajes al formato de ChatGPT
         const conversationHistory = convertMessagesToChatGPTFormat(

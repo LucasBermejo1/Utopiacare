@@ -1,6 +1,7 @@
 /**
  * Servicio para analizar productos de belleza desde imágenes
  * Extrae información del producto y detecta el contexto de uso
+ * Optimizado para mejor rendimiento y precisión
  */
 
 import { logger } from "@/utils/logger";
@@ -19,10 +20,105 @@ interface ProductAnalysis {
   detectedFromImage: boolean;
 }
 
+// Constantes para configuración
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
+const MAX_TOKENS_ANALYSIS = 800;
+const TEMPERATURE_ANALYSIS = 0.2; // Más bajo para mayor precisión en extracción estructurada
+
+/**
+ * Valida que los datos extraídos del análisis sean válidos
+ */
+function validateAnalysis(analysis: any): ProductAnalysis | null {
+  if (!analysis || typeof analysis !== "object") {
+    return null;
+  }
+
+  // Validar campos requeridos
+  if (!analysis.brand || typeof analysis.brand !== "string" || analysis.brand.trim().length === 0) {
+    logger.log("⚠️ Análisis inválido: falta marca");
+    return null;
+  }
+
+  if (!analysis.name || typeof analysis.name !== "string" || analysis.name.trim().length === 0) {
+    logger.log("⚠️ Análisis inválido: falta nombre");
+    return null;
+  }
+
+  // Validar contexto
+  const validContexts = ["using", "consulting", "considering", "reviewing", "unknown"];
+  if (!analysis.context || !validContexts.includes(analysis.context)) {
+    analysis.context = "unknown";
+  }
+
+  // Validar confidence
+  if (typeof analysis.confidence !== "number" || analysis.confidence < 0 || analysis.confidence > 1) {
+    analysis.confidence = 0.5;
+  }
+
+  // Normalizar arrays
+  if (analysis.ingredients && !Array.isArray(analysis.ingredients)) {
+    analysis.ingredients = [];
+  }
+  if (analysis.categories && !Array.isArray(analysis.categories)) {
+    analysis.categories = [];
+  }
+  if (analysis.attributes && !Array.isArray(analysis.attributes)) {
+    analysis.attributes = [];
+  }
+  if (analysis.concerns && !Array.isArray(analysis.concerns)) {
+    analysis.concerns = [];
+  }
+
+  // Limpiar strings (trim, capitalizar)
+  analysis.brand = analysis.brand.trim();
+  analysis.name = analysis.name.trim();
+
+  return analysis as ProductAnalysis;
+}
+
+/**
+ * Retry logic con backoff exponencial
+ */
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = MAX_RETRIES,
+  delay: number = RETRY_DELAY_MS
+): Promise<T> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      
+      // No reintentar si es un error de validación (4xx excepto rate limit)
+      if (error instanceof Error) {
+        const isRateLimit = error.message.includes("429") || error.message.includes("rate limit");
+        const isClientError = error.message.includes("400") || error.message.includes("401") || error.message.includes("403");
+        
+        if (isClientError && !isRateLimit) {
+          throw error; // No reintentar errores de cliente (excepto rate limit)
+        }
+      }
+
+      if (attempt < maxRetries - 1) {
+        const waitTime = delay * Math.pow(2, attempt); // Backoff exponencial
+        logger.log(`⚠️ Intento ${attempt + 1}/${maxRetries} falló. Reintentando en ${waitTime}ms...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
+    }
+  }
+
+  throw lastError || new Error("Error después de múltiples intentos");
+}
+
 /**
  * Analiza una imagen de producto usando ChatGPT Vision
  * Extrae información del producto y detecta el contexto de uso
  * Considera el historial de conversación para determinar mejor el contexto
+ * Optimizado con retry logic y validación robusta
  */
 export async function analyzeProductFromImage(
   imageBase64: string,
@@ -35,44 +131,49 @@ export async function analyzeProductFromImage(
     throw new Error("VITE_CHATGPT_API_KEY no está configurada");
   }
 
-  try {
-    // Construir contexto del historial de conversación si está disponible
-    let historyContext = "";
-    if (conversationHistory && conversationHistory.length > 0) {
-      // Incluir los últimos 5 mensajes del historial para tener contexto
-      const recentHistory = conversationHistory.slice(-5);
-      historyContext = `\n\nHISTORIAL DE CONVERSACIÓN RECIENTE (para contexto):\n${recentHistory.map((msg, idx) => `${msg.role === "user" ? "Usuario" : "Asistente"}: ${msg.content}`).join("\n\n")}`;
-    }
+  // Validar que la imagen sea válida (base64)
+  if (!imageBase64 || !imageBase64.startsWith("data:image/")) {
+    throw new Error("Imagen inválida: debe ser un data URL de imagen");
+  }
 
-    const prompt = `Analiza esta imagen de un producto de belleza/cuidado de la piel y extrae la siguiente información en formato JSON:
+  return retryWithBackoff(async () => {
+    try {
+      // Construir contexto del historial de conversación si está disponible
+      // Optimizado: solo incluir mensajes relevantes y limitar longitud
+      let historyContext = "";
+      if (conversationHistory && conversationHistory.length > 0) {
+        const recentHistory = conversationHistory.slice(-5);
+        // Truncar mensajes largos para reducir tokens
+        const truncatedHistory = recentHistory.map(msg => ({
+          role: msg.role === "user" ? "Usuario" : "Asistente",
+          content: msg.content.length > 200 ? msg.content.substring(0, 200) + "..." : msg.content
+        }));
+        historyContext = `\n\nHISTORIAL RECIENTE (para contexto):\n${truncatedHistory.map(msg => `${msg.role}: ${msg.content}`).join("\n\n")}`;
+      }
+
+      // Prompt optimizado: más conciso pero manteniendo precisión
+      const prompt = `Analiza esta imagen de producto de belleza y extrae información en JSON:
 
 {
-  "brand": "nombre de la marca",
-  "name": "nombre completo del producto",
-  "ingredients": ["ingrediente1", "ingrediente2", ...] (si están visibles en la imagen),
-  "categories": ["categoría1", "categoría2", ...] (ej: "serum", "cleanser", "moisturizer", "sunscreen", etc.),
-  "attributes": ["atributo1", "atributo2", ...] (ej: "anti-aging", "hydrating", "for sensitive skin", etc.),
-  "concerns": ["preocupación1", "preocupación2", ...] (ej: "acne", "wrinkles", "dark spots", etc.),
+  "brand": "marca",
+  "name": "nombre completo",
+  "ingredients": ["ingrediente1", ...] (solo si visibles),
+  "categories": ["serum", "cleanser", "moisturizer", ...],
+  "attributes": ["anti-aging", "hydrating", ...],
+  "concerns": ["acne", "wrinkles", ...],
   "context": "using" | "consulting" | "considering" | "reviewing" | "unknown",
   "confidence": 0.0-1.0
 }
 
-IMPORTANTE sobre el CONTEXTO:
-- "using": El usuario está usando actualmente este producto (ej: "estoy usando esto", "llevo tiempo con este", "mi producto actual", "lo uso desde hace X", "mi rutina incluye esto")
-- "consulting": El usuario solo está consultando información sobre el producto (ej: "qué opinas de este", "es bueno este", "qué te parece", "qué sabes de este")
-- "considering": El usuario está considerando comprarlo/usarlo (ej: "estoy pensando en comprar", "me lo han recomendado", "debería usarlo", "quiero probarlo")
-- "reviewing": El usuario está dando su opinión o reseña sobre el producto (ej: "no me funciona", "me encanta", "me ha dado alergia", "no me gusta", "es genial")
-- "unknown": No se puede determinar el contexto
+CONTEXTO:
+- "using": Usa frases como "estoy usando", "llevo tiempo", "mi producto actual", "lo uso desde"
+- "consulting": Pregunta sobre el producto: "qué opinas", "es bueno", "qué te parece"
+- "considering": Menciona intención: "pensando en comprar", "me lo recomendaron", "debería usarlo"
+- "reviewing": Da opinión: "no me funciona", "me encanta", "me da alergia"
+- "unknown": No se determina
 
-Para determinar el CONTEXTO, analiza:
-1. El mensaje actual del usuario (si está disponible)
-2. El historial de conversación reciente (mensajes anteriores pueden indicar si ya lo está usando o mencionó algo relacionado)
-3. Busca indicadores clave en el lenguaje usado en mensajes anteriores y posteriores
-
-Si el usuario mencionó en mensajes anteriores que está usando un producto o tiene una rutina establecida, es más probable que esté "using" el producto.
-Si solo pregunta sin mencionar uso previo, probablemente está "consulting" o "considering".
-
-Responde SOLO con el JSON, sin texto adicional.`;
+Analiza mensaje actual + historial reciente para contexto.
+Responde SOLO JSON, sin texto adicional.`;
 
     const userContent = [
       {
@@ -101,8 +202,9 @@ Responde SOLO con el JSON, sin texto adicional.`;
             content: userContent
           }
         ],
-        temperature: 0.3,
-        max_tokens: 1000,
+        temperature: TEMPERATURE_ANALYSIS,
+        max_tokens: MAX_TOKENS_ANALYSIS,
+        response_format: { type: "json_object" }, // Forzar formato JSON cuando sea posible
       }),
     });
 
@@ -111,101 +213,195 @@ Responde SOLO con el JSON, sin texto adicional.`;
       throw new Error(errorData.error?.message || `Error de API: ${response.status}`);
     }
 
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content;
 
-    if (!content) {
-      throw new Error("No se recibió una respuesta válida");
+      if (!content) {
+        throw new Error("No se recibió una respuesta válida de la API");
+      }
+
+      // Extraer JSON de la respuesta (puede venir con markdown o texto adicional)
+      let jsonText = content;
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        jsonText = jsonMatch[0];
+      }
+
+      let analysis: any;
+      try {
+        analysis = JSON.parse(jsonText);
+      } catch (parseError) {
+        logger.log("⚠️ Error parseando JSON:", parseError);
+        throw new Error("Respuesta de la API no es JSON válido");
+      }
+
+      // Validar y normalizar los datos extraídos
+      const validatedAnalysis = validateAnalysis(analysis);
+      if (!validatedAnalysis) {
+        throw new Error("Datos extraídos no son válidos (falta marca o nombre)");
+      }
+
+      validatedAnalysis.detectedFromImage = true;
+
+      logger.log("✅ Producto analizado:", {
+        brand: validatedAnalysis.brand,
+        name: validatedAnalysis.name,
+        context: validatedAnalysis.context,
+        confidence: validatedAnalysis.confidence
+      });
+
+      return validatedAnalysis;
+    } catch (error) {
+      logger.log("❌ Error en análisis de producto:", error);
+      throw error;
     }
+  });
+}
 
-    // Extraer JSON de la respuesta (puede venir con markdown o texto adicional)
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error("No se pudo extraer JSON de la respuesta");
-    }
-
-    const analysis = JSON.parse(jsonMatch[0]) as ProductAnalysis;
-    analysis.detectedFromImage = true;
-
-    logger.log("📸 Producto analizado desde imagen:", analysis);
-
-    return analysis;
-  } catch (error) {
-    console.error("Error analizando producto desde imagen:", error);
-    throw error;
-  }
+/**
+ * Genera un ID único para un producto basado en marca y nombre
+ */
+function generateProductId(brand: string, name: string): string {
+  const cleanBrand = brand.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  const cleanName = name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  return `${cleanBrand}-${cleanName}`;
 }
 
 /**
  * Guarda un producto en la base de datos si no existe
  * Retorna el producto guardado o existente
+ * Optimizado con mejor manejo de errores y validación
  */
 export async function saveProductIfNotExists(
   analysis: ProductAnalysis
 ): Promise<Product | null> {
   try {
+    // Validar que tengamos marca y nombre
+    if (!analysis.brand?.trim() || !analysis.name?.trim()) {
+      logger.log("⚠️ No se puede guardar producto: falta marca o nombre");
+      return null;
+    }
+
     // Generar ID único basado en marca y nombre
-    const productId = `${analysis.brand.toLowerCase().replace(/\s+/g, '-')}-${analysis.name.toLowerCase().replace(/\s+/g, '-')}`.replace(/[^a-z0-9-]/g, '');
+    const productId = generateProductId(analysis.brand, analysis.name);
+
+    if (!productId || productId.length < 3) {
+      logger.log("⚠️ ID de producto inválido generado");
+      return null;
+    }
 
     // Verificar si el producto ya existe
     const { fetchProductByIdFromSupabase } = await import("./supabaseProducts");
     const existingProduct = await fetchProductByIdFromSupabase(productId);
 
     if (existingProduct) {
-      logger.log("✅ Producto ya existe en la BD:", productId);
+      logger.log("✅ Producto ya existe en BD:", productId);
       return existingProduct;
     }
 
-    // Crear nuevo producto
+    // Crear nuevo producto con datos validados
     const newProduct = {
       id: productId,
-      brand: analysis.brand,
-      name: analysis.name,
+      brand: analysis.brand.trim(),
+      name: analysis.name.trim(),
       image: "", // La imagen original está en base64, se puede subir después si es necesario
-      categories: analysis.categories || [],
-      attributes: analysis.attributes || [],
-      concerns: analysis.concerns || [],
-      ingredients: analysis.ingredients || [],
+      categories: (analysis.categories || []).filter(c => c && c.trim().length > 0),
+      attributes: (analysis.attributes || []).filter(a => a && a.trim().length > 0),
+      concerns: (analysis.concerns || []).filter(c => c && c.trim().length > 0),
+      ingredients: (analysis.ingredients || []).filter(i => i && i.trim().length > 0),
     };
 
     const savedProduct = await insertProductToSupabase(newProduct);
-    logger.log("✅ Producto guardado en la BD:", savedProduct.id);
+    logger.log("✅ Producto guardado en BD:", {
+      id: savedProduct.id,
+      brand: savedProduct.brand,
+      name: savedProduct.name
+    });
 
     return savedProduct;
   } catch (error) {
-    console.error("Error guardando producto:", error);
-    // No lanzar error, solo loguear
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.log("❌ Error guardando producto:", errorMessage);
+    
+    // No lanzar error para no bloquear el flujo principal
+    // El producto puede ser analizado pero no guardado, lo cual es aceptable
     return null;
   }
 }
 
 /**
  * Analiza múltiples imágenes y extrae información de productos
+ * Optimizado para procesar imágenes en paralelo con mejor manejo de errores
  */
 export async function analyzeProductsFromImages(
   images: string[],
   userMessage?: string,
   conversationHistory?: Array<{ role: "user" | "assistant"; content: string }>
 ): Promise<Array<{ analysis: ProductAnalysis; product: Product | null }>> {
-  const results = await Promise.allSettled(
-    images.map(img => analyzeProductFromImage(img, userMessage, conversationHistory))
-  );
-
-  const analyses: ProductAnalysis[] = [];
-  for (const result of results) {
-    if (result.status === "fulfilled" && result.value) {
-      analyses.push(result.value);
-    }
+  if (!images || images.length === 0) {
+    return [];
   }
 
-  // Guardar productos en la BD
-  const products = await Promise.all(
+  logger.log(`📸 Analizando ${images.length} imagen(es) de producto(s)...`);
+
+  // Procesar todas las imágenes en paralelo
+  // Usar Promise.allSettled para que un fallo no afecte a las demás
+  const analysisResults = await Promise.allSettled(
+    images.map((img, index) => {
+      logger.log(`Analizando imagen ${index + 1}/${images.length}...`);
+      return analyzeProductFromImage(img, userMessage, conversationHistory);
+    })
+  );
+
+  // Extraer análisis exitosos
+  const analyses: ProductAnalysis[] = [];
+  const failedAnalyses: number[] = [];
+
+  analysisResults.forEach((result, index) => {
+    if (result.status === "fulfilled" && result.value) {
+      analyses.push(result.value);
+    } else {
+      failedAnalyses.push(index + 1);
+      const error = result.status === "rejected" ? result.reason : "Error desconocido";
+      logger.log(`⚠️ Error analizando imagen ${index + 1}:`, error);
+    }
+  });
+
+  if (failedAnalyses.length > 0) {
+    logger.log(`⚠️ ${failedAnalyses.length} imagen(es) fallaron al analizar:`, failedAnalyses);
+  }
+
+  if (analyses.length === 0) {
+    logger.log("❌ No se pudo analizar ninguna imagen");
+    return [];
+  }
+
+  logger.log(`✅ ${analyses.length}/${images.length} producto(s) analizado(s) exitosamente`);
+
+  // Guardar productos en la BD en paralelo
+  // Usar Promise.allSettled para que un fallo no afecte a los demás
+  const saveResults = await Promise.allSettled(
     analyses.map(analysis => saveProductIfNotExists(analysis))
   );
 
-  return analyses.map((analysis, index) => ({
+  const products = saveResults.map((result, index) => {
+    if (result.status === "fulfilled") {
+      return result.value;
+    } else {
+      logger.log(`⚠️ Error guardando producto ${index + 1}:`, result.reason);
+      return null;
+    }
+  });
+
+  // Combinar análisis con productos guardados
+  const results = analyses.map((analysis, index) => ({
     analysis,
     product: products[index] || null
   }));
+
+  const savedCount = products.filter(p => p !== null).length;
+  logger.log(`✅ ${savedCount}/${analyses.length} producto(s) guardado(s) en BD`);
+
+  return results;
 }
 
