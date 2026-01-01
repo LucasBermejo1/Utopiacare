@@ -119,12 +119,14 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
   const handleConcernToggle = (concern: string) => {
     setConcerns((prev) => {
       if (prev.includes(concern)) {
+        // Si está seleccionado, lo deseleccionamos
         return prev.filter((c) => c !== concern);
       }
+      // Si ya hay 2 seleccionadas, reemplazamos la primera por la nueva
       if (prev.length >= 2) {
-        toast.error("Solo puedes seleccionar máximo 2 preocupaciones");
-        return prev;
+        return [prev[1], concern];
       }
+      // Si hay menos de 2, añadimos la nueva
       return [...prev, concern];
     });
   };
@@ -298,7 +300,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
               {/* Preocupaciones */}
               <div className="space-y-4">
                 <Label className="text-lg font-semibold">
-                  Preocupaciones principales (máximo 2)
+                  Preocupaciones principales (selecciona hasta 2)
                 </Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {MAIN_CONCERNS.map((concern) => {

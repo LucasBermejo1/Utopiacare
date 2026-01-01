@@ -97,12 +97,14 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
     setData((prev) => {
       const current = prev.mainConcerns || [];
       if (current.includes(concern)) {
+        // Si está seleccionado, lo deseleccionamos
         return { ...prev, mainConcerns: current.filter((c) => c !== concern) };
       }
+      // Si ya hay 2 seleccionadas, reemplazamos la primera por la nueva
       if (current.length >= 2) {
-        toast.error("Solo puedes seleccionar máximo 2 preocupaciones");
-        return prev;
+        return { ...prev, mainConcerns: [current[1], concern] };
       }
+      // Si hay menos de 2, añadimos la nueva
       return { ...prev, mainConcerns: [...current, concern] };
     });
   };
@@ -118,7 +120,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
       case 4:
         return !!data.skinSensitivity;
       case 5:
-        return (data.mainConcerns?.length || 0) > 0 && (data.mainConcerns?.length || 0) <= 2;
+        return (data.mainConcerns?.length || 0) === 2;
       case 6:
         return !!data.climateZone;
       case 7:
@@ -336,7 +338,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           <div className="space-y-6">
             <div>
               <Label className="text-xl font-semibold text-foreground">
-                ¿Cuál es tu preocupación principal hoy? (Elige máximo 2) *
+                ¿Cuáles son tus dos preocupaciones principales? (Selecciona exactamente 2) *
               </Label>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
