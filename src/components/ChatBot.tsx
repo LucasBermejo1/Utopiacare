@@ -621,16 +621,6 @@ export function ChatBot() {
 
           {/* Mensajes */}
           <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 bg-gradient-to-b from-background to-[hsl(var(--terracotta))]/5">
-            {isLoadingHistory && (
-              <div className="flex items-center justify-center py-8">
-                <div className="flex gap-2 items-center text-muted-foreground">
-                  <div className="h-2 w-2 bg-[hsl(var(--terracotta))] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <div className="h-2 w-2 bg-[hsl(var(--terracotta))] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <div className="h-2 w-2 bg-[hsl(var(--terracotta))] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                  <span className="ml-2 text-sm">Cargando historial...</span>
-                </div>
-              </div>
-            )}
             <div className="space-y-4">
               {messages.map((message, index) => (
                 <div
