@@ -772,6 +772,39 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
       prompt += "💡 Adapta la complejidad de tus recomendaciones de rutina a este nivel.\n";
     }
     
+    // Rutina actual del usuario (si está guardada)
+    if (context.userProfile.routine) {
+      prompt += "\n⚠️ RUTINA ACTUAL DEL USUARIO (IMPORTANTE):\n";
+      prompt += "El usuario tiene una rutina guardada. Si te pregunta por su rutina, usa esta información.\n";
+      
+      if (context.userProfile.routine.moments && context.userProfile.routine.moments.length > 0) {
+        prompt += "Momentos del día:\n";
+        context.userProfile.routine.moments.forEach((moment, index) => {
+          prompt += `- ${moment.timeOfDay}:\n`;
+          if (moment.products && moment.products.length > 0) {
+            prompt += `  Productos: ${moment.products.map(p => `${p.name}${p.brand ? ` (${p.brand})` : ''}`).join(', ')}\n`;
+          }
+          if (moment.steps && moment.steps.length > 0) {
+            prompt += `  Pasos: ${moment.steps.join(', ')}\n`;
+          }
+        });
+      }
+      
+      if (context.userProfile.routine.products && context.userProfile.routine.products.length > 0) {
+        prompt += `Productos: ${context.userProfile.routine.products.map(p => `${p.name}${p.brand ? ` (${p.brand})` : ''}${p.timeOfDay ? ` [${p.timeOfDay}]` : ''}`).join(', ')}\n`;
+      }
+      
+      if (context.userProfile.routine.frequency) {
+        prompt += `Frecuencia: ${context.userProfile.routine.frequency}\n`;
+      }
+      
+      if (context.userProfile.routine.notes) {
+        prompt += `Notas: ${context.userProfile.routine.notes}\n`;
+      }
+      
+      prompt += "⚠️ IMPORTANTE: Si el usuario pregunta por su rutina, menciona estos productos y pasos. Esta es su rutina ACTUAL guardada.\n";
+    }
+    
     // Estilo de vida
     if (context.userProfile.lifestyle_smoking !== undefined || 
         context.userProfile.lifestyle_sleep_less_than_7h !== undefined || 
