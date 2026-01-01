@@ -354,7 +354,7 @@ REGLAS FUNDAMENTALES:
 - Usa emojis con moderación (✨ 💕 🧴 🌟).
 - Evita jerga técnica compleja.
 
-❌ NO repitas información entre mensajes. ❌ NO uses estructuras fijas. ❌ NO menciones el perfil explícitamente.`,
+❌ NO repitas información entre mensajes. ❌ NO uses estructuras fijas. ❌ NO menciones el perfil explícitamente. ❌ NO asumas qué productos o rutina usa el usuario solo porque le das recomendaciones. ❌ NO supongas que una recomendación se convertirá en su rutina actual hasta que el usuario lo confirme explícitamente.`,
   };
 
   // Si hay imágenes, construir el mensaje con contenido multimodal incluyendo contexto RAG
