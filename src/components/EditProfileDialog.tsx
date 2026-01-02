@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -30,6 +31,13 @@ const SKIN_SENSITIVITY = [
   { value: "resistant", label: "Resistente (aguanta todo)" },
   { value: "sensitive", label: "Sensible / Reactiva" },
   { value: "rosacea", label: "Con tendencia a rojeces (Rosácea/Cuperosis)" },
+];
+
+const SEX_OPTIONS = [
+  { value: "male", label: "Masculino" },
+  { value: "female", label: "Femenino" },
+  { value: "other", label: "Otro" },
+  { value: "prefer_not_to_say", label: "Prefiero no decir" },
 ];
 
 const CLIMATE_ZONES = [
@@ -67,6 +75,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
   // Estados para todos los campos
   const [name, setName] = useState<string>("");
   const [age, setAge] = useState<number | null>(null);
+  const [sex, setSex] = useState<string>("");
   const [skinType, setSkinType] = useState<string>("normal");
   const [skinSensitivity, setSkinSensitivity] = useState<string>("");
   const [concerns, setConcerns] = useState<string[]>([]);
@@ -100,6 +109,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
       if (profile) {
         setName(profile.name || "");
         setAge(profile.age || null);
+        setSex(profile.sex || "");
         setSkinType(profile.skin_type || "normal");
         setSkinSensitivity(profile.skin_sensitivity || "");
         const concernsArray = profile.concerns || [];
@@ -165,6 +175,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
       await updateUserProfile(user.id, {
         name: name.trim() || null,
         age: age || null,
+        sex: sex || null,
         skin_type: skinType as any,
         skin_sensitivity: skinSensitivity || null,
         concerns: processedConcerns,
@@ -260,6 +271,33 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
                   min={1}
                   max={120}
                 />
+              </div>
+
+              {/* Sexo */}
+              <div className="space-y-4">
+                <Label className="text-lg font-semibold">
+                  Sexo
+                </Label>
+                <RadioGroup value={sex} onValueChange={setSex}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {SEX_OPTIONS.map((option) => (
+                      <label
+                        key={option.value}
+                        className={cn(
+                          "flex items-center space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all",
+                          sex === option.value
+                            ? "border-accent bg-accent/5"
+                            : "border-border hover:border-accent/50"
+                        )}
+                      >
+                        <RadioGroupItem value={option.value} id={option.value} />
+                        <Label htmlFor={option.value} className="cursor-pointer flex-1 font-normal ml-3">
+                          {option.label}
+                        </Label>
+                      </label>
+                    ))}
+                  </div>
+                </RadioGroup>
               </div>
 
               {/* Tipo de piel */}

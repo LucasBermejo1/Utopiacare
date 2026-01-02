@@ -54,11 +54,12 @@ const ROUTINE_COMMITMENT = [
   { value: "advanced", label: "Avanzado", sublabel: "Me encanta el skincare y quiero todos los pasos necesarios (10+ min)" },
 ];
 
-const TOTAL_STEPS = 10;
+const TOTAL_STEPS = 11;
 
 const STEP_TITLES = [
   "Tu nombre",
   "Tu edad",
+  "Tu sexo",
   "Tipo de piel",
   "Sensibilidad",
   "Preocupaciones",
@@ -67,6 +68,13 @@ const STEP_TITLES = [
   "Historial de productos",
   "Compromiso con rutina",
   "Estilo de vida",
+];
+
+const SEX_OPTIONS = [
+  { value: "male", label: "Masculino" },
+  { value: "female", label: "Femenino" },
+  { value: "other", label: "Otro" },
+  { value: "prefer_not_to_say", label: "Prefiero no decir" },
 ];
 
 export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
@@ -113,20 +121,22 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
       case 2:
         return !!data.age && data.age > 0 && data.age <= 120;
       case 3:
-        return !!data.skinType;
+        return !!data.sex;
       case 4:
-        return !!data.skinSensitivity;
+        return !!data.skinType;
       case 5:
-        return !!(data.mainConcernsText && data.mainConcernsText.trim().length > 0);
+        return !!data.skinSensitivity;
       case 6:
-        return !!data.climateZone;
+        return !!(data.mainConcernsText && data.mainConcernsText.trim().length > 0);
       case 7:
-        return !!data.sunExposure;
+        return !!data.climateZone;
       case 8:
-        return true; // Opcional
+        return !!data.sunExposure;
       case 9:
-        return !!data.routineCommitment;
+        return true; // Opcional
       case 10:
+        return !!data.routineCommitment;
+      case 11:
         return true; // Opcional
       default:
         return false;
@@ -160,6 +170,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
         user_id: user.id,
         name: data.name || null,
         age: data.age || null,
+        sex: data.sex || null,
         skin_type: data.skinType,
         skin_sensitivity: data.skinSensitivity,
         concerns: processedConcerns,
@@ -259,6 +270,44 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           <div className="space-y-6">
             <div>
               <Label className="text-xl font-semibold text-foreground">
+                ¿Cuál es tu sexo? *
+              </Label>
+              <p className="text-sm text-muted-foreground mt-2">
+                Esta información nos ayuda a personalizar mejor las recomendaciones según las características específicas de cada tipo de piel.
+              </p>
+            </div>
+            <RadioGroup
+              value={data.sex}
+              onValueChange={(value) => updateData("sex", value)}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {SEX_OPTIONS.map((option) => (
+                  <label
+                    key={option.value}
+                    className={cn(
+                      "relative flex items-center space-x-4 p-5 border-2 rounded-xl cursor-pointer transition-all duration-200",
+                      data.sex === option.value
+                        ? "border-accent bg-accent/5 shadow-md"
+                        : "border-border hover:border-accent/50 hover:bg-accent/5"
+                    )}
+                  >
+                    <RadioGroupItem value={option.value} id={option.value} className="mt-0.5" />
+                    <span className="font-medium text-base ml-3 flex-1">{option.label}</span>
+                    {data.sex === option.value && (
+                      <CheckCircle2 className="h-5 w-5 text-accent absolute top-3 right-3" />
+                    )}
+                  </label>
+                ))}
+              </div>
+            </RadioGroup>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-6">
+            <div>
+              <Label className="text-xl font-semibold text-foreground">
                 ¿Cuál es tu tipo de piel predominante? *
               </Label>
               <p className="text-sm text-muted-foreground mt-2">
@@ -297,7 +346,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           </div>
         );
 
-      case 4:
+      case 5:
         return (
           <div className="space-y-6">
             <div>
@@ -335,7 +384,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           </div>
         );
 
-      case 5:
+      case 6:
         return (
           <div className="space-y-6">
             <div>
@@ -371,7 +420,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           </div>
         );
 
-      case 6:
+      case 7:
         return (
           <div className="space-y-6">
             <div>
@@ -414,7 +463,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           </div>
         );
 
-      case 7:
+      case 8:
         return (
           <div className="space-y-6">
             <Label className="text-xl font-semibold text-foreground">
@@ -452,7 +501,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           </div>
         );
 
-      case 8:
+      case 9:
         return (
           <div className="space-y-6">
             <div>
@@ -475,7 +524,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           </div>
         );
 
-      case 9:
+      case 10:
         return (
           <div className="space-y-6">
             <Label className="text-xl font-semibold text-foreground">
@@ -513,7 +562,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           </div>
         );
 
-      case 10:
+      case 11:
         return (
           <div className="space-y-6">
             <Label className="text-xl font-semibold text-foreground">Estilo de vida</Label>

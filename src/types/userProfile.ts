@@ -7,6 +7,7 @@ export interface UserProfile {
   email?: string;
   name?: string | null;
   age?: number | null;
+  sex?: "male" | "female" | "other" | "prefer_not_to_say" | null;
   
   // Tipo de piel
   skin_type: "normal" | "dry" | "oily" | "combination" | "sensitive";
@@ -83,28 +84,31 @@ export interface OnboardingData {
   // Paso 2: Edad
   age: number;
   
-  // Paso 3: Tipo de piel
+  // Paso 3: Sexo
+  sex: "male" | "female" | "other" | "prefer_not_to_say";
+  
+  // Paso 4: Tipo de piel
   skinType: "normal" | "dry" | "oily" | "combination" | "sensitive";
   
-  // Paso 2: Sensibilidad
+  // Paso 5: Sensibilidad
   skinSensitivity: "resistant" | "sensitive" | "rosacea";
   
-  // Paso 3: Preocupaciones (máximo 2)
+  // Paso 6: Preocupaciones (máximo 2)
   mainConcerns: string[];
   
-  // Paso 4: Zona climática
+  // Paso 7: Zona climática
   climateZone: "dry" | "humid" | "extreme";
   
-  // Paso 5: Exposición solar
+  // Paso 8: Exposición solar
   sunExposure: "low" | "medium" | "high";
   
-  // Paso 6: Historial de productos
+  // Paso 9: Historial de productos
   productHistory: string;
   
-  // Paso 7: Compromiso con rutina
+  // Paso 10: Compromiso con rutina
   routineCommitment: "minimalist" | "intermediate" | "advanced";
   
-  // Paso 8: Estilo de vida
+  // Paso 11: Estilo de vida
   lifestyle: {
     smoking: boolean;
     sleepLessThan7h: boolean;
