@@ -135,13 +135,13 @@ async function getAssistantResponse(
     // PERO NO si es solo un saludo simple
     let ragContextText = "";
     if (userId && !isSimpleGreeting) {
-      try {
-        const ragContext = await getRAGContext(userMessage, userId);
-        ragContextText = formatRAGContextForPrompt(ragContext);
-        logger.log("📚 Contexto RAG generado:", ragContextText.substring(0, 200) + "...");
-      } catch (error) {
-        console.error("Error obteniendo contexto RAG:", error);
-        // Continuar sin contexto RAG si hay error
+    try {
+      const ragContext = await getRAGContext(userMessage, userId);
+      ragContextText = formatRAGContextForPrompt(ragContext);
+      logger.log("📚 Contexto RAG generado:", ragContextText.substring(0, 200) + "...");
+    } catch (error) {
+      console.error("Error obteniendo contexto RAG:", error);
+      // Continuar sin contexto RAG si hay error
         ragContextText = "";
       }
     } else if (isSimpleGreeting) {
@@ -323,9 +323,13 @@ async function getChatCompletionsResponse(
 - Máximo 1-2 frases. Solo saluda y pregunta en qué puedes ayudar.
 - Si el usuario tiene nombre, puedes usarlo: "¡Hola [nombre]! ¿En qué puedo ayudarte?"
 
-**Naturalidad**: Evita estructuras de respuesta fijas o robóticas. Responde de forma fluida y conversacional, como un experto cercano y amigable. No uses formatos tipo "Párrafo 1: X, Párrafo 2: Y". Cada respuesta debe sonar diferente a la anterior. NO repitas información que ya mencionaste en mensajes anteriores.
+**Estilo de comunicación (BALANCEADO POR DEFECTO)**:
+- **Tono**: Balanceado, profesional pero accesible. Sé cercano sin ser demasiado informal, y profesional sin ser frío.
+- **Longitud**: Respuestas balanceadas (100-120 palabras). Ni demasiado cortas ni demasiado extensas. Proporciona información suficiente sin ser abrumador.
+- **Emojis**: NO uses emojis. Mantén un estilo profesional y limpio.
+- **Nivel técnico**: Comprensible para todos pero con base técnica mínima. Puedes usar términos técnicos básicos (como "ácido hialurónico", "retinol", "ceramidas") pero explica brevemente conceptos más complejos cuando sea necesario. El objetivo es que cualquier persona pueda entender tus respuestas, independientemente de su conocimiento previo.
 
-**Brevedad**: Máximo 100-120 palabras. Usa párrafos cortos (2-3 líneas) y lenguaje sencillo, sin jerga técnica compleja.
+**Naturalidad**: Evita estructuras de respuesta fijas o robóticas. Responde de forma fluida y conversacional, como un experto cercano y amigable. No uses formatos tipo "Párrafo 1: X, Párrafo 2: Y". Cada respuesta debe sonar diferente a la anterior. NO repitas información que ya mencionaste en mensajes anteriores.
 
 **Ve directo al grano**: Elimina información redundante u obvia. Responde solo a lo que te preguntan.
 
