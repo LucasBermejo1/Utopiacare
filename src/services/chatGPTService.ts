@@ -131,9 +131,9 @@ async function getAssistantResponse(
     // 2. Buscar contexto RAG relevante antes de añadir el mensaje
     // Nota: userId se puede obtener del historial de conversación o pasarlo como parámetro
     // Por ahora, lo obtenemos del historial si está disponible
-    const { getRAGContext, formatRAGContextForPrompt } = await import("./ragService");
     let ragContextText = "";
     try {
+      const { getRAGContext, formatRAGContextForPrompt } = await import("./ragService");
       // Obtener contexto RAG con el perfil del usuario
       const ragContext = await getRAGContext(userMessage, userId);
       ragContextText = formatRAGContextForPrompt(ragContext);
@@ -141,6 +141,7 @@ async function getAssistantResponse(
     } catch (error) {
       console.error("Error obteniendo contexto RAG:", error);
       // Continuar sin contexto RAG si hay error
+      ragContextText = "";
     }
 
     // 3. Añadir el mensaje actual al thread con contexto RAG
@@ -298,6 +299,7 @@ async function getChatCompletionsResponse(
     } catch (error) {
       console.error("Error obteniendo contexto RAG para imagen:", error);
       // Continuar sin contexto RAG si hay error
+      ragContextText = "";
     }
   }
 
