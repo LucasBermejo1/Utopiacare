@@ -40,3 +40,4 @@ SELECT COUNT(*) as perfiles_restantes FROM public.user_profiles;
 SELECT COUNT(*) as conversaciones_restantes FROM public.chat_conversations;
 SELECT COUNT(*) as datos_chat_restantes FROM public.user_chat_data;
 
+

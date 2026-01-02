@@ -211,3 +211,4 @@ Las tablas tienen **Row Level Security (RLS)** activado, lo que significa que:
 - Como administrador del proyecto, puedes ver todos los datos
 - Si necesitas ver datos de usuarios específicos, usa el SQL Editor con permisos de administrador
 
+

@@ -15,7 +15,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
 import { Sparkles, ChevronRight, ChevronLeft, CheckCircle2 } from "lucide-react";
-import { MAIN_CONCERNS } from "@/config/constants";
 import type { OnboardingData } from "@/types/userProfile";
 import { cn } from "@/lib/utils";
 
@@ -73,8 +72,9 @@ const STEP_TITLES = [
 export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<Partial<OnboardingData>>({
+  const [data, setData] = useState<Partial<OnboardingData & { mainConcernsText: string }>>({
     mainConcerns: [],
+    mainConcernsText: "",
     lifestyle: {
       smoking: false,
       sleepLessThan7h: false,
@@ -93,20 +93,17 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
     }));
   };
 
-  const handleConcernToggle = (concern: string) => {
-    setData((prev) => {
-      const current = prev.mainConcerns || [];
-      if (current.includes(concern)) {
-        // Si está seleccionado, lo deseleccionamos
-        return { ...prev, mainConcerns: current.filter((c) => c !== concern) };
-      }
-      // Si ya hay 2 seleccionadas, no permitir seleccionar más
-      if (current.length >= 2) {
-        return prev; // No hacer cambios
-      }
-      // Si hay menos de 2, añadimos la nueva
-      return { ...prev, mainConcerns: [...current, concern] };
-    });
+  // Función para procesar el texto de preocupaciones y convertirlo en array
+  const processConcernsText = (text: string): string[] => {
+    if (!text || !text.trim()) return [];
+    
+    // Separar por comas, saltos de línea, o punto y coma
+    const concerns = text
+      .split(/[,;\n]/)
+      .map(concern => concern.trim())
+      .filter(concern => concern.length > 0);
+    
+    return concerns;
   };
 
   const canProceed = () => {
@@ -120,7 +117,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
       case 4:
         return !!data.skinSensitivity;
       case 5:
-        return (data.mainConcerns?.length || 0) === 2;
+        return !!(data.mainConcernsText && data.mainConcernsText.trim().length > 0);
       case 6:
         return !!data.climateZone;
       case 7:
@@ -153,6 +150,11 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
         return;
       }
 
+      // Procesar preocupaciones del texto libre
+      const processedConcerns = data.mainConcernsText 
+        ? processConcernsText(data.mainConcernsText)
+        : [];
+
       // Guardar perfil completo del usuario
       const { error } = await supabase.from("user_profiles").upsert({
         user_id: user.id,
@@ -160,7 +162,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
         age: data.age || null,
         skin_type: data.skinType,
         skin_sensitivity: data.skinSensitivity,
-        concerns: data.mainConcerns || [],
+        concerns: processedConcerns,
         climate_zone: data.climateZone,
         sun_exposure: data.sunExposure,
         product_history: data.productHistory || null,
@@ -338,43 +340,32 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           <div className="space-y-6">
             <div>
               <Label className="text-xl font-semibold text-foreground">
-                ¿Cuáles son tus dos preocupaciones principales? (Selecciona exactamente 2) *
+                ¿Cuáles son tus preocupaciones principales? *
               </Label>
+              <p className="text-sm text-muted-foreground mt-2">
+                Escribe todas las preocupaciones que tengas sobre tu piel. Puedes separarlas por comas o escribirlas en líneas diferentes.
+              </p>
+              <p className="text-xs text-muted-foreground mt-2 italic">
+                Ejemplos: Acné, Manchas oscuras, Arrugas, Piel apagada, Deshidratación, Poros abiertos, Rosácea...
+              </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {MAIN_CONCERNS.map((concern) => {
-                const isSelected = data.mainConcerns?.includes(concern);
-                const isDisabled = !isSelected && (data.mainConcerns?.length || 0) >= 2;
-                return (
-                  <label
-                    key={concern}
-                    className={cn(
-                      "relative flex items-center space-x-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200",
-                      isSelected
-                        ? "border-accent bg-accent/5 shadow-md"
-                        : isDisabled
-                        ? "border-border opacity-50 cursor-not-allowed"
-                        : "border-border hover:border-accent/50 hover:bg-accent/5"
-                    )}
-                  >
-                    <Checkbox
-                      id={concern}
-                      checked={isSelected}
-                      onCheckedChange={() => handleConcernToggle(concern)}
-                      disabled={isDisabled}
-                      className="mt-0.5"
-                    />
-                    <span className="font-medium text-sm flex-1">{concern}</span>
-                    {isSelected && (
-                      <CheckCircle2 className="h-5 w-5 text-accent absolute top-3 right-3" />
-                    )}
-                  </label>
-                );
-              })}
-            </div>
+            <Textarea
+              placeholder="Escribe tus preocupaciones separadas por comas o en líneas diferentes. Ej: Acné, Manchas oscuras, Arrugas..."
+              value={data.mainConcernsText || ""}
+              onChange={(e) => {
+                const text = e.target.value;
+                setData((prev) => ({ 
+                  ...prev, 
+                  mainConcernsText: text,
+                  mainConcerns: processConcernsText(text)
+                }));
+              }}
+              rows={6}
+              className="resize-none text-base"
+            />
             {data.mainConcerns && data.mainConcerns.length > 0 && (
-              <p className="text-sm text-muted-foreground text-center">
-                Seleccionadas: <strong>{data.mainConcerns.length}/2</strong>
+              <p className="text-sm text-muted-foreground">
+                Preocupaciones detectadas: <strong>{data.mainConcerns.length}</strong>
               </p>
             )}
           </div>

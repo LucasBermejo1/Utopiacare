@@ -189,3 +189,4 @@ NOTIFY pgrst, 'reload config';
 -- WHERE schemaname = 'public' 
 -- AND tablename IN ('chat_conversations', 'user_chat_data');
 
+

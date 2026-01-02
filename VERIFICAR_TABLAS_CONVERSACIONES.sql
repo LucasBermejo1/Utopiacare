@@ -61,3 +61,4 @@ WHERE schemaname = 'public'
 AND tablename IN ('chat_conversations', 'user_chat_data')
 ORDER BY tablename, indexname;
 
+

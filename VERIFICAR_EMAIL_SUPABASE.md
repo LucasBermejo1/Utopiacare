@@ -75,3 +75,4 @@ Esto mejora la entrega de emails y reduce la posibilidad de que vayan a spam.
 
 Si la verificación está deshabilitada en Supabase, los usuarios podrán iniciar sesión sin verificar. Esto **NO es seguro** y debe estar habilitado en producción.
 
+

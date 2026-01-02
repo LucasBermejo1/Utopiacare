@@ -88,3 +88,4 @@ Después de configurar todo:
 4. Crea una cuenta completamente nueva para probar
 5. Revisa la plantilla de email y asegúrate de que use `{{ .ConfirmationURL }}` o `{{ .SiteURL }}`
 
+
