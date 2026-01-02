@@ -761,21 +761,34 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
       }
     }
     
-    // Historial de productos problemáticos
-    if (context.userProfile.product_history) {
-      prompt += "\n⚠️ HISTORIAL DE PRODUCTOS PROBLEMÁTICOS (CRÍTICO):\n";
-      prompt += `- Ingredientes o marcas que le han sentado mal: ${context.userProfile.product_history}\n`;
-      prompt += "❌ REGLA OBLIGATORIA: NUNCA recomiendes productos que contengan estos ingredientes o estas marcas.\n";
-      prompt += "❌ Si un producto contiene alguno de estos ingredientes, DEBES advertirlo claramente.\n";
-    }
+    // Historial completo de experiencias (positivas y negativas)
+    const hasProblematicHistory = context.userProfile.product_history && context.userProfile.product_history.trim().length > 0;
+    const hasWorkingWellHistory = context.userProfile.products_working_well && context.userProfile.products_working_well.trim().length > 0;
     
-    // Productos que funcionan bien
-    if (context.userProfile.products_working_well) {
-      prompt += "\n✅ PRODUCTOS QUE FUNCIONAN BIEN:\n";
-      prompt += `- Productos, marcas o ingredientes que le funcionan bien: ${context.userProfile.products_working_well}\n`;
-      prompt += "💡 IMPORTANTE: Puedes recomendar productos similares o de las mismas marcas que le funcionan bien.\n";
-      prompt += "💡 Si el usuario pregunta por productos similares, considera estos como referencia de lo que le funciona.\n";
-      prompt += "💡 Puedes mencionar estos productos como ejemplos de lo que le ha funcionado cuando sea relevante.\n";
+    if (hasProblematicHistory || hasWorkingWellHistory) {
+      prompt += "\n📚 HISTORIAL COMPLETO DE EXPERIENCIAS DEL USUARIO (USA ESTO PARA PERSONALIZAR TODAS TUS RESPUESTAS):\n";
+      
+      if (hasProblematicHistory) {
+        prompt += `\n❌ EXPERIENCIAS NEGATIVAS (EVITAR):\n`;
+        prompt += `- Productos, ingredientes o marcas que le han sentado mal: ${context.userProfile.product_history}\n`;
+        prompt += "⚠️ REGLA OBLIGATORIA: NUNCA recomiendes productos que contengan estos ingredientes o estas marcas.\n";
+        prompt += "⚠️ Si un producto contiene alguno de estos ingredientes, DEBES advertirlo claramente.\n";
+        prompt += "⚠️ Usa esta información para evitar recomendaciones similares que puedan causar los mismos problemas.\n";
+      }
+      
+      if (hasWorkingWellHistory) {
+        prompt += `\n✅ EXPERIENCIAS POSITIVAS (USAR COMO REFERENCIA):\n`;
+        prompt += `- Productos, marcas o ingredientes que le funcionan bien: ${context.userProfile.products_working_well}\n`;
+        prompt += "💡 IMPORTANTE: Usa esta información activamente para personalizar tus recomendaciones.\n";
+        prompt += "💡 Puedes recomendar productos similares, de las mismas marcas, o con ingredientes similares a los que le funcionan bien.\n";
+        prompt += "💡 Si el usuario pregunta por productos similares, considera estos como referencia de lo que le funciona.\n";
+        prompt += "💡 Puedes mencionar estos productos como ejemplos de lo que le ha funcionado cuando sea relevante.\n";
+        prompt += "💡 Analiza qué tienen en común estos productos (ingredientes, texturas, tipos de fórmula) y busca productos similares.\n";
+      }
+      
+      prompt += "\n🎯 REGLA GENERAL: Usa TODO este historial (positivo y negativo) para crear respuestas altamente personalizadas.\n";
+      prompt += "🎯 No te limites solo a evitar lo negativo, también aprovecha activamente lo que le funciona bien.\n";
+      prompt += "🎯 Si el usuario pregunta por recomendaciones, compara con su historial completo para dar sugerencias más precisas.\n";
     }
     
     // Compromiso con la rutina

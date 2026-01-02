@@ -180,12 +180,14 @@ Extrae SOLO la siguiente información en formato JSON (si existe):
   } | null
 }
 
-IMPORTANTE:
+IMPORTANTE - EXTRAER TODAS LAS EXPERIENCIAS DEL USUARIO:
+- ⚠️ CRÍTICO: Extrae TODAS las experiencias del usuario con productos, ingredientes o marcas, tanto positivas como negativas
 - Si el usuario menciona que es ALÉRGICO a algo, inclúyelo en "allergies" o "problematicIngredients"
-- Si menciona que algo le ha sentado mal, causado irritación, o que debe evitar, inclúyelo en "problematicIngredients"
+- Si menciona que algo le ha sentado mal, causado irritación, reacción, enrojecimiento, sequedad, o que debe evitar, inclúyelo en "problematicIngredients"
+- ✅ Si el usuario menciona que un producto le FUNCIONA BIEN, le gusta, le ha ido bien, le ha ayudado, tiene resultados positivos, le ha mejorado la piel, le ha calmado, le ha hidratado bien, o cualquier experiencia positiva, inclúyelo en "productsWorkingWell" (puede ser nombre del producto, marca, o ingrediente específico)
+- Ejemplos de experiencias positivas: "X me funciona bien", "me gusta Y", "Z me ha ido genial", "W me ha ayudado mucho", "uso V y me va perfecto", "estoy contento con U", "X me ha mejorado la piel", "Y me ha calmado", "Z me hidrata bien", "W me ha reducido el acné", "V me ha suavizado la piel"
+- Ejemplos de experiencias negativas: "X me da alergia", "Y me irrita", "Z me reseca", "W me causa enrojecimiento", "V no me funciona", "U me ha empeorado la piel"
 - ⚠️ CRÍTICO: Si el usuario dice que YA NO tiene alergia a algo, que era mentira, o que se equivocó, inclúyelo en "removedAllergies" o "removedProblematicIngredients"
-- ✅ Si el usuario menciona que un producto le FUNCIONA BIEN, le gusta, le ha ido bien, le ha ayudado, o tiene resultados positivos, inclúyelo en "productsWorkingWell" (puede ser nombre del producto, marca, o ingrediente específico)
-- Ejemplos de productos que funcionan bien: "X me funciona bien", "me gusta Y", "Z me ha ido genial", "W me ha ayudado mucho", "uso V y me va perfecto", "estoy contento con U"
 - ⚠️ CRÍTICO: Si el usuario dice que un producto YA NO le funciona bien, que antes le iba bien pero ahora no, o que se equivocó, inclúyelo en "removedProductsWorkingWell"
 - Ejemplos de correcciones: "ya no tengo alergia a X", "eso era mentira", "me equivoqué con X", "ya no soy alérgico a X", "X ya no me da alergia", "retiro lo de X", "olvídate de X"
 - Si el usuario menciona su TIPO DE PIEL (ej: "tengo piel grasa", "mi piel es seca"), inclúyelo en "skinType"
