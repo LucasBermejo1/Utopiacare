@@ -710,7 +710,17 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
       prompt += `EDAD DEL USUARIO: ${context.userProfile.age} años\n`;
       prompt += "⚠️ IMPORTANTE: Ten en cuenta la edad del usuario para personalizar las recomendaciones. Las necesidades de la piel cambian con la edad (hidratación, anti-edad, etc.).\n";
     }
-    if (context.userProfile.name || context.userProfile.age) {
+    if (context.userProfile.sex) {
+      const sexMap: Record<string, string> = {
+        male: "Masculino",
+        female: "Femenino",
+        other: "Otro",
+        prefer_not_to_say: "Prefiere no decir"
+      };
+      prompt += `SEXO DEL USUARIO: ${sexMap[context.userProfile.sex] || context.userProfile.sex}\n`;
+      prompt += "⚠️ IMPORTANTE: Ten en cuenta el sexo del usuario para personalizar las recomendaciones. Las características de la piel pueden variar según el sexo (grosor de la piel, producción de sebo, etc.).\n";
+    }
+    if (context.userProfile.name || context.userProfile.age || context.userProfile.sex) {
       prompt += "\n";
     }
     
