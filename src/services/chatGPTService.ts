@@ -280,9 +280,13 @@ async function getChatCompletionsResponse(
   images?: string[],
   userId?: string | null
 ): Promise<string> {
+  // Detectar si el mensaje es solo un saludo simple
+  const isSimpleGreeting = /^(Hola|Hola!|Buenos días|Buenas|Hi|Hello|Buenas tardes|Buenas noches)[\s!.,]*$/i.test(userMessage.trim());
+  
   // Obtener contexto RAG si hay userId (perfil del usuario e historial)
+  // PERO NO si es solo un saludo simple
   let ragContextText = "";
-  if (userId) {
+  if (userId && !isSimpleGreeting) {
     try {
       const ragContext = await getRAGContext(userMessage, userId);
       ragContextText = formatRAGContextForPrompt(ragContext);
@@ -292,6 +296,8 @@ async function getChatCompletionsResponse(
       // Continuar sin contexto RAG si hay error
       ragContextText = "";
     }
+  } else if (isSimpleGreeting) {
+    logger.log("🚨 Saludo simple detectado - NO se añadirá contexto RAG");
   }
 
   const systemPrompt: ChatGPTMessage = {
