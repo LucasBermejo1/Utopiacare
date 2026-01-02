@@ -131,13 +131,13 @@ async function getAssistantResponse(
     // 3. Obtener contexto RAG si hay userId
     let ragContextText = "";
     if (userId) {
-      try {
-        const ragContext = await getRAGContext(userMessage, userId);
-        ragContextText = formatRAGContextForPrompt(ragContext);
-        logger.log("📚 Contexto RAG generado:", ragContextText.substring(0, 200) + "...");
-      } catch (error) {
-        console.error("Error obteniendo contexto RAG:", error);
-        // Continuar sin contexto RAG si hay error
+    try {
+      const ragContext = await getRAGContext(userMessage, userId);
+      ragContextText = formatRAGContextForPrompt(ragContext);
+      logger.log("📚 Contexto RAG generado:", ragContextText.substring(0, 200) + "...");
+    } catch (error) {
+      console.error("Error obteniendo contexto RAG:", error);
+      // Continuar sin contexto RAG si hay error
         ragContextText = "";
       }
     }
@@ -146,7 +146,7 @@ async function getAssistantResponse(
     const messageContent = ragContextText 
       ? `${userMessage}\n\n${ragContextText}`
       : userMessage;
-
+    
     // 5. Añadir mensaje al thread
     await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
       method: "POST",
@@ -304,7 +304,12 @@ async function getChatCompletionsResponse(
 
 **Filtro de Intención (CRÍTICO)**: Si el usuario solo aporta datos o contexto (ej: "Soy alérgico a X", "Me he mudado", "Cambié de rutina", "Uso este producto"), confirma brevemente que has guardado la información. NO des recomendaciones de productos ni información si no te la han pedido explícitamente. ⚠️ Si el usuario solo saluda (Hola, Buenos días, etc.), NO des recomendaciones ni información adicional. Solo saluda.
 
-**Saludos Simples (CRÍTICO)**: Cuando el usuario salude de forma simple (Hola, Hola!, Buenos días, etc.), responde SOLO con un saludo breve. Ejemplos: "¡Hola! ¿En qué puedo ayudarte?", "Hola! ¿Qué necesitas?" (máximo 1-2 frases). ⚠️ PROHIBIDO: NO des recomendaciones, NO menciones productos, NO describas el perfil del usuario, NO des información adicional. Solo saluda y pregunta en qué puedes ayudar.
+**Saludos Simples (CRÍTICO - LEER PRIMERO)**: 
+- Si el usuario dice SOLO "Hola", "Hola!", "Buenos días", "Buenas", "Hi", o cualquier saludo simple sin más texto, responde ÚNICAMENTE con un saludo breve.
+- Ejemplos CORRECTOS: "¡Hola! ¿En qué puedo ayudarte?", "Hola! ¿Qué necesitas?", "¡Buenos días! ¿En qué puedo ayudarte hoy?"
+- ⚠️⚠️⚠️ PROHIBIDO ABSOLUTO en saludos simples: NO menciones productos, NO des recomendaciones, NO describas el perfil del usuario, NO des información adicional, NO menciones ingredientes, NO menciones rutinas.
+- Máximo 1-2 frases. Solo saluda y pregunta en qué puedes ayudar.
+- Si el usuario tiene nombre, puedes usarlo: "¡Hola [nombre]! ¿En qué puedo ayudarte?"
 
 **Naturalidad**: Evita estructuras de respuesta fijas o robóticas. Responde de forma fluida y conversacional, como un experto cercano y amigable. No uses formatos tipo "Párrafo 1: X, Párrafo 2: Y". Cada respuesta debe sonar diferente a la anterior. NO repitas información que ya mencionaste en mensajes anteriores.
 
@@ -417,12 +422,17 @@ Si hay experiencias de usuarios con perfiles parecidos, úsalas para reforzar: "
 
 === LO QUE NUNCA DEBES HACER ===
 
-❌❌❌ PROHIBIDO EN SALUDOS SIMPLES:
-- Si el usuario solo dice "Hola", "Buenos días", "Hola!", etc., responde SOLO con un saludo breve.
-- NO des recomendaciones de productos en respuesta a un saludo.
-- NO menciones productos, ingredientes, rutinas o cualquier información en respuesta a un saludo.
-- NO describas el perfil del usuario en respuesta a un saludo.
-- Solo saluda y pregunta en qué puedes ayudar (máximo 1-2 frases).
+🚨🚨🚨 SALUDOS SIMPLES - REGLA ABSOLUTA (LEER PRIMERO):
+- Si el usuario dice SOLO "Hola", "Hola!", "Buenos días", "Buenas", o cualquier saludo simple SIN MÁS TEXTO:
+  * Responde ÚNICAMENTE con: "¡Hola! ¿En qué puedo ayudarte?" o similar (máximo 1-2 frases)
+  * ❌ NO menciones productos
+  * ❌ NO des recomendaciones
+  * ❌ NO describas el perfil del usuario
+  * ❌ NO des información adicional
+  * ❌ NO menciones ingredientes
+  * ❌ NO menciones rutinas
+  * ❌ NO menciones NADA más que el saludo y preguntar en qué puedes ayudar
+  * Solo saluda y pregunta en qué puedes ayudar.
 
 NO des recomendaciones si el usuario solo está compartiendo información o contexto sin pedirlas.
 
