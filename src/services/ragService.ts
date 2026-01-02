@@ -769,6 +769,15 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
       prompt += "❌ Si un producto contiene alguno de estos ingredientes, DEBES advertirlo claramente.\n";
     }
     
+    // Productos que funcionan bien
+    if (context.userProfile.products_working_well) {
+      prompt += "\n✅ PRODUCTOS QUE FUNCIONAN BIEN:\n";
+      prompt += `- Productos, marcas o ingredientes que le funcionan bien: ${context.userProfile.products_working_well}\n`;
+      prompt += "💡 IMPORTANTE: Puedes recomendar productos similares o de las mismas marcas que le funcionan bien.\n";
+      prompt += "💡 Si el usuario pregunta por productos similares, considera estos como referencia de lo que le funciona.\n";
+      prompt += "💡 Puedes mencionar estos productos como ejemplos de lo que le ha funcionado cuando sea relevante.\n";
+    }
+    
     // Compromiso con la rutina
     if (context.userProfile.routine_commitment) {
       prompt += "\nRUTINA DE CUIDADO:\n";

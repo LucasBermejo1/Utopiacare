@@ -27,6 +27,9 @@ export interface UserProfile {
   // Historial de productos
   product_history?: string | null;
   
+  // Productos que funcionan bien
+  products_working_well?: string | null;
+  
   // Compromiso con rutina
   routine_commitment?: "minimalist" | "intermediate" | "advanced" | null;
   

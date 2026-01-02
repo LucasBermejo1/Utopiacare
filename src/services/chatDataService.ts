@@ -70,6 +70,8 @@ export async function extractRelevantDataFromMessage(
   problematicIngredients?: string[];
   removedAllergies?: string[];
   removedProblematicIngredients?: string[];
+  productsWorkingWell?: string[]; // Productos que funcionan bien
+  removedProductsWorkingWell?: string[]; // Productos que ya no funcionan bien
   preferences?: Record<string, any>;
   // Información del perfil
   name?: string;
@@ -131,6 +133,8 @@ Extrae SOLO la siguiente información en formato JSON (si existe):
   "problematicIngredients": ["ingrediente1", "ingrediente2"],
   "removedAllergies": ["ingrediente1", "ingrediente2"],
   "removedProblematicIngredients": ["ingrediente1", "ingrediente2"],
+  "productsWorkingWell": ["producto1", "producto2", "marca X"],
+  "removedProductsWorkingWell": ["producto1", "producto2"],
   "preferences": {
     "precio": "rango mencionado",
     "marca": "marca preferida",
@@ -180,6 +184,9 @@ IMPORTANTE:
 - Si el usuario menciona que es ALÉRGICO a algo, inclúyelo en "allergies" o "problematicIngredients"
 - Si menciona que algo le ha sentado mal, causado irritación, o que debe evitar, inclúyelo en "problematicIngredients"
 - ⚠️ CRÍTICO: Si el usuario dice que YA NO tiene alergia a algo, que era mentira, o que se equivocó, inclúyelo en "removedAllergies" o "removedProblematicIngredients"
+- ✅ Si el usuario menciona que un producto le FUNCIONA BIEN, le gusta, le ha ido bien, le ha ayudado, o tiene resultados positivos, inclúyelo en "productsWorkingWell" (puede ser nombre del producto, marca, o ingrediente específico)
+- Ejemplos de productos que funcionan bien: "X me funciona bien", "me gusta Y", "Z me ha ido genial", "W me ha ayudado mucho", "uso V y me va perfecto", "estoy contento con U"
+- ⚠️ CRÍTICO: Si el usuario dice que un producto YA NO le funciona bien, que antes le iba bien pero ahora no, o que se equivocó, inclúyelo en "removedProductsWorkingWell"
 - Ejemplos de correcciones: "ya no tengo alergia a X", "eso era mentira", "me equivoqué con X", "ya no soy alérgico a X", "X ya no me da alergia", "retiro lo de X", "olvídate de X"
 - Si el usuario menciona su TIPO DE PIEL (ej: "tengo piel grasa", "mi piel es seca"), inclúyelo en "skinType"
 - Si menciona SENSIBILIDAD (ej: "mi piel es sensible", "tengo rosácea"), inclúyelo en "skinSensitivity"
@@ -453,6 +460,8 @@ export async function updateUserProfileFromChat(
     allergies?: string[];
     removedProblematicIngredients?: string[];
     removedAllergies?: string[];
+    productsWorkingWell?: string[];
+    removedProductsWorkingWell?: string[];
     routine?: {
       moments?: Array<{
         timeOfDay: string;
@@ -601,6 +610,58 @@ export async function updateUserProfileFromChat(
     
     if (itemsToRemove.length > 0 || problematicItems.length > 0) {
       updates.product_history = updatedHistory || null;
+    }
+
+    // Actualizar productos que funcionan bien
+    let updatedProductsWorkingWell = currentProfile.products_working_well || "";
+    
+    const productsToRemove = extractedData.removedProductsWorkingWell || [];
+    
+    if (productsToRemove.length > 0) {
+      const currentProducts = updatedProductsWorkingWell
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean);
+      
+      const productsToRemoveLower = productsToRemove.map(item => item.toLowerCase().trim());
+      
+      const filteredProducts = currentProducts.filter(item => {
+        const itemLower = item.toLowerCase();
+        return !productsToRemoveLower.some(removeItem => 
+          itemLower === removeItem || 
+          itemLower.includes(removeItem) || 
+          (removeItem.includes(itemLower) && itemLower.length > 2)
+        );
+      });
+      
+      updatedProductsWorkingWell = filteredProducts.join(', ').trim();
+    }
+    
+    const productsWorkingWell = extractedData.productsWorkingWell || [];
+    
+    if (productsWorkingWell.length > 0) {
+      const currentProducts = updatedProductsWorkingWell
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean);
+      
+      const currentProductsLower = currentProducts.map(item => item.toLowerCase());
+      const newProductsToAdd = productsWorkingWell.filter(item => {
+        const itemLower = item.toLowerCase().trim();
+        return !currentProductsLower.some(current => 
+          current === itemLower || 
+          current.includes(itemLower) || 
+          itemLower.includes(current)
+        );
+      });
+      
+      if (newProductsToAdd.length > 0) {
+        updatedProductsWorkingWell = [...currentProducts, ...newProductsToAdd].join(', ').trim();
+      }
+    }
+    
+    if (productsToRemove.length > 0 || productsWorkingWell.length > 0) {
+      updates.products_working_well = updatedProductsWorkingWell || null;
     }
 
     // Actualizar rutina si se menciona

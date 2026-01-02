@@ -422,6 +422,8 @@ export function ChatBot() {
               allergies: extractedData.allergies,
               removedProblematicIngredients: extractedData.removedProblematicIngredients,
               removedAllergies: extractedData.removedAllergies,
+              productsWorkingWell: extractedData.productsWorkingWell,
+              removedProductsWorkingWell: extractedData.removedProductsWorkingWell,
               routine: extractedData.routine,
             });
           } catch (error) {
