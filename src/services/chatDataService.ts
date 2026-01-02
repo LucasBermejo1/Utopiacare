@@ -253,25 +253,39 @@ IMPORTANTE - EXTRAER TODAS LAS EXPERIENCIAS DEL USUARIO:
 - ⚠️ CRÍTICO: Si el usuario dice que un producto YA NO le funciona bien, que antes le iba bien pero ahora no, o que se equivocó, inclúyelo en "removedProductsWorkingWell"
 - Ejemplos de correcciones: "ya no tengo alergia a X", "eso era mentira", "me equivoqué con X", "ya no soy alérgico a X", "X ya no me da alergia", "retiro lo de X", "olvídate de X"
 - 🚨🚨🚨 CORRECCIONES DIRECTAS AL BOT (MUY IMPORTANTE):
-  * Si el usuario CORRIGE algo que el bot dijo (ej: "eso no es correcto", "te equivocaste", "no es así", "eso está mal", "mejor no", "no hagas eso", "no digas eso", "no es verdad", "eso no es cierto", "mejor no menciones X", "no me gusta cuando dices X", "deja de decir X", "no quiero que me digas X"), extrae:
+  * Si el usuario CORRIGE algo que el bot dijo o hizo (ej: "eso no es correcto", "te equivocaste", "no es así", "eso está mal", "mejor no", "no hagas eso", "no digas eso", "no es verdad", "eso no es cierto", "mejor no menciones X", "no me gusta cuando dices X", "deja de decir X", "no quiero que me digas X", "eso es incorrecto", "estás mal", "corrígete", "aprende esto"), extrae:
     - "whatWasWrong": qué dijo mal el bot o qué comportamiento tuvo que fue incorrecto
     - "correctInfo": información correcta o comportamiento esperado
     - "context": contexto de la corrección (cuándo/por qué lo corrigió)
     - "isGlobal": true/false - Si es TRUE, significa que es un error que el bot puede cometer con CUALQUIER usuario y debe corregirse para TODOS. Si es FALSE, es una preferencia individual del usuario.
-  * DETECCIÓN DE CORRECCIONES GLOBALES vs INDIVIDUALES:
-    - CORRECCIÓN GLOBAL (isGlobal: true): Si el usuario indica que es un error general del bot que puede cometer con otros usuarios:
-      * Ejemplos: "esto lo haces mal siempre", "esto es un error que cometes", "esto deberías corregirlo para todos", "esto lo haces mal con todo el mundo", "esto es incorrecto en general", "esto es un problema del bot", "esto deberías saberlo siempre"
-      * También si el usuario corrige información objetiva incorrecta (ej: "el ácido hialurónico no se usa así", "eso no es correcto sobre los ingredientes")
-    - CORRECCIÓN INDIVIDUAL (isGlobal: false): Si el usuario indica que es una preferencia personal:
-      * Ejemplos: "no me digas que tengo piel seca, tengo piel grasa" (corrección de información personal)
-      * "No me gusta cuando me describes mi perfil" (preferencia personal)
-      * "No me recomiendes productos con fragancia" (preferencia personal del usuario)
+  * ⚠️⚠️⚠️ REGLA CRÍTICA PARA DETECTAR CORRECCIONES GLOBALES:
+    - POR DEFECTO, si el usuario corrige un COMPORTAMIENTO del bot (cómo responde, qué dice, cómo actúa), es GLOBAL (isGlobal: true)
+    - POR DEFECTO, si el usuario corrige INFORMACIÓN OBJETIVA incorrecta (datos técnicos, hechos), es GLOBAL (isGlobal: true)
+    - SOLO es INDIVIDUAL (isGlobal: false) si el usuario corrige información PERSONAL sobre SÍ MISMO (su tipo de piel, sus preferencias personales, sus datos)
+  * DETECCIÓN DE CORRECCIONES GLOBALES (isGlobal: true) - MÁS PERMISIVA:
+    - Si el usuario corrige un COMPORTAMIENTO del bot (cómo responde, qué dice, cómo actúa):
+      * Ejemplos: "no me des recomendaciones si solo saludo", "no me describes mi perfil en cada mensaje", "no me digas X", "no hagas Y", "deja de decir Z", "no quiero que me digas A", "mejor no hagas B"
+      * Palabras clave que indican comportamiento: "no hagas", "no digas", "no me digas", "deja de", "no quiero que", "mejor no", "no deberías", "no debes", "corrígete", "aprende"
+    - Si el usuario corrige INFORMACIÓN OBJETIVA incorrecta (datos técnicos, hechos científicos):
+      * Ejemplos: "el ácido hialurónico no se usa así", "eso no es correcto sobre los ingredientes", "esa información es incorrecta", "eso es falso", "eso no es verdad"
+    - Si el usuario indica explícitamente que es un error general:
+      * Ejemplos: "esto lo haces mal siempre", "esto es un error que cometes", "esto deberías corregirlo para todos", "esto lo haces mal con todo el mundo", "esto es incorrecto en general", "esto es un problema del bot", "esto deberías saberlo siempre", "esto es un error", "corrígete esto"
+    - Si el usuario corrige el ESTILO de comunicación del bot:
+      * Ejemplos: "eres muy insistente", "hablas demasiado", "no me gusta tu tono", "eres muy técnico", "no entiendo"
+  * DETECCIÓN DE CORRECCIONES INDIVIDUALES (isGlobal: false) - SOLO para información personal:
+    - SOLO si el usuario corrige información PERSONAL sobre SÍ MISMO:
+      * Ejemplos: "no me digas que tengo piel seca, tengo piel grasa" (corrige información personal sobre su tipo de piel)
+      * "No tengo acné, tengo rosácea" (corrige información personal sobre su condición)
+      * "No soy alérgico a X" (corrige información personal sobre sus alergias)
+    - Si el usuario dice "YO tengo X" o "MI piel es Y" o "YO soy Z", es probablemente individual
   * Ejemplos de correcciones al bot:
-    - "No me digas que tengo piel seca, tengo piel grasa" → whatWasWrong: "dijo que tengo piel seca", correctInfo: "tengo piel grasa", context: "descripción del tipo de piel", isGlobal: false (es información personal)
-    - "No me recomiendes productos con fragancia" → whatWasWrong: "recomendó productos con fragancia", correctInfo: "no recomendar productos con fragancia", context: "recomendaciones de productos", isGlobal: false (preferencia personal)
-    - "No me gusta cuando me describes mi perfil en cada mensaje" → whatWasWrong: "describe el perfil en cada mensaje", correctInfo: "no describir el perfil continuamente", context: "estilo de comunicación", isGlobal: true (si el usuario dice "esto lo haces mal siempre" o similar)
-    - "No me des recomendaciones si solo saludo" → whatWasWrong: "da recomendaciones en saludos", correctInfo: "solo saludar sin dar recomendaciones", context: "respuesta a saludos simples", isGlobal: true (error general del bot)
+    - "No me des recomendaciones si solo saludo" → whatWasWrong: "da recomendaciones en saludos", correctInfo: "solo saludar sin dar recomendaciones", context: "respuesta a saludos simples", isGlobal: true (comportamiento del bot)
+    - "No me digas que tengo piel seca, tengo piel grasa" → whatWasWrong: "dijo que tengo piel seca", correctInfo: "tengo piel grasa", context: "descripción del tipo de piel", isGlobal: false (información personal del usuario)
+    - "No me gusta cuando me describes mi perfil en cada mensaje" → whatWasWrong: "describe el perfil en cada mensaje", correctInfo: "no describir el perfil continuamente", context: "estilo de comunicación", isGlobal: true (comportamiento del bot)
     - "El ácido hialurónico no se aplica así, eso es incorrecto" → whatWasWrong: "información incorrecta sobre ácido hialurónico", correctInfo: "información correcta sobre aplicación", context: "información técnica", isGlobal: true (información objetiva incorrecta)
+    - "No me recomiendes productos con fragancia" → whatWasWrong: "recomendó productos con fragancia", correctInfo: "no recomendar productos con fragancia", context: "recomendaciones de productos", isGlobal: true (comportamiento del bot - a menos que el usuario diga "YO no quiero" o "MI preferencia es")
+    - "Eres muy insistente con las recomendaciones" → whatWasWrong: "es muy insistente con recomendaciones", correctInfo: "no ser insistente con recomendaciones", context: "estilo de comunicación", isGlobal: true (comportamiento del bot)
+  * ⚠️ CUANDO DUDES: Si no está claro si es global o individual, pero el usuario está corrigiendo un COMPORTAMIENTO del bot (no información personal sobre sí mismo), marca isGlobal: true
   * Si el usuario da FEEDBACK sobre el comportamiento del bot (positivo o negativo), inclúyelo en "botFeedback"
 - Si el usuario menciona su TIPO DE PIEL (ej: "tengo piel grasa", "mi piel es seca"), inclúyelo en "skinType"
 - Si menciona SENSIBILIDAD (ej: "mi piel es sensible", "tengo rosácea"), inclúyelo en "skinSensitivity"
