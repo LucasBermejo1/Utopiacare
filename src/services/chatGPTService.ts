@@ -16,6 +16,7 @@
  */
 
 import { logger } from "@/utils/logger";
+import { getRAGContext, formatRAGContextForPrompt } from "./ragService";
 
 interface ChatGPTMessage {
   role: "user" | "assistant" | "system";
@@ -133,7 +134,6 @@ async function getAssistantResponse(
     // Por ahora, lo obtenemos del historial si está disponible
     let ragContextText = "";
     try {
-      const { getRAGContext, formatRAGContextForPrompt } = await import("./ragService");
       // Obtener contexto RAG con el perfil del usuario
       const ragContext = await getRAGContext(userMessage, userId);
       ragContextText = formatRAGContextForPrompt(ragContext);
@@ -292,7 +292,6 @@ async function getChatCompletionsResponse(
   let ragContextText = "";
   if (userId) {
     try {
-      const { getRAGContext, formatRAGContextForPrompt } = await import("./ragService");
       const ragContext = await getRAGContext(userMessage, userId);
       ragContextText = formatRAGContextForPrompt(ragContext);
       logger.log("📚 Contexto RAG generado para análisis de imagen:", ragContextText.substring(0, 200) + "...");
