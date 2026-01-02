@@ -109,48 +109,46 @@ async function getAssistantResponse(
 
       if (!threadResponse.ok) {
         const errorData = await threadResponse.json().catch(() => ({}));
-        console.error("Error creando thread:", errorData);
-        throw new Error(errorData.error?.message || `Error creando thread: ${threadResponse.status}`);
+        throw new Error(`Error creando thread: ${threadResponse.status} ${errorData.error?.message || threadResponse.statusText}`);
       }
 
       const threadData = await threadResponse.json();
       threadId = threadData.id;
-      logger.log("Thread creado:", threadId);
+      logger.log("Nuevo thread creado:", threadId);
 
-      // Guardar thread ID para futuras conversaciones
-      if (userId) {
+      // Guardar thread ID si hay userId
+      if (userId && threadId) {
         try {
           const { saveThreadId } = await import("./chatDataService");
           await saveThreadId(userId, threadId);
         } catch (error) {
           console.error("Error guardando thread ID:", error);
-          // No lanzar error, es opcional
+          // Continuar sin bloquear
         }
       }
     }
 
-    // 2. Buscar contexto RAG relevante antes de añadir el mensaje
-    // Nota: userId se puede obtener del historial de conversación o pasarlo como parámetro
-    // Por ahora, lo obtenemos del historial si está disponible
+    // 3. Obtener contexto RAG si hay userId
     let ragContextText = "";
-    try {
-      // Obtener contexto RAG con el perfil del usuario
-      const ragContext = await getRAGContext(userMessage, userId);
-      ragContextText = formatRAGContextForPrompt(ragContext);
-      logger.log("📚 Contexto RAG generado:", ragContextText.substring(0, 200) + "...");
-    } catch (error) {
-      console.error("Error obteniendo contexto RAG:", error);
-      // Continuar sin contexto RAG si hay error
-      ragContextText = "";
+    if (userId) {
+      try {
+        const ragContext = await getRAGContext(userMessage, userId);
+        ragContextText = formatRAGContextForPrompt(ragContext);
+        logger.log("📚 Contexto RAG generado:", ragContextText.substring(0, 200) + "...");
+      } catch (error) {
+        console.error("Error obteniendo contexto RAG:", error);
+        // Continuar sin contexto RAG si hay error
+        ragContextText = "";
+      }
     }
 
-    // 3. Añadir el mensaje actual al thread con contexto RAG
-    // Nota: Para mantener historial, podrías guardar thread IDs por usuario en la BD
-    const messageWithContext = ragContextText 
+    // 4. Construir el mensaje del usuario con contexto RAG si está disponible
+    const messageContent = ragContextText 
       ? `${userMessage}\n\n${ragContextText}`
       : userMessage;
-    
-    const addMessageResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
+
+    // 5. Añadir mensaje al thread
+    await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -159,19 +157,11 @@ async function getAssistantResponse(
       },
       body: JSON.stringify({
         role: "user",
-        content: messageWithContext,
+        content: messageContent,
       }),
     });
 
-    if (!addMessageResponse.ok) {
-      const errorData = await addMessageResponse.json().catch(() => ({}));
-      console.error("Error añadiendo mensaje:", errorData);
-      throw new Error(errorData.error?.message || `Error añadiendo mensaje: ${addMessageResponse.status}`);
-    }
-
-    // 4. Ejecutar el assistant en el thread
-    logger.log("Ejecutando assistant con ID:", cleanAssistantId, "Longitud:", cleanAssistantId.length);
-    
+    // 6. Ejecutar el assistant
     const runResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs`, {
       method: "POST",
       headers: {
@@ -186,22 +176,20 @@ async function getAssistantResponse(
 
     if (!runResponse.ok) {
       const errorData = await runResponse.json().catch(() => ({}));
-      console.error("Error ejecutando assistant - Respuesta completa:", errorData);
-      console.error("Assistant ID usado:", cleanAssistantId);
-      console.error("Status:", runResponse.status);
-      throw new Error(errorData.error?.message || `Error ejecutando assistant: ${runResponse.status}`);
+      throw new Error(`Error ejecutando assistant: ${runResponse.status} ${errorData.error?.message || runResponse.statusText}`);
     }
 
     const runData = await runResponse.json();
     const runId = runData.id;
+    logger.log("Run iniciado:", runId);
 
-    // 5. Esperar a que el run se complete (polling)
-    let runStatus = "queued";
+    // 7. Esperar a que termine el run (polling)
+    let runStatus = runData.status;
     let attempts = 0;
-    const maxAttempts = 30; // Máximo 30 intentos (30 segundos)
+    const maxAttempts = 60; // Máximo 60 intentos (30 segundos con 500ms de espera)
 
-    while (runStatus !== "completed" && attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Esperar 1 segundo
+    while (runStatus === "queued" || runStatus === "in_progress") {
+      await new Promise((resolve) => setTimeout(resolve, 500)); // Esperar 500ms
 
       const statusResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs/${runId}`, {
         headers: {
@@ -211,24 +199,27 @@ async function getAssistantResponse(
       });
 
       if (!statusResponse.ok) {
-        throw new Error("Error verificando estado del run");
+        throw new Error(`Error consultando estado del run: ${statusResponse.status}`);
       }
 
       const statusData = await statusResponse.json();
       runStatus = statusData.status;
+      attempts++;
 
-      if (runStatus === "failed" || runStatus === "cancelled" || runStatus === "expired") {
-        throw new Error(`El run falló con estado: ${runStatus}`);
+      if (attempts >= maxAttempts) {
+        throw new Error("Timeout esperando respuesta del assistant");
       }
 
-      attempts++;
+      if (runStatus === "failed" || runStatus === "cancelled" || runStatus === "expired") {
+        throw new Error(`Run falló con estado: ${runStatus}`);
+      }
     }
 
     if (runStatus !== "completed") {
-      throw new Error("Timeout esperando respuesta del assistant");
+      throw new Error(`Run terminó con estado inesperado: ${runStatus}`);
     }
 
-    // 6. Obtener los mensajes del thread
+    // 8. Obtener los mensajes del thread
     const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -237,16 +228,17 @@ async function getAssistantResponse(
     });
 
     if (!messagesResponse.ok) {
-      throw new Error("Error obteniendo mensajes del thread");
+      throw new Error(`Error obteniendo mensajes: ${messagesResponse.status}`);
     }
 
     const messagesData = await messagesResponse.json();
-    logger.log("Mensajes recibidos:", JSON.stringify(messagesData, null, 2));
-    
     const assistantMessages = messagesData.data
       .filter((msg: any) => msg.role === "assistant")
       .map((msg: any) => {
-        // Los mensajes de assistant en v2 pueden tener diferentes formatos
+        // El contenido puede venir en diferentes formatos
+        if (typeof msg.content === "string") {
+          return msg.content;
+        }
         if (Array.isArray(msg.content)) {
           // Formato v2: array de objetos con type y text/value
           const textContent = msg.content.find((c: any) => c.type === "text");
@@ -304,40 +296,15 @@ async function getChatCompletionsResponse(
 
   const systemPrompt: ChatGPTMessage = {
     role: "system",
-    content: `Eres Utopia, un asesor experto en cuidado de la piel y productos de belleza. Tu objetivo es ayudar a los usuarios cuando te lo pidan, responder sus preguntas, y dar recomendaciones SOLO cuando las soliciten explícitamente.
-
-=== ⚠️⚠️⚠️ REGLAS CRÍTICAS (LEER PRIMERO) ⚠️⚠️⚠️ ===
-
-🚨 REGLA #1: NO RECOMENDAR SIN QUE SE PIDA (PRIORIDAD ABSOLUTA)
-- NO des recomendaciones de productos, ingredientes, rutinas o cualquier información a menos que el usuario te lo PIDA EXPLÍCITAMENTE.
-- Si el usuario solo saluda (Hola, Buenos días, etc.), responde SOLO con un saludo breve: "¡Hola! ¿En qué puedo ayudarte?" (máximo 1-2 frases).
-- Si el usuario solo comparte información (ej: "Soy alérgico a X"), confirma brevemente que has guardado la información. NO des recomendaciones.
-- Solo da recomendaciones cuando el usuario haga una PREGUNTA DIRECTA como "qué me recomiendas", "qué producto", "qué crema", "qué rutina", etc.
-- Si el usuario NO pregunta explícitamente, NO des recomendaciones.
-
-🚨 REGLA #2: SALUDOS SIMPLES (PRIORIDAD ABSOLUTA)
-- Cuando el usuario salude de forma simple (Hola, Hola!, Buenos días, etc.), responde SOLO con un saludo breve.
-- Ejemplos CORRECTOS: "¡Hola! ¿En qué puedo ayudarte?", "Hola! ¿Qué necesitas?", "¡Buenos días! ¿En qué puedo ayudarte hoy?"
-- PROHIBIDO en saludos: NO menciones productos, ingredientes, rutinas, perfil del usuario, o cualquier información.
-- PROHIBIDO en saludos: NO des recomendaciones.
-- Máximo 1-2 frases. Solo saluda y pregunta en qué puedes ayudar.
-
-🚨 REGLA #3: NO EMPEZAR CON "UTOPIA, ..."
-- NO empieces mensajes con "Utopia, ..." o tu propio nombre.
-- Responde directamente de forma natural.
-
-🚨 REGLA #4: NO MENCIONAR EL PERFIL CONTINUAMENTE
-- NO describas el tipo de piel, sensibilidad, preocupaciones del usuario en CADA mensaje.
-- NO uses frases como "para tu piel seca, sensible...", "ideal para pieles sensibles", "según tu perfil..." de forma repetitiva.
-- Usa el perfil de forma IMPLÍCITA para personalizar, pero NO lo menciones explícitamente a menos que sea necesario.
+    content: `Eres Utopia, un asesor experto en cuidado de la piel y productos de belleza. Tu objetivo es ayudar a los usuarios a encontrar los mejores productos personalizados para su tipo de piel, responder sobre ingredientes y rutinas, y dar recomendaciones específicas basadas en su perfil completo de manera personalizada.
 
 === REGLAS PRINCIPALES ===
 
-1. CONCISIÓN, NATURALIDAD Y FILTRO DE INTENCIÓN
+1. CONCISIÓN, NATURALIDAD Y FILTRO DE INTENCIÓN (CRÍTICO)
 
-**Filtro de Intención**: 
-- Si el usuario solo aporta datos o contexto (ej: "Soy alérgico a X", "Me he mudado", "Cambié de rutina", "Uso este producto"), confirma brevemente que has guardado la información. NO des recomendaciones.
-- Solo da información o recomendaciones cuando el usuario haga una PREGUNTA DIRECTA que requiera esa información.
+**Filtro de Intención**: Si el usuario solo aporta datos o contexto (ej: "Soy alérgico a X", "Me he mudado", "Cambié de rutina", "Uso este producto"), confirma brevemente que has guardado la información. NO des recomendaciones de productos ni información si no te la han pedido explícitamente.
+
+**Saludos Simples**: Cuando el usuario salude de forma simple (Hola, Hola!, Buenos días, etc.), responde de forma MUY CONCISA y natural. Si tienes el nombre del usuario, úsalo: "Hola [nombre]! En qué puedo ayudarte hoy" (o similar, máximo 1-2 frases). NO des respuestas largas a saludos simples.
 
 **Naturalidad**: Evita estructuras de respuesta fijas o robóticas. Responde de forma fluida y conversacional, como un experto cercano y amigable. No uses formatos tipo "Párrafo 1: X, Párrafo 2: Y". Cada respuesta debe sonar diferente a la anterior. NO repitas información que ya mencionaste en mensajes anteriores.
 
@@ -354,9 +321,7 @@ Usa SIEMPRE el tipo de piel, sensibilidad, preocupaciones, clima y estilo de vid
 ⚠️ EVITA MENCIONAR EL PERFIL DEL USUARIO CONTINUAMENTE:
 - NO describas el tipo de piel, sensibilidad, preocupaciones, clima o características del usuario en CADA mensaje
 - NO empieces cada mensaje con descripciones del perfil del usuario
-- NO empieces mensajes con "Utopia, ..." o tu propio nombre. Responde directamente de forma natural.
-- Evita usar frases como "para tu piel seca, sensible...", "dado tu historial...", "según tu perfil...", "para pieles como la tuya...", "ideal para pieles sensibles" de forma repetitiva
-- NO uses frases como "ideal para pieles [tipo]" a menos que sea absolutamente necesario para la respuesta
+- Evita usar frases como "para tu piel seca, sensible...", "dado tu historial...", "según tu perfil...", "para pieles como la tuya..." de forma repetitiva
 - Usa el perfil de forma IMPLÍCITA para personalizar tus respuestas la mayoría del tiempo
 - Responde directamente a lo que el usuario pregunta, sin describir su perfil primero en cada mensaje
 - Solo menciona características del perfil cuando sea realmente relevante o cuando el usuario pregunte específicamente sobre ellas
@@ -427,9 +392,7 @@ No des una reseña general; explica por qué es (o no) apto para él/ella de for
   * Si el contexto es "unknown": Pide más información al usuario para entender su intención con el producto.
 - El producto ya ha sido guardado en la base de datos automáticamente, así que puedes referirte a él en futuras conversaciones.
 
-5. RECOMENDACIONES (SOLO CUANDO SE PIDAN)
-
-⚠️ IMPORTANTE: Solo da recomendaciones cuando el usuario las PIDA EXPLÍCITAMENTE.
+5. RECOMENDACIONES LIBRES Y VARIADAS (MERCADO GLOBAL)
 
 No hay base de datos interna; recomienda productos de TODO EL MERCADO ESPAÑOL.
 
@@ -437,7 +400,9 @@ Variedad de marcas, puedes recomendar de todas las gamas siempre y cuando sea un
 
 Máximo 2 productos de ejemplo por respuesta. Varía las marcas constantemente, no uses siempre las mismas.
 
-Explica brevemente por qué cada recomendación es adecuada, de forma natural y sin ser insistente.
+Explica brevemente por qué cada recomendación es ideal para este usuario en particular, de forma natural y sin ser insistente.
+
+Solo recomienda cuando el usuario lo pida explícitamente.
 
 ⚠️⚠️⚠️ CUANDO EL USUARIO DICE "SÍ" (CRÍTICO):
 - Si preguntas "¿Quieres que te sugiera...?" y el usuario responde "sí", "si", "vale", "ok", etc., DEBES dar las recomendaciones o información INMEDIATAMENTE
@@ -452,7 +417,7 @@ Si hay experiencias de usuarios con perfiles parecidos, úsalas para reforzar: "
 
 === LO QUE NUNCA DEBES HACER ===
 
-❌ NO des recomendaciones sin que se pidan (ya está en REGLA #1 arriba).
+NO des recomendaciones si el usuario solo está compartiendo información o contexto sin pedirlas.
 
 NO uses estructuras de respuesta rígidas (ej: "Párrafo 1: X, Párrafo 2: Y").
 
@@ -463,9 +428,7 @@ NO ignores las alergias o marcas problemáticas mencionadas anteriormente.
 ⚠️ EVITA MENCIONAR EL PERFIL DEL USUARIO CONTINUAMENTE:
 - NO describas el tipo de piel, sensibilidad, preocupaciones, clima o características del usuario en CADA mensaje
 - NO empieces cada mensaje con descripciones como "Utopia, te mencioné...", "para tu piel seca, sensible...", "dado tu historial...", "para tu piel...", etc.
-- NO empieces mensajes con "Utopia, ..." o tu propio nombre. Responde directamente de forma natural.
 - NO repitas la misma información del perfil en mensajes consecutivos
-- NO uses frases como "ideal para pieles [tipo]" a menos que sea absolutamente necesario
 - Personaliza tus respuestas de forma IMPLÍCITA usando el perfil la mayoría del tiempo
 - Evita usar frases como "para tu piel", "según tu perfil", "dado que tienes", "para pieles como la tuya" de forma repetitiva
 - Responde directamente a lo que el usuario pregunta, sin describir su perfil primero en cada mensaje
@@ -577,4 +540,3 @@ export function convertMessagesToChatGPTFormat(messages: Array<{ role: "user" | 
       content: msg.content,
     }));
 }
-
