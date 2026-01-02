@@ -31,9 +31,12 @@ async function saveGlobalCorrections(
         });
 
       if (error) {
-        console.error("Error guardando corrección global:", error);
-        // Continuar con las siguientes
+        console.error("❌ Error guardando corrección global:", error);
+        console.error("Detalles del error:", JSON.stringify(error, null, 2));
+        // Continuar con las siguientes pero lanzar el error para que se vea
+        throw new Error(`Error guardando corrección global: ${error.message || JSON.stringify(error)}`);
       } else {
+        console.log(`✅ Corrección global guardada correctamente (pendiente de verificación): ${correction.whatWasWrong}`);
         logger.log(`✅ Corrección global guardada (pendiente de verificación): ${correction.whatWasWrong}`);
       }
     }
@@ -822,11 +825,15 @@ export async function updateUserProfileFromChat(
       // Guardar correcciones globales en la tabla de correcciones globales
       if (globalCorrections.length > 0) {
         try {
+          console.log(`📝 Intentando guardar ${globalCorrections.length} corrección(es) global(es)...`);
+          console.log("Detalles de las correcciones:", JSON.stringify(globalCorrections, null, 2));
           await saveGlobalCorrections(userId, globalCorrections);
-          console.log(`✅ ${globalCorrections.length} corrección(es) global(es) guardada(s) para verificación`);
-        } catch (error) {
-          console.error("Error guardando correcciones globales:", error);
-          // Continuar sin bloquear
+          console.log(`✅ ${globalCorrections.length} corrección(es) global(es) guardada(s) correctamente para verificación`);
+        } catch (error: any) {
+          console.error("❌ Error guardando correcciones globales:", error);
+          console.error("Stack trace:", error?.stack);
+          // Mostrar el error pero continuar sin bloquear el flujo principal
+          // El error ya se lanzó en saveGlobalCorrections para debugging
         }
       }
     }

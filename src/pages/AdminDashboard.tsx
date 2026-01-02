@@ -34,9 +34,10 @@ export default function AdminDashboard() {
   const [selectedCorrection, setSelectedCorrection] = useState<string | null>(null);
 
   // Obtener todas las correcciones
-  const { data: corrections, isLoading } = useQuery({
+  const { data: corrections, isLoading, error: queryError } = useQuery({
     queryKey: ["globalCorrections"],
     queryFn: getAllGlobalCorrections,
+    retry: 2,
   });
 
   // Mutaciones
@@ -102,6 +103,27 @@ export default function AdminDashboard() {
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             Debes iniciar sesión para acceder al panel de administración.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (queryError) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Error al cargar las correcciones: {queryError instanceof Error ? queryError.message : "Error desconocido"}
+            <br />
+            <br />
+            <strong>Posibles causas:</strong>
+            <ul className="list-disc list-inside mt-2">
+              <li>La tabla bot_global_corrections no existe. Ejecuta el script SQL: CREAR_TABLA_BOT_CORRECTIONS_GLOBALES.sql</li>
+              <li>Problemas de permisos RLS en Supabase</li>
+              <li>Error de conexión a la base de datos</li>
+            </ul>
           </AlertDescription>
         </Alert>
       </div>

@@ -26,17 +26,34 @@ export async function getAllGlobalCorrections(): Promise<GlobalCorrection[]> {
     throw new Error("Supabase no configurado");
   }
 
-  const { data, error } = await supabase
-    .from("bot_global_corrections")
-    .select("*")
-    .order("created_at", { ascending: false });
+  try {
+    const { data, error } = await supabase
+      .from("bot_global_corrections")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("Error obteniendo correcciones globales:", error);
+    if (error) {
+      console.error("❌ Error obteniendo correcciones globales:", error);
+      console.error("Detalles del error:", JSON.stringify(error, null, 2));
+      // Si el error es que la tabla no existe, devolver array vacío
+      if (error.code === "42P01" || error.message?.includes("does not exist")) {
+        console.warn("⚠️ La tabla bot_global_corrections no existe. Ejecuta el script SQL para crearla.");
+        return [];
+      }
+      throw error;
+    }
+
+    console.log(`📊 Obtenidas ${data?.length || 0} correcciones globales de la base de datos`);
+    return data || [];
+  } catch (error: any) {
+    console.error("❌ Error en getAllGlobalCorrections:", error);
+    // Si es un error de tabla no existe, devolver array vacío en lugar de lanzar error
+    if (error?.code === "42P01" || error?.message?.includes("does not exist")) {
+      console.warn("⚠️ La tabla bot_global_corrections no existe. Ejecuta el script SQL para crearla.");
+      return [];
+    }
     throw error;
   }
-
-  return data || [];
 }
 
 /**
