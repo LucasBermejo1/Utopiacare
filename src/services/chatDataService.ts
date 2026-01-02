@@ -145,7 +145,8 @@ Extrae SOLO la siguiente información en formato JSON (si existe):
     {
       "whatWasWrong": "qué dijo mal el bot o qué comportamiento incorrecto tuvo",
       "correctInfo": "información correcta o comportamiento esperado",
-      "context": "contexto de la corrección (ej: 'cuando recomiendas productos', 'cuando describes mi piel')"
+      "context": "contexto de la corrección (ej: 'cuando recomiendas productos', 'cuando describes mi piel')",
+      "isGlobal": true/false
     }
   ],
   "botFeedback": {
@@ -213,11 +214,21 @@ IMPORTANTE - EXTRAER TODAS LAS EXPERIENCIAS DEL USUARIO:
     - "whatWasWrong": qué dijo mal el bot o qué comportamiento tuvo que fue incorrecto
     - "correctInfo": información correcta o comportamiento esperado
     - "context": contexto de la corrección (cuándo/por qué lo corrigió)
+    - "isGlobal": true/false - Si es TRUE, significa que es un error que el bot puede cometer con CUALQUIER usuario y debe corregirse para TODOS. Si es FALSE, es una preferencia individual del usuario.
+  * DETECCIÓN DE CORRECCIONES GLOBALES vs INDIVIDUALES:
+    - CORRECCIÓN GLOBAL (isGlobal: true): Si el usuario indica que es un error general del bot que puede cometer con otros usuarios:
+      * Ejemplos: "esto lo haces mal siempre", "esto es un error que cometes", "esto deberías corregirlo para todos", "esto lo haces mal con todo el mundo", "esto es incorrecto en general", "esto es un problema del bot", "esto deberías saberlo siempre"
+      * También si el usuario corrige información objetiva incorrecta (ej: "el ácido hialurónico no se usa así", "eso no es correcto sobre los ingredientes")
+    - CORRECCIÓN INDIVIDUAL (isGlobal: false): Si el usuario indica que es una preferencia personal:
+      * Ejemplos: "no me digas que tengo piel seca, tengo piel grasa" (corrección de información personal)
+      * "No me gusta cuando me describes mi perfil" (preferencia personal)
+      * "No me recomiendes productos con fragancia" (preferencia personal del usuario)
   * Ejemplos de correcciones al bot:
-    - "No me digas que tengo piel seca, tengo piel grasa" → whatWasWrong: "dijo que tengo piel seca", correctInfo: "tengo piel grasa", context: "descripción del tipo de piel"
-    - "No me recomiendes productos con fragancia" → whatWasWrong: "recomendó productos con fragancia", correctInfo: "no recomendar productos con fragancia", context: "recomendaciones de productos"
-    - "No me gusta cuando me describes mi perfil en cada mensaje" → whatWasWrong: "describe el perfil en cada mensaje", correctInfo: "no describir el perfil continuamente", context: "estilo de comunicación"
-    - "No me des recomendaciones si solo saludo" → whatWasWrong: "da recomendaciones en saludos", correctInfo: "solo saludar sin dar recomendaciones", context: "respuesta a saludos simples"
+    - "No me digas que tengo piel seca, tengo piel grasa" → whatWasWrong: "dijo que tengo piel seca", correctInfo: "tengo piel grasa", context: "descripción del tipo de piel", isGlobal: false (es información personal)
+    - "No me recomiendes productos con fragancia" → whatWasWrong: "recomendó productos con fragancia", correctInfo: "no recomendar productos con fragancia", context: "recomendaciones de productos", isGlobal: false (preferencia personal)
+    - "No me gusta cuando me describes mi perfil en cada mensaje" → whatWasWrong: "describe el perfil en cada mensaje", correctInfo: "no describir el perfil continuamente", context: "estilo de comunicación", isGlobal: true (si el usuario dice "esto lo haces mal siempre" o similar)
+    - "No me des recomendaciones si solo saludo" → whatWasWrong: "da recomendaciones en saludos", correctInfo: "solo saludar sin dar recomendaciones", context: "respuesta a saludos simples", isGlobal: true (error general del bot)
+    - "El ácido hialurónico no se aplica así, eso es incorrecto" → whatWasWrong: "información incorrecta sobre ácido hialurónico", correctInfo: "información correcta sobre aplicación", context: "información técnica", isGlobal: true (información objetiva incorrecta)
   * Si el usuario da FEEDBACK sobre el comportamiento del bot (positivo o negativo), inclúyelo en "botFeedback"
 - Si el usuario menciona su TIPO DE PIEL (ej: "tengo piel grasa", "mi piel es seca"), inclúyelo en "skinType"
 - Si menciona SENSIBILIDAD (ej: "mi piel es sensible", "tengo rosácea"), inclúyelo en "skinSensitivity"

@@ -306,9 +306,28 @@ async function getChatCompletionsResponse(
     logger.log("🚨 Saludo simple detectado - NO se añadirá contexto RAG");
   }
 
+  // Obtener correcciones globales verificadas
+  const globalCorrections = await getGlobalCorrections();
+  
+  let globalCorrectionsText = "";
+  if (globalCorrections.length > 0) {
+    globalCorrectionsText = "\n\n=== 🚨 CORRECCIONES GLOBALES VERIFICADAS (APLICAN A TODOS LOS USUARIOS) 🚨 ===\n";
+    globalCorrectionsText += "Estas correcciones han sido verificadas y DEBES aplicarlas en TODAS tus respuestas:\n\n";
+    globalCorrections.forEach((correction, index) => {
+      globalCorrectionsText += `${index + 1}. ❌ ERROR: ${correction.whatWasWrong}\n`;
+      globalCorrectionsText += `   ✅ CORRECCIÓN: ${correction.correctInfo}\n`;
+      if (correction.context) {
+        globalCorrectionsText += `   📝 CONTEXTO: ${correction.context}\n`;
+      }
+      globalCorrectionsText += "\n";
+    });
+    globalCorrectionsText += "⚠️⚠️⚠️ IMPORTANTE: Estas correcciones son ABSOLUTAS y aplican a TODOS los usuarios. NO vuelvas a cometer estos errores.\n";
+  }
+
   const systemPrompt: ChatGPTMessage = {
     role: "system",
     content: `Eres Utopia, un asesor experto en cuidado de la piel y productos de belleza. Tu objetivo es ayudar a los usuarios a encontrar los mejores productos personalizados para su tipo de piel, responder sobre ingredientes y rutinas, y dar recomendaciones específicas basadas en su perfil completo de manera personalizada.
+${globalCorrectionsText}
 
 === REGLAS PRINCIPALES ===
 
