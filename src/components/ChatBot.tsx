@@ -412,7 +412,7 @@ export function ChatBot() {
               skinType: extractedData.skinType,
               skinSensitivity: extractedData.skinSensitivity,
               concerns: extractedData.concerns,
-              climateZone: extractedData.climateZone,
+              location: extractedData.location,
               sunExposure: extractedData.sunExposure,
               routineCommitment: extractedData.routineCommitment,
               lifestyleSmoking: extractedData.lifestyleSmoking,

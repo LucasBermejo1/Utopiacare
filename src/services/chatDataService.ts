@@ -76,7 +76,7 @@ export async function extractRelevantDataFromMessage(
   age?: number;
   skinType?: "normal" | "dry" | "oily" | "combination" | "sensitive";
   skinSensitivity?: "resistant" | "sensitive" | "rosacea";
-  climateZone?: "dry" | "humid" | "extreme";
+  location?: string;
   sunExposure?: "low" | "medium" | "high";
   routineCommitment?: "minimalist" | "intermediate" | "advanced";
   lifestyleSmoking?: boolean;
