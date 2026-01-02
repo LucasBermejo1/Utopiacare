@@ -968,7 +968,11 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
   prompt += "=== FIN DEL CONTEXTO PERSONALIZADO ===\n\n";
   prompt += "INSTRUCCIONES FINALES (CRÍTICO):\n";
   prompt += "⚠️ NO HAY PRODUCTOS DE LA BASE DE DATOS EN ESTE CONTEXTO - NO LOS MENCIONES\n";
-  prompt += "⚠️ NO debes mencionar productos específicos de la base de datos de Utopia\n";
+  prompt += "⚠️ NO debes mencionar productos específicos de la base de datos de Utopia\n\n";
+  prompt += "🚨🚨🚨 REGLA CRÍTICA PARA SALUDOS SIMPLES:\n";
+  prompt += "Si el usuario solo dice 'Hola', 'Buenos días', 'Hola!', etc., responde SOLO con un saludo breve (máximo 1-2 frases).\n";
+  prompt += "❌ PROHIBIDO en saludos: NO des recomendaciones, NO menciones productos, NO describas el perfil, NO des información adicional.\n";
+  prompt += "✅ Ejemplos correctos: '¡Hola! ¿En qué puedo ayudarte?', 'Hola! ¿Qué necesitas?'\n\n";
   
   prompt += "\n⚠️ EVITA MENCIONAR EL PERFIL DEL USUARIO CONTINUAMENTE:\n";
   prompt += "- NO describas el tipo de piel, sensibilidad, preocupaciones, clima o características del usuario en CADA mensaje\n";
