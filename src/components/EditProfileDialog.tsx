@@ -319,41 +319,31 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
 
               {/* Preocupaciones */}
               <div className="space-y-4">
-                <Label className="text-lg font-semibold">
-                  Preocupaciones principales (selecciona hasta 2)
-                </Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {MAIN_CONCERNS.map((concern) => {
-                    const isSelected = concerns.includes(concern);
-                    const isDisabled = !isSelected && concerns.length >= 2;
-                    return (
-                      <label
-                        key={concern}
-                        className={cn(
-                          "flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all",
-                          isSelected
-                            ? "border-accent bg-accent/5"
-                            : isDisabled
-                            ? "border-border opacity-50 cursor-not-allowed"
-                            : "border-border hover:border-accent/50"
-                        )}
-                      >
-                        <Checkbox
-                          id={concern}
-                          checked={isSelected}
-                          onCheckedChange={() => handleConcernToggle(concern)}
-                          disabled={isDisabled}
-                        />
-                        <Label htmlFor={concern} className="cursor-pointer flex-1 font-normal">
-                          {concern}
-                        </Label>
-                      </label>
-                    );
-                  })}
+                <div>
+                  <Label className="text-lg font-semibold">
+                    Preocupaciones principales
+                  </Label>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Escribe todas las preocupaciones que tengas sobre tu piel. Puedes separarlas por comas o escribirlas en líneas diferentes.
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1 italic">
+                    Ejemplos: Acné, Manchas oscuras, Arrugas, Piel apagada, Deshidratación, Poros abiertos, Rosácea...
+                  </p>
                 </div>
+                <Textarea
+                  placeholder="Escribe tus preocupaciones separadas por comas o en líneas diferentes. Ej: Acné, Manchas oscuras, Arrugas..."
+                  value={concernsText}
+                  onChange={(e) => {
+                    const text = e.target.value;
+                    setConcernsText(text);
+                    setConcerns(processConcernsText(text));
+                  }}
+                  rows={4}
+                  className="resize-none"
+                />
                 {concerns.length > 0 && (
                   <p className="text-sm text-muted-foreground">
-                    Seleccionadas: <strong>{concerns.length}/2</strong>
+                    Preocupaciones detectadas: <strong>{concerns.length}</strong>
                   </p>
                 )}
               </div>
