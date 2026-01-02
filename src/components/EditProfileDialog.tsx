@@ -80,7 +80,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
   const [skinSensitivity, setSkinSensitivity] = useState<string>("");
   const [concerns, setConcerns] = useState<string[]>([]);
   const [concernsText, setConcernsText] = useState<string>("");
-  const [climateZone, setClimateZone] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
   const [sunExposure, setSunExposure] = useState<string>("");
   const [productHistory, setProductHistory] = useState<string>("");
   const [routineCommitment, setRoutineCommitment] = useState<string>("");
@@ -115,7 +115,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
         const concernsArray = profile.concerns || [];
         setConcerns(concernsArray);
         setConcernsText(concernsArray.join(", "));
-        setClimateZone(profile.climate_zone || "");
+        setLocation(profile.location || "");
         setSunExposure(profile.sun_exposure || "");
         setProductHistory(profile.product_history || "");
         setRoutineCommitment(profile.routine_commitment || "");
@@ -179,7 +179,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
         skin_type: skinType as any,
         skin_sensitivity: skinSensitivity || null,
         concerns: processedConcerns,
-        climate_zone: climateZone || null,
+        location: location || null,
         sun_exposure: sunExposure || null,
         product_history: productHistory || null,
         routine_commitment: routineCommitment || null,
@@ -385,34 +385,23 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
                 )}
               </div>
 
-              {/* Zona climática */}
+              {/* Ubicación */}
               <div className="space-y-4">
-                <Label className="text-lg font-semibold">
-                  Zona climática
+                <Label htmlFor="location" className="text-lg font-semibold">
+                  Ubicación
                 </Label>
-                <RadioGroup value={climateZone} onValueChange={setClimateZone}>
-                  <div className="grid grid-cols-1 gap-3">
-                    {CLIMATE_ZONES.map((zone) => (
-                      <label
-                        key={zone.value}
-                        className={cn(
-                          "flex items-start space-x-3 p-4 border-2 rounded-lg cursor-pointer transition-all",
-                          climateZone === zone.value
-                            ? "border-accent bg-accent/5"
-                            : "border-border hover:border-accent/50"
-                        )}
-                      >
-                        <RadioGroupItem value={zone.value} id={zone.value} className="mt-1" />
-                        <div className="flex-1 ml-3">
-                          <Label htmlFor={zone.value} className="cursor-pointer font-normal">
-                            {zone.label}
-                          </Label>
-                          <p className="text-sm text-muted-foreground">{zone.sublabel}</p>
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                </RadioGroup>
+                <Input
+                  id="location"
+                  type="text"
+                  placeholder="Ej: Madrid, Barcelona, Valencia, Sevilla..."
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="text-base"
+                  maxLength={100}
+                />
+                <p className="text-sm text-muted-foreground">
+                  Indica la ciudad o región donde resides habitualmente.
+                </p>
               </div>
 
               {/* Exposición solar */}

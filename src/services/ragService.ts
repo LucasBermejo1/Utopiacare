@@ -742,15 +742,11 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
     }
     
     // Información ambiental
-    if (context.userProfile.climate_zone || context.userProfile.sun_exposure) {
+    if (context.userProfile.location || context.userProfile.sun_exposure) {
       prompt += "\nCONTEXTO AMBIENTAL:\n";
-      if (context.userProfile.climate_zone) {
-        const climateMap: Record<string, string> = {
-          dry: "Clima Seco (Madrid, Castilla) - Agua con cal, puede resecar más la piel",
-          humid: "Clima Húmedo / Costa (Barcelona, Valencia, Galicia) - Agua con mucha cal",
-          extreme: "Clima Extremo (Montaña o Canarias) - Condiciones extremas"
-        };
-        prompt += `- Zona climática: ${climateMap[context.userProfile.climate_zone] || context.userProfile.climate_zone}\n`;
+      if (context.userProfile.location) {
+        prompt += `- Ubicación: ${context.userProfile.location}\n`;
+        prompt += "💡 Considera el clima y la calidad del agua de esta zona para personalizar las recomendaciones.\n";
       }
       if (context.userProfile.sun_exposure) {
         const sunMap: Record<string, string> = {

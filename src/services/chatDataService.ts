@@ -33,18 +33,18 @@ export async function saveChatMessage(
   }
 
   try {
-    const { error } = await supabase.from("chat_conversations").insert({
-      user_id: userId,
-      message_id: message.messageId,
-      role: message.role,
-      content: message.content,
-      timestamp: message.timestamp.toISOString(),
-      metadata: message.metadata || {},
-    });
+  const { error } = await supabase.from("chat_conversations").insert({
+    user_id: userId,
+    message_id: message.messageId,
+    role: message.role,
+    content: message.content,
+    timestamp: message.timestamp.toISOString(),
+    metadata: message.metadata || {},
+  });
 
-    if (error) {
-      console.error("Error guardando mensaje:", error);
-      throw new Error(`Error al guardar mensaje: ${error.message}`);
+  if (error) {
+    console.error("Error guardando mensaje:", error);
+    throw new Error(`Error al guardar mensaje: ${error.message}`);
     }
 
     // Log para confirmar que se guardó correctamente
@@ -140,7 +140,7 @@ Extrae SOLO la siguiente información en formato JSON (si existe):
   "age": número (edad) | null,
   "skinType": "normal" | "dry" | "oily" | "combination" | "sensitive" | null,
   "skinSensitivity": "resistant" | "sensitive" | "rosacea" | null,
-  "climateZone": "dry" | "humid" | "extreme" | null,
+  "location": "texto libre (ciudad o región)" | null,
   "sunExposure": "low" | "medium" | "high" | null,
   "routineCommitment": "minimalist" | "intermediate" | "advanced" | null,
   "lifestyleSmoking": true | false | null,
@@ -184,7 +184,7 @@ IMPORTANTE:
 - Si el usuario menciona su TIPO DE PIEL (ej: "tengo piel grasa", "mi piel es seca"), inclúyelo en "skinType"
 - Si menciona SENSIBILIDAD (ej: "mi piel es sensible", "tengo rosácea"), inclúyelo en "skinSensitivity"
 - Si menciona PREOCUPACIONES principales (ej: "me preocupa el acné", "quiero prevenir arrugas"), inclúyelas en "concerns"
-- Si menciona ZONA CLIMÁTICA (ej: "vivo en un clima seco"), inclúyelo en "climateZone"
+- Si el usuario menciona dónde VIVE (ej: "vivo en Madrid", "soy de Barcelona", "resido en Valencia"), inclúyelo en "location"
 - Si menciona EXPOSICIÓN SOLAR (ej: "me expongo mucho al sol"), inclúyelo en "sunExposure"
 - Si menciona COMPROMISO CON RUTINA (ej: "soy minimalista"), inclúyelo en "routineCommitment"
 - Si menciona que FUMA, inclúyelo en "lifestyleSmoking" (true)
@@ -443,7 +443,7 @@ export async function updateUserProfileFromChat(
     skinType?: "normal" | "dry" | "oily" | "combination" | "sensitive";
     skinSensitivity?: "resistant" | "sensitive" | "rosacea";
     concerns?: string[];
-    climateZone?: "dry" | "humid" | "extreme";
+    location?: string;
     sunExposure?: "low" | "medium" | "high";
     routineCommitment?: "minimalist" | "intermediate" | "advanced";
     lifestyleSmoking?: boolean;
@@ -519,9 +519,9 @@ export async function updateUserProfileFromChat(
       updates.concerns = newConcerns.slice(0, 2);
     }
 
-    // Actualizar zona climática
-    if (extractedData.climateZone) {
-      updates.climate_zone = extractedData.climateZone;
+    // Actualizar ubicación
+    if (extractedData.location) {
+      updates.location = extractedData.location.trim();
     }
 
     // Actualizar exposición solar

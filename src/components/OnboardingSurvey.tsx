@@ -36,11 +36,6 @@ const SKIN_SENSITIVITY = [
   { value: "rosacea", label: "Con tendencia a rojeces (Rosácea/Cuperosis)" },
 ];
 
-const CLIMATE_ZONES = [
-  { value: "dry", label: "Clima Seco", sublabel: "Madrid, Castilla" },
-  { value: "humid", label: "Clima Húmedo / Costa", sublabel: "Barcelona, Valencia, Galicia" },
-  { value: "extreme", label: "Clima Extremo", sublabel: "Montaña o Canarias" },
-];
 
 const SUN_EXPOSURE = [
   { value: "low", label: "Baja", sublabel: "Trabajo en oficina, salgo poco" },
@@ -63,7 +58,7 @@ const STEP_TITLES = [
   "Tipo de piel",
   "Sensibilidad",
   "Preocupaciones",
-  "Zona climática",
+  "Ubicación",
   "Exposición solar",
   "Historial de productos",
   "Compromiso con rutina",
@@ -129,7 +124,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
       case 6:
         return !!(data.mainConcernsText && data.mainConcernsText.trim().length > 0);
       case 7:
-        return !!data.climateZone;
+        return !!(data.location && data.location.trim().length > 0);
       case 8:
         return !!data.sunExposure;
       case 9:
@@ -174,7 +169,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
         skin_type: data.skinType,
         skin_sensitivity: data.skinSensitivity,
         concerns: processedConcerns,
-        climate_zone: data.climateZone,
+        location: data.location || null,
         sun_exposure: data.sunExposure,
         product_history: data.productHistory || null,
         routine_commitment: data.routineCommitment,
@@ -425,41 +420,20 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
           <div className="space-y-6">
             <div>
               <Label className="text-xl font-semibold text-foreground">
-                ¿En qué zona de España resides habitualmente? *
+                ¿Dónde vives? *
               </Label>
               <p className="text-sm text-muted-foreground mt-2">
-                <strong>Clave para saberlo:</strong> Esto nos ayuda a saber la dureza del agua con la que te lavas. En la costa mediterránea el agua tiene mucha cal y reseca más la barrera de la piel que en el centro o norte.
+                Indica la ciudad o región donde resides habitualmente. Esto nos ayuda a personalizar las recomendaciones según el clima y la calidad del agua de tu zona.
               </p>
             </div>
-            <RadioGroup
-              value={data.climateZone}
-              onValueChange={(value) => updateData("climateZone", value)}
-            >
-              <div className="grid grid-cols-1 gap-4">
-                {CLIMATE_ZONES.map((zone) => (
-                  <label
-                    key={zone.value}
-                    className={cn(
-                      "relative flex items-start space-x-4 p-5 border-2 rounded-xl cursor-pointer transition-all duration-200",
-                      data.climateZone === zone.value
-                        ? "border-accent bg-accent/5 shadow-md"
-                        : "border-border hover:border-accent/50 hover:bg-accent/5"
-                    )}
-                  >
-                    <RadioGroupItem value={zone.value} id={zone.value} className="mt-1" />
-                    <div className="flex items-start gap-3 flex-1 ml-3">
-                      <div>
-                        <div className="font-medium text-base">{zone.label}</div>
-                        <div className="text-sm text-muted-foreground mt-0.5">{zone.sublabel}</div>
-                      </div>
-                    </div>
-                    {data.climateZone === zone.value && (
-                      <CheckCircle2 className="h-5 w-5 text-accent absolute top-3 right-3" />
-                    )}
-                  </label>
-                ))}
-              </div>
-            </RadioGroup>
+            <Input
+              type="text"
+              placeholder="Ej: Madrid, Barcelona, Valencia, Sevilla..."
+              value={data.location || ""}
+              onChange={(e) => updateData("location", e.target.value)}
+              className="text-lg py-6"
+              maxLength={100}
+            />
           </div>
         );
 

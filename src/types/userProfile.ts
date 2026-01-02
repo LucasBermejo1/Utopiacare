@@ -18,8 +18,8 @@ export interface UserProfile {
   // Preocupaciones principales (máximo 2)
   concerns: string[];
   
-  // Zona climática
-  climate_zone?: "dry" | "humid" | "extreme" | null;
+  // Ubicación (ciudad o región donde vive)
+  location?: string | null;
   
   // Exposición solar
   sun_exposure?: "low" | "medium" | "high" | null;
@@ -96,8 +96,8 @@ export interface OnboardingData {
   // Paso 6: Preocupaciones (máximo 2)
   mainConcerns: string[];
   
-  // Paso 7: Zona climática
-  climateZone: "dry" | "humid" | "extreme";
+  // Paso 7: Ubicación
+  location: string;
   
   // Paso 8: Exposición solar
   sunExposure: "low" | "medium" | "high";
