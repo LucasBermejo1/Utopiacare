@@ -10,6 +10,10 @@
 --
 -- ============================================
 
+-- Primero, eliminar la restricción CHECK si existe
+ALTER TABLE public.user_profiles
+DROP CONSTRAINT IF EXISTS user_profiles_climate_zone_check;
+
 -- Renombrar la columna climate_zone a location
 ALTER TABLE public.user_profiles
 RENAME COLUMN climate_zone TO location;
