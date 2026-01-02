@@ -770,8 +770,32 @@ export async function updateUserProfileFromChat(
 
     // Guardar correcciones directas al bot
     if (extractedData.botCorrections && extractedData.botCorrections.length > 0) {
-      const individualCorrections = extractedData.botCorrections.filter(c => !c.isGlobal);
-      const globalCorrections = extractedData.botCorrections.filter(c => c.isGlobal === true);
+      // Si isGlobal no está definido, intentar inferirlo del contexto
+      const processedCorrections = extractedData.botCorrections.map(correction => {
+        // Si isGlobal no está definido, inferirlo:
+        // - Si corrige información personal (menciona "yo", "mi", "tengo", "soy"), es individual
+        // - Si corrige comportamiento del bot o información objetiva, es global
+        if (correction.isGlobal === undefined) {
+          const whatWasWrongLower = (correction.whatWasWrong || "").toLowerCase();
+          const correctInfoLower = (correction.correctInfo || "").toLowerCase();
+          const contextLower = (correction.context || "").toLowerCase();
+          
+          // Palabras que indican información personal
+          const personalIndicators = ["yo tengo", "mi piel", "mi tipo", "soy", "tengo", "mi perfil", "mi información"];
+          const isPersonal = personalIndicators.some(indicator => 
+            whatWasWrongLower.includes(indicator) || 
+            correctInfoLower.includes(indicator) ||
+            contextLower.includes(indicator)
+          );
+          
+          // Si no es claramente personal, asumir que es global (comportamiento del bot)
+          correction.isGlobal = !isPersonal;
+        }
+        return correction;
+      });
+      
+      const individualCorrections = processedCorrections.filter(c => c.isGlobal === false);
+      const globalCorrections = processedCorrections.filter(c => c.isGlobal === true);
       
       // Guardar correcciones individuales en el perfil del usuario
       if (individualCorrections.length > 0) {
@@ -785,6 +809,7 @@ export async function updateUserProfileFromChat(
       if (globalCorrections.length > 0) {
         try {
           await saveGlobalCorrections(userId, globalCorrections);
+          console.log(`✅ ${globalCorrections.length} corrección(es) global(es) guardada(s) para verificación`);
         } catch (error) {
           console.error("Error guardando correcciones globales:", error);
           // Continuar sin bloquear
