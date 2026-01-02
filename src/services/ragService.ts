@@ -882,40 +882,55 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
 
   // Incluir historial completo de conversación si está disponible
   if (context.conversationHistory && context.conversationHistory.length > 0) {
-    prompt += "\n\n=== HISTORIAL COMPLETO DE CONVERSACIÓN (CRÍTICO) ===\n\n";
-    prompt += "⚠️⚠️⚠️ MUY IMPORTANTE: Este es el historial completo de la conversación con el usuario.\n";
-    prompt += "DEBES USAR ESTE HISTORIAL para dar respuestas ESPECÍFICAS y PERSONALIZADAS.\n\n";
-    prompt += "REGLAS OBLIGATORIAS:\n";
-    prompt += "1. Si el usuario menciona un producto específico, BUSCA en el historial si ya lo mencionó antes\n";
-    prompt += "2. Si el usuario pregunta sobre un producto, USA la información del historial sobre ese producto\n";
-    prompt += "3. Si el usuario mencionó alergias, ingredientes problemáticos, o preocupaciones, ÚSALOS en tu respuesta\n";
-    prompt += "4. Si el usuario mencionó productos que le gustan o no le gustan, TENLOS EN CUENTA\n";
-    prompt += "5. NO des respuestas genéricas - SIEMPRE personaliza basándote en el historial\n";
-    prompt += "6. Si el usuario pregunta sobre algo que ya discutiste, referencia la conversación anterior\n\n";
+    prompt += "\n\n=== ⚠️⚠️⚠️ CONTEXTO INMEDIATO DE LA CONVERSACIÓN (CRÍTICO) ⚠️⚠️⚠️ ===\n\n";
+    prompt += "🚨 REGLA ABSOLUTA: El usuario se refiere SIEMPRE al contexto inmediato de la conversación.\n";
+    prompt += "Si acabas de mencionar un producto y el usuario dice 'me da alergia', se refiere a ESE producto que acabas de mencionar.\n";
+    prompt += "Si acabas de recomendar algo y el usuario responde, se refiere a LO QUE ACABAS DE DECIR.\n\n";
     
-    // Mostrar los últimos mensajes (máximo 30 para tener más contexto)
-    const recentHistory = context.conversationHistory.slice(-30);
-    prompt += "HISTORIAL DE MENSAJES (del más antiguo al más reciente):\n\n";
-    recentHistory.forEach((msg, index) => {
-      const roleLabel = msg.role === "user" ? "👤 USUARIO" : "🤖 ASISTENTE";
-      const dateStr = msg.timestamp.toLocaleDateString("es-ES", { 
-        day: "2-digit", 
-        month: "2-digit", 
-        hour: "2-digit", 
-        minute: "2-digit" 
+    // Separar historial en contexto inmediato (últimos 5-10 mensajes) y contexto general
+    const allHistory = context.conversationHistory.slice(-30);
+    const immediateContext = allHistory.slice(-10); // Últimos 10 mensajes
+    const generalContext = allHistory.slice(0, -10); // Mensajes anteriores
+    
+    // CONTEXTO INMEDIATO (más importante)
+    if (immediateContext.length > 0) {
+      prompt += "🔥 CONTEXTO INMEDIATO (ÚLTIMOS MENSAJES - MÁXIMA PRIORIDAD):\n";
+      prompt += "Estos son los mensajes MÁS RECIENTES. El usuario se refiere a estos cuando habla.\n\n";
+      immediateContext.forEach((msg, index) => {
+        const roleLabel = msg.role === "user" ? "👤 USUARIO" : "🤖 TÚ (ASISTENTE)";
+        const position = immediateContext.length - index; // Invertir para mostrar más reciente primero
+        prompt += `[MENSAJE ${position}] ${roleLabel}:\n`;
+        prompt += `${msg.content}\n\n`;
       });
-      prompt += `[${index + 1}] ${roleLabel} (${dateStr}):\n`;
-      prompt += `${msg.content}\n\n`;
-    });
+      prompt += "⚠️⚠️⚠️ IMPORTANTE:\n";
+      prompt += "- Si el usuario dice 'me da alergia', 'no me gusta', 'me funciona bien', etc., se refiere al ÚLTIMO producto o tema que MENCIONASTE\n";
+      prompt += "- Si el usuario pregunta sobre algo sin especificar, busca en los ÚLTIMOS MENSAJES qué acabas de mencionar\n";
+      prompt += "- NO preguntes '¿qué producto?' o '¿de qué hablas?' - el usuario se refiere al contexto inmediato\n";
+      prompt += "- Si acabas de recomendar un gel y el usuario dice 'me da alergia', entiende que se refiere a ESE gel\n";
+      prompt += "- Si acabas de mencionar un ingrediente y el usuario responde, se refiere a ESE ingrediente\n\n";
+    }
     
-    prompt += "💡 EJEMPLOS DE CÓMO USAR EL HISTORIAL:\n";
-    prompt += "- Si el usuario dice '¿Qué te parece el producto X?' y en el historial mencionó que es alérgico al ácido hialurónico, verifica si X contiene ácido hialurónico y ADVIÉRTELO\n";
-    prompt += "- Si el usuario pregunta sobre un producto que ya mencionó antes, usa la información previa sobre ese producto\n";
-    prompt += "- Si el usuario mencionó preocupaciones específicas (acné, arrugas, etc.), úsalas para personalizar tu respuesta\n";
-    prompt += "- Si el usuario mencionó productos que le gustan, sugiere productos similares\n";
-    prompt += "- Si el usuario mencionó productos que no le gustan, evita recomendar productos similares\n\n";
-    prompt += "⚠️ NUNCA des respuestas genéricas sin revisar el historial primero.\n";
-    prompt += "⚠️ SIEMPRE personaliza tu respuesta basándote en lo que el usuario ha mencionado anteriormente.\n\n";
+    // CONTEXTO GENERAL (para referencia)
+    if (generalContext.length > 0) {
+      prompt += "📚 CONTEXTO GENERAL (MENSAJES ANTERIORES - PARA REFERENCIA):\n";
+      prompt += "Información previa de la conversación para contexto adicional.\n\n";
+      generalContext.forEach((msg, index) => {
+        const roleLabel = msg.role === "user" ? "👤 USUARIO" : "🤖 ASISTENTE";
+        prompt += `[${index + 1}] ${roleLabel}:\n`;
+        prompt += `${msg.content.substring(0, 200)}${msg.content.length > 200 ? '...' : ''}\n\n`;
+      });
+    }
+    
+    prompt += "💡 EJEMPLOS DE CÓMO INTERPRETAR EL CONTEXTO:\n";
+    prompt += "1. Si TÚ dijiste: 'Te recomiendo el gel limpiador X de la marca Y'\n";
+    prompt += "   Y el USUARIO dice: 'me da alergia'\n";
+    prompt += "   → Entiende que se refiere al gel limpiador X que acabas de recomendar. NO preguntes '¿qué gel?', simplemente confirma y pregunta por el ingrediente problemático.\n\n";
+    prompt += "2. Si TÚ dijiste: 'El ácido salicílico es bueno para el acné'\n";
+    prompt += "   Y el USUARIO dice: 'no me funciona'\n";
+    prompt += "   → Entiende que se refiere al ácido salicílico que acabas de mencionar.\n\n";
+    prompt += "3. Si el USUARIO pregunta: '¿qué te parece?' sin contexto\n";
+    prompt += "   → Busca en los ÚLTIMOS MENSAJES qué producto o tema acabas de mencionar.\n\n";
+    prompt += "⚠️ REGLA DE ORO: El usuario NO repite información que ya está en el contexto inmediato. Si mencionas algo y el usuario responde, se refiere a ESO.\n\n";
   }
 
   // NO incluir productos, discusiones ni reviews de la base de datos
