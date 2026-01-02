@@ -902,11 +902,13 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
         prompt += `${msg.content}\n\n`;
       });
       prompt += "⚠️⚠️⚠️ IMPORTANTE:\n";
-      prompt += "- Si el usuario dice 'me da alergia', 'no me gusta', 'me funciona bien', etc., se refiere al ÚLTIMO producto o tema que MENCIONASTE\n";
+      prompt += "- Si el usuario MENCIONA un producto (ej: 'CeraVe Hydrating me ha ido mal') y dice 'me ha ido mal' o 'me da alergia', se refiere a ESE producto que ÉL/ELLA mencionó, NO a productos que tú hayas mencionado\n";
+      prompt += "- Si el usuario dice 'me da alergia', 'no me gusta', 'me funciona bien', etc., busca en los ÚLTIMOS MENSAJES qué producto mencionó el usuario o qué producto mencionaste tú\n";
       prompt += "- Si el usuario pregunta sobre algo sin especificar, busca en los ÚLTIMOS MENSAJES qué acabas de mencionar\n";
       prompt += "- NO preguntes '¿qué producto?' o '¿de qué hablas?' - el usuario se refiere al contexto inmediato\n";
       prompt += "- Si acabas de recomendar un gel y el usuario dice 'me da alergia', entiende que se refiere a ESE gel\n";
-      prompt += "- Si acabas de mencionar un ingrediente y el usuario responde, se refiere a ESE ingrediente\n\n";
+      prompt += "- Si el usuario menciona un producto y dice 'me ha ido mal', habla de ESE producto, NO inventes otros productos\n";
+      prompt += "- NO confundas productos. Si el usuario habla de 'CeraVe Hydrating', NO hables de 'Neutrogena' u otros productos a menos que el usuario los mencione\n\n";
     }
     
     // CONTEXTO GENERAL (para referencia)
@@ -930,6 +932,12 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
     prompt += "3. Si el USUARIO pregunta: '¿qué te parece?' sin contexto\n";
     prompt += "   → Busca en los ÚLTIMOS MENSAJES qué producto o tema acabas de mencionar.\n\n";
     prompt += "⚠️ REGLA DE ORO: El usuario NO repite información que ya está en el contexto inmediato. Si mencionas algo y el usuario responde, se refiere a ESO.\n\n";
+    prompt += "⚠️⚠️⚠️ CUANDO EL USUARIO DICE 'SÍ' (CRÍTICO):\n";
+    prompt += "- Si preguntas '¿Quieres que te sugiera...?' y el usuario responde 'sí', 'si', 'vale', 'ok', etc., DEBES dar las recomendaciones o información INMEDIATAMENTE\n";
+    prompt += "- NO vuelvas a preguntar '¿Quieres que te sugiera...?' después de que el usuario haya dicho 'sí'\n";
+    prompt += "- Si el usuario dice 'sí', interpreta que está pidiendo la información/recomendación que ofreciste\n";
+    prompt += "- Da recomendaciones CONCRETAS con nombres de productos específicos cuando el usuario dice 'sí' a una oferta de recomendaciones\n";
+    prompt += "- NO repitas la misma pregunta después de que el usuario haya respondido afirmativamente\n\n";
   }
 
   // NO incluir productos, discusiones ni reviews de la base de datos
