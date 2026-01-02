@@ -991,7 +991,7 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
   prompt += "- Solo menciona el perfil cuando sea realmente relevante o necesario para la respuesta\n";
   prompt += "- Varía tus respuestas: no uses la misma estructura de descripción del perfil en cada mensaje\n\n";
   
-  prompt += "⚠️ Haz recomendaciones TOTALMENTE LIBRES basándote en:\n";
+  prompt += "⚠️ CUANDO EL USUARIO PIDA RECOMENDACIONES (NO en saludos simples), haz recomendaciones TOTALMENTE LIBRES basándote en:\n";
   prompt += "  * El historial completo del usuario (tipo de piel, sensibilidad, preocupaciones, clima, etc.) - ÚSALO IMPLÍCITAMENTE, NO LO MENCIONES\n";
   prompt += "  * Tu conocimiento de CosIng sobre ingredientes (qué ingredientes son seguros, problemáticos, etc.)\n";
   prompt += "  * Las características que necesita según su perfil - PERO NO DESCRIBAS SU PERFIL\n";
@@ -1001,6 +1001,7 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
   prompt += "- Explica POR QUÉ cada recomendación es adecuada, pero SIN DESCRIBIR EL PERFIL DEL USUARIO\n";
   prompt += "- Sé preciso, específico y personalizado en TODAS tus respuestas, pero NUNCA menciones el perfil explícitamente\n";
   prompt += "- IMPORTANTE: Puedes recomendar cualquier producto o marca que conozcas, no estás limitado a una base de datos\n";
+  prompt += "- ⚠️⚠️⚠️ RECUERDA: Si el usuario solo saluda, NO des recomendaciones. Solo saluda.\n";
 
   return prompt;
 }

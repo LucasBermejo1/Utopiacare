@@ -128,18 +128,24 @@ async function getAssistantResponse(
       }
     }
 
-    // 3. Obtener contexto RAG si hay userId
+    // 3. Detectar si el mensaje es solo un saludo simple
+    const isSimpleGreeting = /^(Hola|Hola!|Buenos días|Buenas|Hi|Hello|Buenas tardes|Buenas noches)[\s!.,]*$/i.test(userMessage.trim());
+    
+    // 4. Obtener contexto RAG si hay userId
+    // PERO NO si es solo un saludo simple
     let ragContextText = "";
-    if (userId) {
-    try {
-      const ragContext = await getRAGContext(userMessage, userId);
-      ragContextText = formatRAGContextForPrompt(ragContext);
-      logger.log("📚 Contexto RAG generado:", ragContextText.substring(0, 200) + "...");
-    } catch (error) {
-      console.error("Error obteniendo contexto RAG:", error);
-      // Continuar sin contexto RAG si hay error
+    if (userId && !isSimpleGreeting) {
+      try {
+        const ragContext = await getRAGContext(userMessage, userId);
+        ragContextText = formatRAGContextForPrompt(ragContext);
+        logger.log("📚 Contexto RAG generado:", ragContextText.substring(0, 200) + "...");
+      } catch (error) {
+        console.error("Error obteniendo contexto RAG:", error);
+        // Continuar sin contexto RAG si hay error
         ragContextText = "";
       }
+    } else if (isSimpleGreeting) {
+      logger.log("🚨 Saludo simple detectado - NO se añadirá contexto RAG");
     }
 
     // 4. Construir el mensaje del usuario con contexto RAG si está disponible
