@@ -1,4 +1,47 @@
 import { supabase } from "@/lib/supabaseClient";
+import { logger } from "@/utils/logger";
+
+/**
+ * Guarda correcciones globales del bot en la base de datos
+ */
+async function saveGlobalCorrections(
+  userId: string,
+  corrections: Array<{
+    whatWasWrong: string;
+    correctInfo: string;
+    context?: string;
+  }>
+): Promise<void> {
+  if (!supabase) {
+    throw new Error("Supabase no configurado");
+  }
+
+  try {
+    // Insertar cada corrección global
+    for (const correction of corrections) {
+      const { error } = await supabase
+        .from("bot_global_corrections")
+        .insert({
+          what_was_wrong: correction.whatWasWrong,
+          correct_info: correction.correctInfo,
+          context: correction.context || null,
+          created_by_user_id: userId,
+          verified: false, // Requiere verificación antes de aplicarse
+          is_active: false, // No activa hasta que se verifique
+        });
+
+      if (error) {
+        console.error("Error guardando corrección global:", error);
+        // Continuar con las siguientes
+      } else {
+        logger.log(`✅ Corrección global guardada (pendiente de verificación): ${correction.whatWasWrong}`);
+      }
+    }
+  } catch (error) {
+    console.error("Error en saveGlobalCorrections:", error);
+    throw error;
+  }
+}
 
 export interface ChatMessage {
   messageId: string;
