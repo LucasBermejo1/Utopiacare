@@ -13,6 +13,7 @@ import Discussions from "./pages/Discussions";
 import ResetPassword from "./pages/ResetPassword";
 import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
+import AdminDashboard from "./pages/AdminDashboard";
 import { ComingSoon } from "./components/ComingSoon";
 import { BETA_MODE } from "./config/constants";
 
@@ -72,6 +73,10 @@ const router = createBrowserRouter([
             feature="Próximamente: Comunidad de usuarios y expertos"
           />
         ) : <Discussions />
+      },
+      { 
+        path: "/admin", 
+        element: <AdminDashboard />
       },
       { path: "*", element: <NotFound /> }
     ]
