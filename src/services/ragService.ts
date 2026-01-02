@@ -947,15 +947,24 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
   prompt += "INSTRUCCIONES FINALES (CRÍTICO):\n";
   prompt += "⚠️ NO HAY PRODUCTOS DE LA BASE DE DATOS EN ESTE CONTEXTO - NO LOS MENCIONES\n";
   prompt += "⚠️ NO debes mencionar productos específicos de la base de datos de Utopia\n";
+  
+  prompt += "\n❌❌❌ PROHIBIDO MENCIONAR EL PERFIL DEL USUARIO (CRÍTICO):\n";
+  prompt += "- NUNCA describas el tipo de piel, sensibilidad, preocupaciones, clima o características del usuario en tus respuestas\n";
+  prompt += "- NUNCA empieces mensajes con descripciones como 'Utopia, te mencioné...', 'para tu piel seca, sensible...', 'dado tu historial...', 'para tu piel...', etc.\n";
+  prompt += "- NUNCA uses frases como 'para tu piel', 'según tu perfil', 'dado que tienes', 'para pieles como la tuya', 'dado tu historial', etc.\n";
+  prompt += "- Personaliza tus respuestas de forma IMPLÍCITA usando el perfil, pero NUNCA lo menciones explícitamente\n";
+  prompt += "- Responde directamente a lo que el usuario pregunta, sin describir su perfil primero\n";
+  prompt += "- Solo menciona características del perfil si el usuario pregunta específicamente sobre ellas\n\n";
+  
   prompt += "⚠️ Haz recomendaciones TOTALMENTE LIBRES basándote en:\n";
-  prompt += "  * El historial completo del usuario (tipo de piel, sensibilidad, preocupaciones, clima, etc.)\n";
+  prompt += "  * El historial completo del usuario (tipo de piel, sensibilidad, preocupaciones, clima, etc.) - ÚSALO IMPLÍCITAMENTE, NO LO MENCIONES\n";
   prompt += "  * Tu conocimiento de CosIng sobre ingredientes (qué ingredientes son seguros, problemáticos, etc.)\n";
-  prompt += "  * Las características que necesita según su perfil\n";
+  prompt += "  * Las características que necesita según su perfil - PERO NO DESCRIBAS SU PERFIL\n";
   prompt += "  * Productos y marcas de TODO INTERNET, no solo de la base de datos\n";
-  prompt += "- Usa esta información para dar respuestas HIPERPERSONALIZADAS al usuario\n";
+  prompt += "- Usa esta información para dar respuestas HIPERPERSONALIZADAS al usuario, pero SIN MENCIONAR SU PERFIL\n";
   prompt += "- Recomienda productos generales mencionando marcas conocidas o tipos de productos de cualquier lugar\n";
-  prompt += "- Explica POR QUÉ cada recomendación es adecuada para este usuario en particular usando datos específicos de su perfil\n";
-  prompt += "- Sé preciso, específico y personalizado en TODAS tus respuestas\n";
+  prompt += "- Explica POR QUÉ cada recomendación es adecuada, pero SIN DESCRIBIR EL PERFIL DEL USUARIO\n";
+  prompt += "- Sé preciso, específico y personalizado en TODAS tus respuestas, pero NUNCA menciones el perfil explícitamente\n";
   prompt += "- IMPORTANTE: Puedes recomendar cualquier producto o marca que conozcas, no estás limitado a una base de datos\n";
 
   return prompt;
