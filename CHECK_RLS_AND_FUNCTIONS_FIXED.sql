@@ -15,8 +15,8 @@ SELECT
     permissive,
     roles,
     cmd,
-    qual,
-    with_check
+    qual::text AS qual_text,
+    with_check::text AS with_check_text
 FROM pg_policies
 WHERE tablename = 'user_profiles'
 AND (
@@ -27,7 +27,7 @@ AND (
 -- 2. Verificar funciones que usen climate_zone
 SELECT 
     p.proname AS function_name,
-    pg_get_functiondef(p.oid) AS function_definition
+    pg_get_functiondef(p.oid)::text AS function_definition
 FROM pg_proc p
 JOIN pg_namespace n ON p.pronamespace = n.oid
 WHERE n.nspname = 'public'
