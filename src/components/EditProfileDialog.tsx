@@ -40,12 +40,6 @@ const SEX_OPTIONS = [
   { value: "prefer_not_to_say", label: "Prefiero no decir" },
 ];
 
-const CLIMATE_ZONES = [
-  { value: "dry", label: "Clima Seco", sublabel: "Madrid, Castilla" },
-  { value: "humid", label: "Clima Húmedo / Costa", sublabel: "Barcelona, Valencia, Galicia" },
-  { value: "extreme", label: "Clima Extremo", sublabel: "Montaña o Canarias" },
-];
-
 const SUN_EXPOSURE = [
   { value: "low", label: "Baja", sublabel: "Trabajo en oficina, salgo poco" },
   { value: "medium", label: "Media", sublabel: "Camino al trabajo, salgo a pasear" },
