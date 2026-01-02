@@ -42,11 +42,11 @@ COMMENT ON COLUMN public.bot_global_corrections.is_active IS 'Si la corrección 
 ALTER TABLE public.bot_global_corrections ENABLE ROW LEVEL SECURITY;
 
 -- Políticas RLS
--- Todos pueden leer correcciones activas y verificadas
+-- Los usuarios autenticados pueden leer TODAS las correcciones (para el dashboard de admin)
 DROP POLICY IF EXISTS bot_global_corrections_select ON public.bot_global_corrections;
 CREATE POLICY bot_global_corrections_select ON public.bot_global_corrections
   FOR SELECT
-  USING (is_active = true AND verified = true);
+  USING (auth.uid() IS NOT NULL);
 
 -- Solo usuarios autenticados pueden crear correcciones
 DROP POLICY IF EXISTS bot_global_corrections_insert ON public.bot_global_corrections;
