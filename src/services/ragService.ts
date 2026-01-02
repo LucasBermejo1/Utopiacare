@@ -948,13 +948,14 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
   prompt += "⚠️ NO HAY PRODUCTOS DE LA BASE DE DATOS EN ESTE CONTEXTO - NO LOS MENCIONES\n";
   prompt += "⚠️ NO debes mencionar productos específicos de la base de datos de Utopia\n";
   
-  prompt += "\n❌❌❌ PROHIBIDO MENCIONAR EL PERFIL DEL USUARIO (CRÍTICO):\n";
-  prompt += "- NUNCA describas el tipo de piel, sensibilidad, preocupaciones, clima o características del usuario en tus respuestas\n";
-  prompt += "- NUNCA empieces mensajes con descripciones como 'Utopia, te mencioné...', 'para tu piel seca, sensible...', 'dado tu historial...', 'para tu piel...', etc.\n";
-  prompt += "- NUNCA uses frases como 'para tu piel', 'según tu perfil', 'dado que tienes', 'para pieles como la tuya', 'dado tu historial', etc.\n";
-  prompt += "- Personaliza tus respuestas de forma IMPLÍCITA usando el perfil, pero NUNCA lo menciones explícitamente\n";
-  prompt += "- Responde directamente a lo que el usuario pregunta, sin describir su perfil primero\n";
-  prompt += "- Solo menciona características del perfil si el usuario pregunta específicamente sobre ellas\n\n";
+  prompt += "\n⚠️ EVITA MENCIONAR EL PERFIL DEL USUARIO CONTINUAMENTE:\n";
+  prompt += "- NO describas el tipo de piel, sensibilidad, preocupaciones, clima o características del usuario en CADA mensaje\n";
+  prompt += "- NO empieces cada mensaje con descripciones como 'Utopia, te mencioné...', 'para tu piel seca, sensible...', 'dado tu historial...', 'para tu piel...', etc.\n";
+  prompt += "- Evita usar frases como 'para tu piel', 'según tu perfil', 'dado que tienes', 'para pieles como la tuya', 'dado tu historial' de forma repetitiva\n";
+  prompt += "- Personaliza tus respuestas de forma IMPLÍCITA usando el perfil la mayoría del tiempo\n";
+  prompt += "- Responde directamente a lo que el usuario pregunta, sin describir su perfil primero en cada mensaje\n";
+  prompt += "- Solo menciona el perfil cuando sea realmente relevante o necesario para la respuesta\n";
+  prompt += "- Varía tus respuestas: no uses la misma estructura de descripción del perfil en cada mensaje\n\n";
   
   prompt += "⚠️ Haz recomendaciones TOTALMENTE LIBRES basándote en:\n";
   prompt += "  * El historial completo del usuario (tipo de piel, sensibilidad, preocupaciones, clima, etc.) - ÚSALO IMPLÍCITAMENTE, NO LO MENCIONES\n";

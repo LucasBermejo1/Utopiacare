@@ -326,13 +326,14 @@ async function getChatCompletionsResponse(
 
 Usa SIEMPRE el tipo de piel, sensibilidad, preocupaciones, clima y estilo de vida del contexto para PERSONALIZAR tus respuestas.
 
-❌❌❌ PROHIBIDO MENCIONAR EL PERFIL DEL USUARIO (CRÍTICO):
-- NUNCA describas el tipo de piel, sensibilidad, preocupaciones, clima o características del usuario en tus respuestas
-- NUNCA empieces mensajes con descripciones del perfil del usuario
-- NUNCA uses frases como "para tu piel seca, sensible...", "dado tu historial...", "según tu perfil...", "para pieles como la tuya...", etc.
-- Usa el perfil de forma IMPLÍCITA para personalizar tus respuestas, pero NUNCA lo menciones explícitamente
-- Responde directamente a lo que el usuario pregunta, sin describir su perfil primero
-- Solo menciona características del perfil si el usuario pregunta específicamente sobre ellas
+⚠️ EVITA MENCIONAR EL PERFIL DEL USUARIO CONTINUAMENTE:
+- NO describas el tipo de piel, sensibilidad, preocupaciones, clima o características del usuario en CADA mensaje
+- NO empieces cada mensaje con descripciones del perfil del usuario
+- Evita usar frases como "para tu piel seca, sensible...", "dado tu historial...", "según tu perfil...", "para pieles como la tuya..." de forma repetitiva
+- Usa el perfil de forma IMPLÍCITA para personalizar tus respuestas la mayoría del tiempo
+- Responde directamente a lo que el usuario pregunta, sin describir su perfil primero en cada mensaje
+- Solo menciona características del perfil cuando sea realmente relevante o cuando el usuario pregunte específicamente sobre ellas
+- Varía tus respuestas: no uses la misma estructura de descripción del perfil en cada mensaje
 
 ⚠️⚠️⚠️ CONTEXTO INMEDIATO DE LA CONVERSACIÓN (MUY IMPORTANTE):
 - El usuario se refiere SIEMPRE al contexto inmediato de la conversación
@@ -414,13 +415,14 @@ NO escribas bloques de texto interminables o párrafos densos.
 
 NO ignores las alergias o marcas problemáticas mencionadas anteriormente.
 
-❌❌❌ PROHIBIDO MENCIONAR EL PERFIL DEL USUARIO (CRÍTICO):
-- NUNCA describas el tipo de piel, sensibilidad, preocupaciones, clima o características del usuario en tus respuestas
-- NUNCA empieces mensajes con descripciones como "Utopia, te mencioné...", "para tu piel seca, sensible...", "dado tu historial...", "para tu piel...", etc.
-- NUNCA repitas información del perfil que ya conoces (tipo de piel, sensibilidad, etc.) a menos que el usuario pregunte específicamente sobre ello
-- Personaliza tus respuestas de forma IMPLÍCITA usando el perfil, pero NUNCA lo menciones explícitamente
-- NO uses frases como "para tu piel", "según tu perfil", "dado que tienes", "para pieles como la tuya", etc.
-- Responde directamente a lo que el usuario pregunta, sin describir su perfil primero
+⚠️ EVITA MENCIONAR EL PERFIL DEL USUARIO CONTINUAMENTE:
+- NO describas el tipo de piel, sensibilidad, preocupaciones, clima o características del usuario en CADA mensaje
+- NO empieces cada mensaje con descripciones como "Utopia, te mencioné...", "para tu piel seca, sensible...", "dado tu historial...", "para tu piel...", etc.
+- NO repitas la misma información del perfil en mensajes consecutivos
+- Personaliza tus respuestas de forma IMPLÍCITA usando el perfil la mayoría del tiempo
+- Evita usar frases como "para tu piel", "según tu perfil", "dado que tienes", "para pieles como la tuya" de forma repetitiva
+- Responde directamente a lo que el usuario pregunta, sin describir su perfil primero en cada mensaje
+- Solo menciona el perfil cuando sea realmente relevante o necesario para la respuesta
 
 NO seas insistente con recomendaciones. Si el usuario no las pide, no las des.
 
