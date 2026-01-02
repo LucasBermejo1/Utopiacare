@@ -124,8 +124,8 @@ function calculateProductRelevance(
     }
   }
 
-  // 4. Zona climática y exposición solar (peso medio: 2 puntos)
-  if (userProfile.climate_zone || userProfile.sun_exposure) {
+  // 4. Ubicación y exposición solar (peso medio: 2 puntos)
+  if (userProfile.location || userProfile.sun_exposure) {
     // Productos con SPF para alta exposición solar
     if (userProfile.sun_exposure === "high") {
       const hasSPF = product.name.toLowerCase().includes("spf") ||
@@ -138,8 +138,8 @@ function calculateProductRelevance(
       }
     }
 
-    // Productos hidratantes para clima seco
-    if (userProfile.climate_zone === "dry") {
+    // Productos hidratantes para zonas con clima seco (inferido de la ubicación)
+    if (userProfile.location && (userProfile.location.toLowerCase().includes("madrid") || userProfile.location.toLowerCase().includes("castilla"))) {
       const hydratingIngredients = ["ácido hialurónico", "glicerina", "ceramidas", "urea"];
       const hasHydrating = product.ingredients.some((ing) =>
         hydratingIngredients.some((hyd) => ing.toLowerCase().includes(hyd))
@@ -150,8 +150,8 @@ function calculateProductRelevance(
       }
     }
 
-    // Productos ligeros para clima húmedo
-    if (userProfile.climate_zone === "humid") {
+    // Productos ligeros para clima húmedo (inferido de la ubicación)
+    if (userProfile.location && (userProfile.location.toLowerCase().includes("barcelona") || userProfile.location.toLowerCase().includes("valencia") || userProfile.location.toLowerCase().includes("galicia") || userProfile.location.toLowerCase().includes("costa"))) {
       const lightIngredients = ["gel", "gel-crema", "lotion"];
       const isLight = product.name.toLowerCase().includes("gel") ||
                      product.categories.some((cat) => lightIngredients.some((light) => cat.toLowerCase().includes(light)));
@@ -465,10 +465,13 @@ function calculateProfileSimilarity(profile1: UserProfile, profile2: UserProfile
     }
   }
 
-  // 4. Zona climática (peso: 10%)
+  // 4. Ubicación (peso: 10%)
   maxScore += 10;
-  if (profile1.climate_zone && profile2.climate_zone) {
-    if (profile1.climate_zone === profile2.climate_zone) {
+  if (profile1.location && profile2.location) {
+    // Comparar ubicaciones (ciudades similares o regiones cercanas)
+    const loc1 = profile1.location.toLowerCase();
+    const loc2 = profile2.location.toLowerCase();
+    if (loc1 === loc2 || loc1.includes(loc2) || loc2.includes(loc1)) {
       score += 10;
     }
   }
