@@ -725,12 +725,28 @@ export async function updateUserProfileFromChat(
       updates.routine = routineToSave;
     }
 
-    // Guardar correcciones directas al bot (en metadata o campo JSONB)
+    // Guardar correcciones directas al bot
     if (extractedData.botCorrections && extractedData.botCorrections.length > 0) {
-      const currentCorrections = (currentProfile as any).bot_corrections || [];
-      const newCorrections = [...currentCorrections, ...extractedData.botCorrections];
-      // Limitar a las últimas 20 correcciones para no sobrecargar
-      (updates as any).bot_corrections = newCorrections.slice(-20);
+      const individualCorrections = extractedData.botCorrections.filter(c => !c.isGlobal);
+      const globalCorrections = extractedData.botCorrections.filter(c => c.isGlobal === true);
+      
+      // Guardar correcciones individuales en el perfil del usuario
+      if (individualCorrections.length > 0) {
+        const currentCorrections = (currentProfile as any).bot_corrections || [];
+        const newCorrections = [...currentCorrections, ...individualCorrections];
+        // Limitar a las últimas 20 correcciones para no sobrecargar
+        (updates as any).bot_corrections = newCorrections.slice(-20);
+      }
+      
+      // Guardar correcciones globales en la tabla de correcciones globales
+      if (globalCorrections.length > 0) {
+        try {
+          await saveGlobalCorrections(userId, globalCorrections);
+        } catch (error) {
+          console.error("Error guardando correcciones globales:", error);
+          // Continuar sin bloquear
+        }
+      }
     }
 
     // Guardar feedback del usuario sobre el bot
