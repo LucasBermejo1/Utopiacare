@@ -137,7 +137,7 @@ async function getAssistantResponse(
     if (userId && !isSimpleGreeting) {
     try {
       const ragContext = await getRAGContext(userMessage, userId);
-      ragContextText = formatRAGContextForPrompt(ragContext);
+      ragContextText = await formatRAGContextForPrompt(ragContext);
       logger.log("📚 Contexto RAG generado:", ragContextText.substring(0, 200) + "...");
     } catch (error) {
       console.error("Error obteniendo contexto RAG:", error);
@@ -294,9 +294,9 @@ async function getChatCompletionsResponse(
   let ragContextText = "";
   if (userId && !isSimpleGreeting) {
     try {
-      const ragContext = await getRAGContext(userMessage, userId);
-      ragContextText = formatRAGContextForPrompt(ragContext);
-      logger.log("📚 Contexto RAG generado para análisis de imagen:", ragContextText.substring(0, 200) + "...");
+        const ragContext = await getRAGContext(userMessage, userId);
+        ragContextText = await formatRAGContextForPrompt(ragContext);
+        logger.log("📚 Contexto RAG generado para análisis de imagen:", ragContextText.substring(0, 200) + "...");
     } catch (error) {
       console.error("Error obteniendo contexto RAG para imagen:", error);
       // Continuar sin contexto RAG si hay error
