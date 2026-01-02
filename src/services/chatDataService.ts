@@ -118,9 +118,15 @@ export async function extractRelevantDataFromMessage(
   try {
     const { getChatGPTResponse } = await import("./chatGPTService");
 
-    const prompt = `Analiza el siguiente mensaje de un usuario sobre cuidado de la piel y extrae información relevante:
+    const prompt = `Analiza el siguiente mensaje de un usuario sobre cuidado de la piel y extrae información relevante.
 
 MENSAJE: "${userMessage}"
+
+⚠️⚠️⚠️ DETECCIÓN DE CORRECCIONES AL BOT (CRÍTICO):
+- Si el usuario está CORRIGIENDO al bot (ej: "eso no es correcto", "te equivocaste", "no es así", "eso está mal", "mejor no", "no hagas eso", "no digas eso", "no es verdad", "eso no es cierto", "mejor no menciones", "no me gusta cuando dices", "deja de decir", "no quiero que me digas"), extrae:
+  * "botCorrections": [{"whatWasWrong": "qué dijo mal el bot", "correctInfo": "información correcta", "context": "contexto de la corrección"}]
+- Si el usuario da FEEDBACK NEGATIVO sobre el comportamiento del bot (ej: "eres muy insistente", "hablas demasiado", "no me gusta tu tono", "eres muy técnico", "no entiendo"), inclúyelo en "botFeedback"
+- Si el usuario da FEEDBACK POSITIVO (ej: "perfecto", "gracias", "muy útil", "me gusta cómo respondes"), inclúyelo en "botFeedback"
 
 Extrae SOLO la siguiente información en formato JSON (si existe):
 {
@@ -135,6 +141,18 @@ Extrae SOLO la siguiente información en formato JSON (si existe):
   "removedProblematicIngredients": ["ingrediente1", "ingrediente2"],
   "productsWorkingWell": ["producto1", "producto2", "marca X"],
   "removedProductsWorkingWell": ["producto1", "producto2"],
+  "botCorrections": [
+    {
+      "whatWasWrong": "qué dijo mal el bot o qué comportamiento incorrecto tuvo",
+      "correctInfo": "información correcta o comportamiento esperado",
+      "context": "contexto de la corrección (ej: 'cuando recomiendas productos', 'cuando describes mi piel')"
+    }
+  ],
+  "botFeedback": {
+    "type": "positive" | "negative" | "neutral",
+    "message": "feedback del usuario sobre el comportamiento del bot",
+    "aspect": "qué aspecto del bot está comentando (ej: 'tono', 'longitud', 'recomendaciones', 'explicaciones')"
+  },
   "preferences": {
     "precio": "rango mencionado",
     "marca": "marca preferida",
@@ -190,6 +208,17 @@ IMPORTANTE - EXTRAER TODAS LAS EXPERIENCIAS DEL USUARIO:
 - ⚠️ CRÍTICO: Si el usuario dice que YA NO tiene alergia a algo, que era mentira, o que se equivocó, inclúyelo en "removedAllergies" o "removedProblematicIngredients"
 - ⚠️ CRÍTICO: Si el usuario dice que un producto YA NO le funciona bien, que antes le iba bien pero ahora no, o que se equivocó, inclúyelo en "removedProductsWorkingWell"
 - Ejemplos de correcciones: "ya no tengo alergia a X", "eso era mentira", "me equivoqué con X", "ya no soy alérgico a X", "X ya no me da alergia", "retiro lo de X", "olvídate de X"
+- 🚨🚨🚨 CORRECCIONES DIRECTAS AL BOT (MUY IMPORTANTE):
+  * Si el usuario CORRIGE algo que el bot dijo (ej: "eso no es correcto", "te equivocaste", "no es así", "eso está mal", "mejor no", "no hagas eso", "no digas eso", "no es verdad", "eso no es cierto", "mejor no menciones X", "no me gusta cuando dices X", "deja de decir X", "no quiero que me digas X"), extrae:
+    - "whatWasWrong": qué dijo mal el bot o qué comportamiento tuvo que fue incorrecto
+    - "correctInfo": información correcta o comportamiento esperado
+    - "context": contexto de la corrección (cuándo/por qué lo corrigió)
+  * Ejemplos de correcciones al bot:
+    - "No me digas que tengo piel seca, tengo piel grasa" → whatWasWrong: "dijo que tengo piel seca", correctInfo: "tengo piel grasa", context: "descripción del tipo de piel"
+    - "No me recomiendes productos con fragancia" → whatWasWrong: "recomendó productos con fragancia", correctInfo: "no recomendar productos con fragancia", context: "recomendaciones de productos"
+    - "No me gusta cuando me describes mi perfil en cada mensaje" → whatWasWrong: "describe el perfil en cada mensaje", correctInfo: "no describir el perfil continuamente", context: "estilo de comunicación"
+    - "No me des recomendaciones si solo saludo" → whatWasWrong: "da recomendaciones en saludos", correctInfo: "solo saludar sin dar recomendaciones", context: "respuesta a saludos simples"
+  * Si el usuario da FEEDBACK sobre el comportamiento del bot (positivo o negativo), inclúyelo en "botFeedback"
 - Si el usuario menciona su TIPO DE PIEL (ej: "tengo piel grasa", "mi piel es seca"), inclúyelo en "skinType"
 - Si menciona SENSIBILIDAD (ej: "mi piel es sensible", "tengo rosácea"), inclúyelo en "skinSensitivity"
 - Si menciona PREOCUPACIONES principales (ej: "me preocupa el acné", "quiero prevenir arrugas"), inclúyelas en "concerns"
@@ -464,6 +493,16 @@ export async function updateUserProfileFromChat(
     removedAllergies?: string[];
     productsWorkingWell?: string[];
     removedProductsWorkingWell?: string[];
+    botCorrections?: Array<{
+      whatWasWrong: string;
+      correctInfo: string;
+      context?: string;
+    }>;
+    botFeedback?: {
+      type: "positive" | "negative" | "neutral";
+      message: string;
+      aspect?: string;
+    };
     routine?: {
       moments?: Array<{
         timeOfDay: string;
@@ -673,6 +712,25 @@ export async function updateUserProfileFromChat(
         lastUpdated: new Date().toISOString(),
       };
       updates.routine = routineToSave;
+    }
+
+    // Guardar correcciones directas al bot (en metadata o campo JSONB)
+    if (extractedData.botCorrections && extractedData.botCorrections.length > 0) {
+      const currentCorrections = (currentProfile as any).bot_corrections || [];
+      const newCorrections = [...currentCorrections, ...extractedData.botCorrections];
+      // Limitar a las últimas 20 correcciones para no sobrecargar
+      (updates as any).bot_corrections = newCorrections.slice(-20);
+    }
+
+    // Guardar feedback del usuario sobre el bot
+    if (extractedData.botFeedback) {
+      const currentFeedback = (currentProfile as any).bot_feedback || [];
+      const newFeedback = [...currentFeedback, {
+        ...extractedData.botFeedback,
+        timestamp: new Date().toISOString(),
+      }];
+      // Limitar a los últimos 10 feedbacks
+      (updates as any).bot_feedback = newFeedback.slice(-10);
     }
 
     if (Object.keys(updates).length > 0) {

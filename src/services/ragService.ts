@@ -866,6 +866,35 @@ export function formatRAGContextForPrompt(context: RAGContext): string {
     prompt += "6. 🏥 Considera estilo de vida (fumar, sueño, medicamentos) en todos los consejos\n";
     prompt += "7. ✅ SIEMPRE personaliza según el tipo de piel del usuario - NUNCA des respuestas genéricas\n";
     prompt += "8. 📊 Si analizas un producto, SIEMPRE menciona si es adecuado o no para el tipo de piel del usuario\n\n";
+    
+    // CORRECCIONES DIRECTAS DEL USUARIO AL BOT (CRÍTICO)
+    if (context.userProfile.bot_corrections && context.userProfile.bot_corrections.length > 0) {
+      prompt += "\n🚨🚨🚨 CORRECCIONES DIRECTAS DEL USUARIO (LEER Y APLICAR INMEDIATAMENTE) 🚨🚨🚨:\n";
+      prompt += "El usuario ha corregido directamente tu comportamiento. DEBES seguir estas correcciones:\n\n";
+      context.userProfile.bot_corrections.forEach((correction: any, index: number) => {
+        prompt += `${index + 1}. ❌ QUÉ HICISTE MAL: ${correction.whatWasWrong}\n`;
+        prompt += `   ✅ CORRECCIÓN: ${correction.correctInfo}\n`;
+        if (correction.context) {
+          prompt += `   📝 CONTEXTO: ${correction.context}\n`;
+        }
+        prompt += "\n";
+      });
+      prompt += "⚠️⚠️⚠️ IMPORTANTE: Estas correcciones son ABSOLUTAS. NO vuelvas a cometer estos errores.\n";
+      prompt += "Aplica estas correcciones en TODAS tus respuestas futuras.\n\n";
+    }
+    
+    // FEEDBACK DEL USUARIO SOBRE EL COMPORTAMIENTO DEL BOT
+    if (context.userProfile.bot_feedback && context.userProfile.bot_feedback.length > 0) {
+      prompt += "\n💬 FEEDBACK DEL USUARIO SOBRE TU COMPORTAMIENTO:\n";
+      context.userProfile.bot_feedback.forEach((feedback: any, index: number) => {
+        const emoji = feedback.type === "positive" ? "✅" : feedback.type === "negative" ? "❌" : "ℹ️";
+        prompt += `${emoji} ${feedback.message}\n`;
+        if (feedback.aspect) {
+          prompt += `   (Sobre: ${feedback.aspect})\n`;
+        }
+      });
+      prompt += "\n⚠️ Ten en cuenta este feedback para mejorar tu comunicación con este usuario.\n\n";
+    }
   }
 
   // Incluir historial completo de conversación si está disponible
