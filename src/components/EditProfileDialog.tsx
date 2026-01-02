@@ -17,7 +17,6 @@ import { toast } from "sonner";
 import { User, AlertTriangle } from "lucide-react";
 import { getUserProfile, updateUserProfile } from "@/services/supabaseUserProfile";
 import { useAuth } from "@/hooks/useAuth";
-import { MAIN_CONCERNS } from "@/config/constants";
 import { cn } from "@/lib/utils";
 
 const SKIN_TYPES = [
@@ -72,6 +71,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
   const [skinType, setSkinType] = useState<string>("normal");
   const [skinSensitivity, setSkinSensitivity] = useState<string>("");
   const [concerns, setConcerns] = useState<string[]>([]);
+  const [concernsText, setConcernsText] = useState<string>("");
   const [climateZone, setClimateZone] = useState<string>("");
   const [sunExposure, setSunExposure] = useState<string>("");
   const [productHistory, setProductHistory] = useState<string>("");
@@ -103,7 +103,9 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
         setAge(profile.age || null);
         setSkinType(profile.skin_type || "normal");
         setSkinSensitivity(profile.skin_sensitivity || "");
-        setConcerns(profile.concerns || []);
+        const concernsArray = profile.concerns || [];
+        setConcerns(concernsArray);
+        setConcernsText(concernsArray.join(", "));
         setClimateZone(profile.climate_zone || "");
         setSunExposure(profile.sun_exposure || "");
         setProductHistory(profile.product_history || "");
@@ -124,19 +126,17 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
     }
   };
 
-  const handleConcernToggle = (concern: string) => {
-    setConcerns((prev) => {
-      if (prev.includes(concern)) {
-        // Si está seleccionado, lo deseleccionamos
-        return prev.filter((c) => c !== concern);
-      }
-      // Si ya hay 2 seleccionadas, no permitir seleccionar más
-      if (prev.length >= 2) {
-        return prev; // No hacer cambios
-      }
-      // Si hay menos de 2, añadimos la nueva
-      return [...prev, concern];
-    });
+  // Función para procesar el texto de preocupaciones y convertirlo en array
+  const processConcernsText = (text: string): string[] => {
+    if (!text || !text.trim()) return [];
+    
+    // Separar por comas, saltos de línea, o punto y coma
+    const concerns = text
+      .split(/[,;\n]/)
+      .map(concern => concern.trim())
+      .filter(concern => concern.length > 0);
+    
+    return concerns;
   };
 
   const handleSubmit = async () => {
@@ -160,12 +160,15 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
         if (conversationTechnicalLevel) conversationPreferences.technicalLevel = conversationTechnicalLevel;
       }
       
+      // Procesar preocupaciones del texto libre
+      const processedConcerns = processConcernsText(concernsText);
+      
       await updateUserProfile(user.id, {
         name: name.trim() || null,
         age: age || null,
         skin_type: skinType as any,
         skin_sensitivity: skinSensitivity || null,
-        concerns: concerns,
+        concerns: processedConcerns,
         climate_zone: climateZone || null,
         sun_exposure: sunExposure || null,
         product_history: productHistory || null,
