@@ -16,7 +16,7 @@ export function CookieBanner() {
     const checkCookieConsent = async () => {
       // Verificar si ya hay consentimiento guardado en localStorage (para usuarios no autenticados)
       const localConsent = localStorage.getItem("cookie_consent");
-      if (localConsent === "accepted") {
+      if (localConsent === "accepted" || localConsent === "rejected") {
         setShowBanner(false);
         setIsLoading(false);
         return;
@@ -26,7 +26,8 @@ export function CookieBanner() {
       if (user) {
         try {
           const profile = await getUserProfile(user.id);
-          if (profile?.cookie_consent === true) {
+          // Si el usuario ya ha respondido (aceptado o rechazado), no mostrar el banner
+          if (profile?.cookie_consent !== null && profile?.cookie_consent !== undefined) {
             setShowBanner(false);
             setIsLoading(false);
             return;
@@ -36,7 +37,7 @@ export function CookieBanner() {
         }
       }
 
-      // Si no hay consentimiento, mostrar el banner
+      // Si no hay respuesta previa, mostrar el banner
       setShowBanner(true);
       setIsLoading(false);
     };
@@ -46,7 +47,7 @@ export function CookieBanner() {
 
   const handleAccept = async () => {
     if (user) {
-      // Guardar en la base de datos si el usuario está autenticado
+      // Guardar aceptación en la base de datos si el usuario está autenticado
       try {
         await updateUserProfile(user.id, {
           cookie_consent: true,
@@ -63,10 +64,62 @@ export function CookieBanner() {
     setShowBanner(false);
   };
 
-  const handleReject = () => {
-    // Guardar rechazo en localStorage
-    localStorage.setItem("cookie_consent", "rejected");
+  const handleReject = async () => {
+    if (user) {
+      // Guardar rechazo en la base de datos si el usuario está autenticado
+      try {
+        await updateUserProfile(user.id, {
+          cookie_consent: false,
+          cookie_consent_at: new Date().toISOString(),
+        });
+      } catch (error) {
+        console.error("Error guardando rechazo de cookies:", error);
+      }
+    } else {
+      // Guardar rechazo en localStorage si el usuario no está autenticado
+      localStorage.setItem("cookie_consent", "rejected");
+    }
+
+    // Deshabilitar cookies de tracking/analytics si rechazan
+    // Esto cumple con el RGPD - no usar cookies no esenciales sin consentimiento
+    disableTrackingCookies();
+
     setShowBanner(false);
+  };
+
+  // Función para deshabilitar cookies de tracking cuando el usuario rechaza
+  const disableTrackingCookies = () => {
+    // Deshabilitar Google Analytics si está presente
+    if (typeof window !== "undefined" && (window as any).ga) {
+      (window as any).ga("set", "anonymizeIp", true);
+      (window as any).ga("set", "allowAdFeatures", false);
+    }
+
+    // Eliminar cookies de tracking existentes
+    const trackingCookies = [
+      "_ga",
+      "_gid",
+      "_gat",
+      "_gat_gtag_UA_",
+      "_fbp",
+      "_fbc",
+    ];
+
+    trackingCookies.forEach((cookieName) => {
+      // Eliminar cookie del dominio actual
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      // Eliminar cookie del dominio con punto (para subdominios)
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+      // Eliminar cookie del dominio raíz
+      const domainParts = window.location.hostname.split(".");
+      if (domainParts.length > 1) {
+        const rootDomain = "." + domainParts.slice(-2).join(".");
+        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${rootDomain};`;
+      }
+    });
+
+    // Guardar preferencia para futuras cargas
+    localStorage.setItem("cookie_tracking_disabled", "true");
   };
 
   if (isLoading || !showBanner) {

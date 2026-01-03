@@ -11,12 +11,12 @@
 -- ============================================
 
 ALTER TABLE public.user_profiles
-ADD COLUMN IF NOT EXISTS cookie_consent BOOLEAN DEFAULT FALSE;
+ADD COLUMN IF NOT EXISTS cookie_consent BOOLEAN DEFAULT NULL;
 
-COMMENT ON COLUMN public.user_profiles.cookie_consent IS 'Indica si el usuario ha aceptado el uso de cookies.';
+COMMENT ON COLUMN public.user_profiles.cookie_consent IS 'Indica si el usuario ha aceptado (true) o rechazado (false) el uso de cookies. NULL significa que no ha respondido.';
 
 ALTER TABLE public.user_profiles
 ADD COLUMN IF NOT EXISTS cookie_consent_at TIMESTAMP WITH TIME ZONE;
 
-COMMENT ON COLUMN public.user_profiles.cookie_consent_at IS 'Timestamp de cuando el usuario aceptó el uso de cookies.';
+COMMENT ON COLUMN public.user_profiles.cookie_consent_at IS 'Timestamp de cuando el usuario aceptó o rechazó el uso de cookies.';
 
