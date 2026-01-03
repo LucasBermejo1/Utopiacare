@@ -218,7 +218,9 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
           return;
         } else if (data.session) {
           // Email ya confirmado (puede pasar en desarrollo si está deshabilitada la verificación)
-          toast.success("¡Cuenta creada e iniciada sesión!");
+          toast.success("¡Cuenta creada e iniciada sesión!", {
+            duration: 1500,
+          });
           setOpen(false);
           setShowOnboarding(true);
           onLoginSuccess?.();
@@ -275,7 +277,9 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
           throw error;
         }
 
-        toast.success("Sesión iniciada correctamente");
+        toast.success("Sesión iniciada correctamente", {
+          duration: 1500,
+        });
         setOpen(false);
         setEmail("");
         setPassword("");
