@@ -565,6 +565,21 @@ export function ChatBot() {
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Mostrar pantalla de consentimiento si es necesario
+  if (showLegalConsent && user) {
+    return (
+      <>
+        <ChatBotButton onClick={() => setIsOpen(true)} />
+        <LegalConsentScreen
+          onConsentAccepted={() => {
+            setShowLegalConsent(false);
+            setIsOpen(true);
+          }}
+        />
+      </>
+    );
+  }
+
   return (
     <>
       {/* Animación de presentación - Solo en producción */}
