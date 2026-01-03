@@ -344,6 +344,19 @@ export function ChatBot() {
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
 
+    // Verificar edad antes de permitir enviar mensajes
+    if (user && !authLoading) {
+      try {
+        const profile = await getUserProfile(user.id);
+        if (profile?.age !== undefined && profile.age !== null && profile.age < 16) {
+          setIsUnderage(true);
+          return;
+        }
+      } catch (error) {
+        console.error("Error verificando edad:", error);
+      }
+    }
+
     // Si el usuario no está autenticado, mostrar mensaje de recordatorio
     if (!user && !authLoading) {
       const reminderMessage: Message = {
