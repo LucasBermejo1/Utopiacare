@@ -14,10 +14,22 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { User, AlertTriangle } from "lucide-react";
+import { User, AlertTriangle, Trash2 } from "lucide-react";
 import { getUserProfile, updateUserProfile } from "@/services/supabaseUserProfile";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { deleteAllUserData } from "@/services/userDataDeletionService";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const SKIN_TYPES = [
   { value: "normal", label: "Normal" },
@@ -81,6 +93,7 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
   const [lifestyleSmoking, setLifestyleSmoking] = useState<boolean>(false);
   const [lifestyleSleepLessThan7h, setLifestyleSleepLessThan7h] = useState<boolean>(false);
   const [lifestyleMedications, setLifestyleMedications] = useState<string>("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Cargar perfil del usuario cuando se abre el diálogo
   useEffect(() => {
@@ -175,6 +188,31 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
       toast.error(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteAllData = async () => {
+    if (!user) {
+      toast.error("Debes iniciar sesión");
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await deleteAllUserData(user.id);
+      toast.success("Todos tus datos han sido eliminados correctamente");
+      setOpen(false);
+      
+      // Recargar la página para reflejar los cambios
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      console.error("Error eliminando datos:", error);
+      const errorMessage = error instanceof Error ? error.message : "Error al eliminar tus datos";
+      toast.error(errorMessage);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -500,18 +538,72 @@ export function EditProfileDialog({ open: controlledOpen, onOpenChange, trigger 
                 </div>
               </div>
 
-              <DialogFooter className="pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setOpen(false)}
-                  disabled={loading}
-                >
-                  Cancelar
-                </Button>
-                <Button onClick={handleSubmit} disabled={loading || !skinType}>
-                  {loading ? "Guardando..." : "Guardar cambios"}
-                </Button>
+              <DialogFooter className="pt-4 flex-col sm:flex-row gap-3">
+                <div className="flex-1">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        disabled={loading || isDeleting}
+                        className="w-full sm:w-auto"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Eliminar mi perfil y datos de piel
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                          <AlertTriangle className="h-5 w-5 text-destructive" />
+                          ¿Eliminar todos tus datos?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="space-y-2">
+                          <p>
+                            Esta acción es <strong>irreversible</strong> y eliminará permanentemente:
+                          </p>
+                          <ul className="list-disc list-inside space-y-1 text-sm">
+                            <li>Tu perfil completo (tipo de piel, preocupaciones, preferencias)</li>
+                            <li>Todas tus conversaciones con Utopia</li>
+                            <li>Todos los datos extraídos de tus conversaciones</li>
+                            <li>Tu historial de chat completo</li>
+                          </ul>
+                          <p className="mt-2">
+                            <strong>No podrás recuperar esta información después.</strong>
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Tu cuenta de autenticación no se eliminará, solo los datos relacionados con tu perfil y conversaciones.
+                          </p>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>
+                          Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleDeleteAllData}
+                          disabled={isDeleting}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          {isDeleting ? "Eliminando..." : "Sí, eliminar todo"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setOpen(false)}
+                    disabled={loading || isDeleting}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleSubmit} disabled={loading || isDeleting || !skinType}>
+                    {loading ? "Guardando..." : "Guardar cambios"}
+                  </Button>
+                </div>
               </DialogFooter>
             </div>
           )}
