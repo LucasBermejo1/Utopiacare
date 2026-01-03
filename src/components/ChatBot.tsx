@@ -617,15 +617,22 @@ export function ChatBot() {
       {!isOpen && (
         <div className="fixed bottom-6 right-6 z-50">
           <ChatBotButton 
-            onClick={() => setIsOpen(true)}
+            onClick={() => {
+              // Si el usuario está autenticado pero no ha aceptado los términos, mostrar pantalla de consentimiento
+              if (user && showLegalConsent) {
+                setShowLegalConsent(true);
+              } else {
+                setIsOpen(true);
+              }
+            }}
             showPresentation={showPresentation}
             size={BETA_MODE ? "large" : "default"}
           />
         </div>
       )}
 
-      {/* Ventana del chat */}
-      {isOpen && (
+      {/* Ventana del chat - Solo mostrar si el usuario ha aceptado los términos o no está autenticado */}
+      {isOpen && !showLegalConsent && (
         <Card className={cn(
           "fixed bottom-6 right-6 shadow-2xl z-50 flex flex-col border-2 border-[hsl(var(--terracotta))]/20 overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-300",
           isExpanded 
