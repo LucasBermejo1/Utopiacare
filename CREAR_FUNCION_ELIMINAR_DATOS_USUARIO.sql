@@ -19,8 +19,9 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-  result JSONB := '{}'::jsonb;
+  result JSONB;
   deleted_counts JSONB := '{}'::jsonb;
+  count_val INTEGER;
 BEGIN
   -- Verificar que el usuario existe
   IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = user_uuid) THEN
@@ -33,8 +34,8 @@ BEGIN
     WHERE user_id = user_uuid
     RETURNING 1
   )
-  SELECT COUNT(*) INTO deleted_counts->'discussion_votes'
-  FROM deleted;
+  SELECT COUNT(*) INTO count_val FROM deleted;
+  deleted_counts := jsonb_set(deleted_counts, '{discussion_votes}', to_jsonb(count_val));
 
   -- 2. Eliminar comentarios en discusiones
   WITH deleted AS (
@@ -42,8 +43,8 @@ BEGIN
     WHERE user_id = user_uuid
     RETURNING 1
   )
-  SELECT COUNT(*) INTO deleted_counts->'discussion_comments'
-  FROM deleted;
+  SELECT COUNT(*) INTO count_val FROM deleted;
+  deleted_counts := jsonb_set(deleted_counts, '{discussion_comments}', to_jsonb(count_val));
 
   -- 3. Eliminar discusiones creadas por el usuario
   WITH deleted AS (
@@ -51,8 +52,8 @@ BEGIN
     WHERE user_id = user_uuid
     RETURNING 1
   )
-  SELECT COUNT(*) INTO deleted_counts->'discussions'
-  FROM deleted;
+  SELECT COUNT(*) INTO count_val FROM deleted;
+  deleted_counts := jsonb_set(deleted_counts, '{discussions}', to_jsonb(count_val));
 
   -- 4. Eliminar reseñas de productos
   WITH deleted AS (
@@ -60,8 +61,8 @@ BEGIN
     WHERE user_id = user_uuid
     RETURNING 1
   )
-  SELECT COUNT(*) INTO deleted_counts->'reviews'
-  FROM deleted;
+  SELECT COUNT(*) INTO count_val FROM deleted;
+  deleted_counts := jsonb_set(deleted_counts, '{reviews}', to_jsonb(count_val));
 
   -- 5. Eliminar historial de conversaciones
   WITH deleted AS (
@@ -69,20 +70,18 @@ BEGIN
     WHERE user_id = user_uuid
     RETURNING 1
   )
-  SELECT COUNT(*) INTO deleted_counts->'chat_conversations'
-  FROM deleted;
+  SELECT COUNT(*) INTO count_val FROM deleted;
+  deleted_counts := jsonb_set(deleted_counts, '{chat_conversations}', to_jsonb(count_val));
 
   -- 6. Eliminar datos extraídos del chat
   DELETE FROM public.user_chat_data
   WHERE user_id = user_uuid;
-  
-  deleted_counts->'user_chat_data' := '1'::jsonb;
+  deleted_counts := jsonb_set(deleted_counts, '{user_chat_data}', '1'::jsonb);
 
   -- 7. Eliminar perfil del usuario (ÚLTIMO)
   DELETE FROM public.user_profiles
   WHERE user_id = user_uuid;
-  
-  deleted_counts->'user_profiles' := '1'::jsonb;
+  deleted_counts := jsonb_set(deleted_counts, '{user_profiles}', '1'::jsonb);
 
   -- Retornar resumen de eliminaciones
   result := jsonb_build_object(
