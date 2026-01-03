@@ -186,13 +186,23 @@ export function ChatBot() {
   }, [isOpen]);
   
   const [userName, setUserName] = useState<string | null>(null);
+  const [isUnderage, setIsUnderage] = useState(false);
 
-  // Verificar consentimiento legal cuando el usuario está autenticado
+  // Verificar consentimiento legal y edad cuando el usuario está autenticado
   useEffect(() => {
     if (user && !authLoading && !hasCheckedConsent) {
       const checkLegalConsent = async () => {
         try {
           const profile = await getUserProfile(user.id);
+          
+          // Verificar edad mínima (16 años)
+          if (profile?.age !== undefined && profile.age !== null && profile.age < 16) {
+            setIsUnderage(true);
+            setShowLegalConsent(false);
+            setHasCheckedConsent(true);
+            return;
+          }
+          
           const hasAllConsents = 
             profile?.terms_accepted === true &&
             profile?.medical_disclaimer_accepted === true &&
@@ -213,6 +223,7 @@ export function ChatBot() {
     } else if (!user && !authLoading) {
       setHasCheckedConsent(false);
       setShowLegalConsent(false);
+      setIsUnderage(false);
     }
   }, [user, authLoading, hasCheckedConsent]);
 
@@ -593,6 +604,53 @@ export function ChatBot() {
   const removeImage = (index: number) => {
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
   };
+
+  // Mostrar mensaje de edad mínima si el usuario es menor de 16 años
+  if (isUnderage && user) {
+    return (
+      <>
+        {!isOpen && (
+          <div className="fixed bottom-6 right-6 z-50">
+            <ChatBotButton 
+              onClick={() => setIsOpen(true)}
+              showPresentation={showPresentation}
+              size={BETA_MODE ? "large" : "default"}
+            />
+          </div>
+        )}
+        {isOpen && (
+          <Card className="fixed bottom-6 right-6 shadow-2xl z-50 flex flex-col border-2 border-red-500/20 overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-300 w-[calc(100vw-3rem)] h-[calc(100vh-8rem)] max-w-[400px] max-h-[600px] md:w-[400px] md:h-[600px]">
+            <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-red-500/10 via-red-500/5 to-red-500/10">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="h-5 w-5 text-red-600" />
+                <h3 className="font-semibold text-red-600">Acceso restringido</h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(false)}
+                className="h-8 w-8"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex-1 flex items-center justify-center p-6">
+              <div className="text-center space-y-4">
+                <div className="text-6xl">🔒</div>
+                <h2 className="text-2xl font-bold text-foreground">Lo sentimos</h2>
+                <p className="text-muted-foreground text-base leading-relaxed">
+                  Utopia es solo para mayores de 16 años. Si eres menor de edad, te recomendamos consultar con un dermatólogo o pediatra para recibir asesoramiento profesional adecuado.
+                </p>
+                <p className="text-sm text-muted-foreground mt-4">
+                  Si crees que esto es un error, por favor contacta con soporte.
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
+      </>
+    );
+  }
 
   // Mostrar pantalla de consentimiento si es necesario
   if (showLegalConsent && user) {

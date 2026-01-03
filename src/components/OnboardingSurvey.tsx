@@ -114,7 +114,7 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
       case 1:
         return !!data.name && data.name.trim().length > 0;
       case 2:
-        return !!data.age && data.age > 0 && data.age <= 120;
+        return !!data.age && data.age >= 16 && data.age <= 120;
       case 3:
         return !!data.sex;
       case 4:
@@ -240,6 +240,11 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
               <p className="text-sm text-muted-foreground mt-2">
                 Tu edad es importante para personalizar las recomendaciones según las necesidades de tu piel.
               </p>
+              {data.age !== undefined && data.age < 16 && (
+                <p className="text-sm text-red-600 font-medium mt-2">
+                  Lo sentimos, Utopia es solo para mayores de 16 años. Si eres menor de edad, te recomendamos consultar con un dermatólogo o pediatra.
+                </p>
+              )}
             </div>
             <Input
               type="number"
