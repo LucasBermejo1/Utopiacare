@@ -33,11 +33,13 @@ export default function AdminDashboard() {
   const queryClient = useQueryClient();
   const [selectedCorrection, setSelectedCorrection] = useState<string | null>(null);
 
-  // Obtener todas las correcciones
-  const { data: corrections, isLoading, error: queryError } = useQuery({
+  // Obtener todas las correcciones con actualización automática cada 5 segundos
+  const { data: corrections, isLoading, error: queryError, refetch } = useQuery({
     queryKey: ["globalCorrections"],
     queryFn: getAllGlobalCorrections,
     retry: 2,
+    refetchInterval: 5000, // Actualizar cada 5 segundos
+    refetchOnWindowFocus: true, // Actualizar cuando la ventana recupera el foco
   });
 
   // Mutaciones
