@@ -25,7 +25,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { CheckCircle2, XCircle, Clock, Trash2, Check, X, AlertCircle } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Trash2, Check, X, AlertCircle, RefreshCw } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 export default function AdminDashboard() {
@@ -134,11 +134,26 @@ export default function AdminDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Panel de Administración</h1>
-        <p className="text-muted-foreground">
-          Gestiona las correcciones globales del bot que aplican a todos los usuarios
-        </p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Panel de Administración</h1>
+          <p className="text-muted-foreground">
+            Gestiona las correcciones globales del bot que aplican a todos los usuarios
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            refetch();
+            toast.info("Actualizando correcciones...");
+          }}
+          disabled={isLoading}
+          className="ml-4"
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+          Actualizar
+        </Button>
       </div>
 
       <Tabs defaultValue="pending" className="w-full">
