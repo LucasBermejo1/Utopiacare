@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import { ComingSoon } from "./components/ComingSoon";
 import { BETA_MODE } from "./config/constants";
 import LegalNotice from "./pages/LegalNotice";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,7 @@ const router = createBrowserRouter([
         ) : <Discussions />
       },
       { path: "/aviso-legal", element: <LegalNotice /> },
+      { path: "/politica-privacidad", element: <PrivacyPolicy /> },
       { path: "*", element: <NotFound /> }
     ]
   },

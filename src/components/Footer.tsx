@@ -5,12 +5,20 @@ export function Footer() {
     <footer className="border-t border-border bg-background mt-auto">
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col items-center justify-center gap-2">
-          <Link
-            to="/aviso-legal"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
-          >
-            Aviso legal
-          </Link>
+          <div className="flex gap-4">
+            <Link
+              to="/aviso-legal"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
+            >
+              Aviso legal
+            </Link>
+            <Link
+              to="/politica-privacidad"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
+            >
+              Política de privacidad
+            </Link>
+          </div>
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} UtopiaCare. Todos los derechos reservados.
           </p>
