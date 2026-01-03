@@ -649,7 +649,11 @@ export function ChatBot() {
               // Si el usuario está autenticado pero no ha aceptado los términos, mostrar pantalla de consentimiento
               if (user && showLegalConsent) {
                 setShowLegalConsent(true);
+              } else if (!user) {
+                // Si no está autenticado, abrir el chat normalmente
+                setIsOpen(true);
               } else {
+                // Si está autenticado y tiene consentimiento, abrir el chat
                 setIsOpen(true);
               }
             }}
