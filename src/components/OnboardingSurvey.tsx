@@ -144,6 +144,12 @@ export function OnboardingSurvey({ open, onComplete }: OnboardingSurveyProps) {
       return;
     }
 
+    // Validar edad mínima antes de continuar
+    if (data.age !== undefined && data.age !== null && data.age < 16) {
+      toast.error("Lo sentimos, Utopia es solo para mayores de 16 años. Si eres menor de edad, te recomendamos consultar con un dermatólogo o pediatra.");
+      return;
+    }
+
     setLoading(true);
     try {
       const {
