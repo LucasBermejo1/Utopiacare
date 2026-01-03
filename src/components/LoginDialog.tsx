@@ -373,10 +373,10 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
         <Button 
           variant={BETA_MODE ? "default" : "ghost"} 
           size={BETA_MODE ? "sm" : "sm"}
-          className={BETA_MODE ? "gap-2 bg-[hsl(var(--terracotta))]/90 hover:bg-[hsl(var(--terracotta))] text-white font-medium text-xs px-4 py-2 transition-colors" : "gap-2"}
+          className={BETA_MODE ? "gap-1 md:gap-2 bg-[hsl(var(--terracotta))]/90 hover:bg-[hsl(var(--terracotta))] text-white font-medium text-[10px] md:text-xs px-2 md:px-4 py-1.5 md:py-2 transition-colors" : "gap-2"}
         >
-          <User className="w-4 h-4" />
-          {BETA_MODE && <span>Iniciar sesión / Crear cuenta</span>}
+          <User className="w-3 h-3 md:w-4 md:h-4" />
+          {BETA_MODE && <span className="hidden sm:inline">Iniciar sesión / Crear cuenta</span>}
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -442,7 +442,7 @@ export function LoginDialog({ onLoginSuccess }: LoginDialogProps) {
             <Button 
               type="submit" 
               disabled={loading || !email.trim() || !password.trim() || password.length < 6}
-              className="min-w-[120px]"
+              className="min-w-[120px] text-sm md:text-base py-2 md:py-2.5 px-3 md:px-4"
             >
               {loading ? "Cargando..." : isSignUp ? "Crear cuenta" : "Iniciar sesión"}
             </Button>
