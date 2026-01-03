@@ -46,6 +46,14 @@ export interface UserProfile {
     technicalLevel?: "simple" | "medio" | "avanzado";
   } | null;
   
+  // Consentimientos legales
+  terms_accepted?: boolean | null;
+  terms_accepted_at?: string | null;
+  medical_disclaimer_accepted?: boolean | null;
+  medical_disclaimer_accepted_at?: string | null;
+  health_data_consent?: boolean | null;
+  health_data_consent_at?: string | null;
+  
   // Rutina actual del usuario
   routine?: {
     // Momentos del día: puede incluir "morning", "afternoon", "evening", "night", "midday", etc.

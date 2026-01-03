@@ -14,6 +14,8 @@ import {
 } from "@/services/chatDataService";
 import { getChatGPTResponse, convertMessagesToChatGPTFormat } from "@/services/chatGPTService";
 import { logger } from "@/utils/logger";
+import { LegalConsentScreen } from "./LegalConsentScreen";
+import { getUserProfile } from "@/services/supabaseUserProfile";
 
 // Componente para el botón del chatbot (reutilizable)
 export function ChatBotButton({ 
@@ -150,6 +152,8 @@ export function ChatBot() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [showPresentation, setShowPresentation] = useState(false);
+  const [showLegalConsent, setShowLegalConsent] = useState(false);
+  const [hasCheckedConsent, setHasCheckedConsent] = useState(false);
   
   // Escuchar evento personalizado para abrir el chat desde otros componentes
   useEffect(() => {
