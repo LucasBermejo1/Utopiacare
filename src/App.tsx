@@ -15,6 +15,7 @@ import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 import { ComingSoon } from "./components/ComingSoon";
 import { BETA_MODE } from "./config/constants";
+import LegalNotice from "./pages/LegalNotice";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const router = createBrowserRouter([
           />
         ) : <Discussions />
       },
+      { path: "/aviso-legal", element: <LegalNotice /> },
       { path: "*", element: <NotFound /> }
     ]
   },
