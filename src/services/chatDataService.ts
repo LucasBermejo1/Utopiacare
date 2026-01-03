@@ -314,6 +314,8 @@ IMPORTANTE - EXTRAER TODAS LAS EXPERIENCIAS DEL USUARIO:
 
     const response = await getChatGPTResponse(prompt);
     
+    console.log("📥 Respuesta de extracción de datos:", response.substring(0, 500));
+    
     try {
       const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/) || response.match(/\{[\s\S]*\}/);
       const jsonString = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : response;
@@ -568,6 +570,7 @@ export async function updateUserProfileFromChat(
       whatWasWrong: string;
       correctInfo: string;
       context?: string;
+      isGlobal?: boolean;
     }>;
     botFeedback?: {
       type: "positive" | "negative" | "neutral";
