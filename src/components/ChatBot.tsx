@@ -190,12 +190,12 @@ export function ChatBot() {
 
   // Verificar consentimiento legal y edad cuando el usuario está autenticado
   useEffect(() => {
-    if (user && !authLoading && !hasCheckedConsent) {
+    if (user && !authLoading) {
       const checkLegalConsent = async () => {
         try {
           const profile = await getUserProfile(user.id);
           
-          // Verificar edad mínima (16 años)
+          // Verificar edad mínima (16 años) - SIEMPRE verificar, incluso si ya se verificó antes
           if (profile?.age !== undefined && profile.age !== null && profile.age < 16) {
             setIsUnderage(true);
             setShowLegalConsent(false);
@@ -203,20 +203,25 @@ export function ChatBot() {
             return;
           }
           
-          const hasAllConsents = 
-            profile?.terms_accepted === true &&
-            profile?.medical_disclaimer_accepted === true &&
-            profile?.health_data_consent === true;
-          
-          if (!hasAllConsents) {
-            setShowLegalConsent(true);
+          // Si la edad es válida, continuar con la verificación de consentimientos
+          if (!hasCheckedConsent) {
+            const hasAllConsents = 
+              profile?.terms_accepted === true &&
+              profile?.medical_disclaimer_accepted === true &&
+              profile?.health_data_consent === true;
+            
+            if (!hasAllConsents) {
+              setShowLegalConsent(true);
+            }
+            setHasCheckedConsent(true);
           }
-          setHasCheckedConsent(true);
         } catch (error) {
           console.error("Error verificando consentimiento:", error);
           // Si hay error, mostrar la pantalla de consentimiento por seguridad
-          setShowLegalConsent(true);
-          setHasCheckedConsent(true);
+          if (!hasCheckedConsent) {
+            setShowLegalConsent(true);
+            setHasCheckedConsent(true);
+          }
         }
       };
       checkLegalConsent();
@@ -225,7 +230,7 @@ export function ChatBot() {
       setShowLegalConsent(false);
       setIsUnderage(false);
     }
-  }, [user, authLoading, hasCheckedConsent]);
+  }, [user, authLoading]);
 
   // Cargar nombre del usuario cuando esté disponible
   useEffect(() => {
