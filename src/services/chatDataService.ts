@@ -319,8 +319,17 @@ IMPORTANTE - EXTRAER TODAS LAS EXPERIENCIAS DEL USUARIO:
     try {
       const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/) || response.match(/\{[\s\S]*\}/);
       const jsonString = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : response;
-      return JSON.parse(jsonString);
-    } catch {
+      const parsed = JSON.parse(jsonString);
+      
+      // Logging para debuggear correcciones
+      if (parsed.botCorrections && parsed.botCorrections.length > 0) {
+        console.log("🎯 CORRECCIONES DETECTADAS EN EXTRACCIÓN:", JSON.stringify(parsed.botCorrections, null, 2));
+      }
+      
+      return parsed;
+    } catch (error) {
+      console.error("❌ Error parseando JSON de extracción:", error);
+      console.error("Respuesta recibida:", response);
       return extractBasicData(userMessage);
     }
   } catch {
