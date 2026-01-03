@@ -246,14 +246,15 @@ export function ChatBot() {
       };
     }
     
-    const greeting = userName 
-      ? `¡Hola ${userName}! 👋 ¿En qué puedo ayudarte hoy?`
-      : "¡Hola! 👋 ¿En qué puedo ayudarte hoy?";
+    // Mensaje de bienvenida con descargo de responsabilidad para usuarios autenticados
+    const welcomeMessage = userName 
+      ? `¡Hola ${userName}! Soy tu asistente de IA. Recuerda que mis consejos son informativos y no sustituyen a un dermatólogo. Antes de probar activos potentes, realiza siempre una prueba de parche y, si tienes dudas médicas, consulta a un profesional. ¿En qué puedo ayudarte hoy?`
+      : `¡Hola! Soy tu asistente de IA. Recuerda que mis consejos son informativos y no sustituyen a un dermatólogo. Antes de probar activos potentes, realiza siempre una prueba de parche y, si tienes dudas médicas, consulta a un profesional. ¿En qué puedo ayudarte hoy?`;
     
     return {
       id: "1",
       role: "assistant" as const,
-      content: greeting,
+      content: welcomeMessage,
       timestamp: new Date(),
     };
   };
