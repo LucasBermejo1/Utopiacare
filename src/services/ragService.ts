@@ -697,63 +697,8 @@ export async function getRAGContext(
  * Formatea el contexto RAG como texto para incluir en el prompt del Assistant
  * MEJORADO: Formato más estructurado y detallado para mejor personalización
  */
-/**
- * Obtiene las correcciones globales verificadas del bot
- */
-async function getGlobalCorrections(): Promise<Array<{
-  whatWasWrong: string;
-  correctInfo: string;
-  context?: string;
-}>> {
-  const { supabase } = await import("@/lib/supabaseClient");
-  if (!supabase) {
-    return [];
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from("bot_global_corrections")
-      .select("what_was_wrong, correct_info, context")
-      .eq("is_active", true)
-      .eq("verified", true)
-      .order("created_at", { ascending: false })
-      .limit(50);
-
-    if (error) {
-      console.error("Error obteniendo correcciones globales:", error);
-      return [];
-    }
-
-    return (data || []).map((correction: any) => ({
-      whatWasWrong: correction.what_was_wrong,
-      correctInfo: correction.correct_info,
-      context: correction.context,
-    }));
-  } catch (error) {
-    console.error("Error en getGlobalCorrections:", error);
-    return [];
-  }
-}
-
 export async function formatRAGContextForPrompt(context: RAGContext): Promise<string> {
   let prompt = "";
-  
-  // Obtener correcciones globales verificadas
-  const globalCorrections = await getGlobalCorrections();
-  
-  if (globalCorrections.length > 0) {
-    prompt += "\n\n=== 🚨 CORRECCIONES GLOBALES VERIFICADAS (APLICAN A TODOS LOS USUARIOS) 🚨 ===\n";
-    prompt += "Estas correcciones han sido verificadas y DEBES aplicarlas en TODAS tus respuestas:\n\n";
-    globalCorrections.forEach((correction, index) => {
-      prompt += `${index + 1}. ❌ ERROR: ${correction.whatWasWrong}\n`;
-      prompt += `   ✅ CORRECCIÓN: ${correction.correctInfo}\n`;
-      if (correction.context) {
-        prompt += `   📝 CONTEXTO: ${correction.context}\n`;
-      }
-      prompt += "\n";
-    });
-    prompt += "⚠️⚠️⚠️ IMPORTANTE: Estas correcciones son ABSOLUTAS y aplican a TODOS los usuarios. NO vuelvas a cometer estos errores.\n\n";
-  }
 
   // Incluir perfil del usuario si está disponible
   if (context.userProfile) {
