@@ -506,7 +506,6 @@ export async function updateUserProfileFromChat(
       whatWasWrong: string;
       correctInfo: string;
       context?: string;
-      isGlobal?: boolean;
     }>;
     botFeedback?: {
       type: "positive" | "negative" | "neutral";
@@ -724,57 +723,12 @@ export async function updateUserProfileFromChat(
       updates.routine = routineToSave;
     }
 
-    // Guardar correcciones directas al bot
+    // Guardar correcciones individuales del bot (solo para este usuario)
     if (extractedData.botCorrections && extractedData.botCorrections.length > 0) {
-      // Si isGlobal no está definido, intentar inferirlo del contexto
-      const processedCorrections = extractedData.botCorrections.map(correction => {
-        // Si isGlobal no está definido, inferirlo:
-        // - Si corrige información personal (menciona "yo", "mi", "tengo", "soy"), es individual
-        // - Si corrige comportamiento del bot o información objetiva, es global
-        if (correction.isGlobal === undefined) {
-          const whatWasWrongLower = (correction.whatWasWrong || "").toLowerCase();
-          const correctInfoLower = (correction.correctInfo || "").toLowerCase();
-          const contextLower = (correction.context || "").toLowerCase();
-          
-          // Palabras que indican información personal
-          const personalIndicators = ["yo tengo", "mi piel", "mi tipo", "soy", "tengo", "mi perfil", "mi información"];
-          const isPersonal = personalIndicators.some(indicator => 
-            whatWasWrongLower.includes(indicator) || 
-            correctInfoLower.includes(indicator) ||
-            contextLower.includes(indicator)
-          );
-          
-          // Si no es claramente personal, asumir que es global (comportamiento del bot)
-          correction.isGlobal = !isPersonal;
-        }
-        return correction;
-      });
-      
-      const individualCorrections = processedCorrections.filter(c => c.isGlobal === false);
-      const globalCorrections = processedCorrections.filter(c => c.isGlobal === true);
-      
-      // Guardar correcciones individuales en el perfil del usuario
-      if (individualCorrections.length > 0) {
-        const currentCorrections = (currentProfile as any).bot_corrections || [];
-        const newCorrections = [...currentCorrections, ...individualCorrections];
-        // Limitar a las últimas 20 correcciones para no sobrecargar
-        (updates as any).bot_corrections = newCorrections.slice(-20);
-      }
-      
-      // Guardar correcciones globales en la tabla de correcciones globales
-      if (globalCorrections.length > 0) {
-        try {
-          console.log(`📝 Intentando guardar ${globalCorrections.length} corrección(es) global(es)...`);
-          console.log("Detalles de las correcciones:", JSON.stringify(globalCorrections, null, 2));
-          await saveGlobalCorrections(userId, globalCorrections);
-          console.log(`✅ ${globalCorrections.length} corrección(es) global(es) guardada(s) correctamente para verificación`);
-        } catch (error: any) {
-          console.error("❌ Error guardando correcciones globales:", error);
-          console.error("Stack trace:", error?.stack);
-          // Mostrar el error pero continuar sin bloquear el flujo principal
-          // El error ya se lanzó en saveGlobalCorrections para debugging
-        }
-      }
+      const currentCorrections = (currentProfile as any).bot_corrections || [];
+      const newCorrections = [...currentCorrections, ...extractedData.botCorrections];
+      // Limitar a las últimas 20 correcciones para no sobrecargar
+      (updates as any).bot_corrections = newCorrections.slice(-20);
     }
 
     // Guardar feedback del usuario sobre el bot
