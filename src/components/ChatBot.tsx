@@ -187,12 +187,40 @@ export function ChatBot() {
   
   const [userName, setUserName] = useState<string | null>(null);
 
+  // Verificar consentimiento legal cuando el usuario está autenticado
+  useEffect(() => {
+    if (user && !authLoading && !hasCheckedConsent) {
+      const checkLegalConsent = async () => {
+        try {
+          const profile = await getUserProfile(user.id);
+          const hasAllConsents = 
+            profile?.terms_accepted === true &&
+            profile?.medical_disclaimer_accepted === true &&
+            profile?.health_data_consent === true;
+          
+          if (!hasAllConsents) {
+            setShowLegalConsent(true);
+          }
+          setHasCheckedConsent(true);
+        } catch (error) {
+          console.error("Error verificando consentimiento:", error);
+          // Si hay error, mostrar la pantalla de consentimiento por seguridad
+          setShowLegalConsent(true);
+          setHasCheckedConsent(true);
+        }
+      };
+      checkLegalConsent();
+    } else if (!user && !authLoading) {
+      setHasCheckedConsent(false);
+      setShowLegalConsent(false);
+    }
+  }, [user, authLoading, hasCheckedConsent]);
+
   // Cargar nombre del usuario cuando esté disponible
   useEffect(() => {
     if (user && !authLoading) {
       const loadUserName = async () => {
         try {
-          const { getUserProfile } = await import("@/services/supabaseUserProfile");
           const profile = await getUserProfile(user.id);
           if (profile?.name) {
             setUserName(profile.name);
