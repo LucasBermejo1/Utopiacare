@@ -215,7 +215,6 @@ IMPORTANTE - EXTRAER TODAS LAS EXPERIENCIAS DEL USUARIO:
     - "whatWasWrong": qué dijo mal el bot o qué comportamiento tuvo que fue incorrecto
     - "correctInfo": información correcta o comportamiento esperado
     - "context": contexto de la corrección (cuándo/por qué lo corrigió)
-    - "isGlobal": true/false - Si es TRUE, significa que es un error que el bot puede cometer con CUALQUIER usuario y debe corregirse para TODOS. Si es FALSE, es una preferencia individual del usuario.
   * Si el usuario da FEEDBACK sobre el comportamiento del bot (positivo o negativo), inclúyelo en "botFeedback"
 - Si el usuario menciona su TIPO DE PIEL (ej: "tengo piel grasa", "mi piel es seca"), inclúyelo en "skinType"
 - Si menciona SENSIBILIDAD (ej: "mi piel es sensible", "tengo rosácea"), inclúyelo en "skinSensitivity"
