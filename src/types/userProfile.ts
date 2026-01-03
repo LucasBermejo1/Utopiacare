@@ -53,6 +53,8 @@ export interface UserProfile {
   medical_disclaimer_accepted_at?: string | null;
   health_data_consent?: boolean | null;
   health_data_consent_at?: string | null;
+  cookie_consent?: boolean | null;
+  cookie_consent_at?: string | null;
   
   // Rutina actual del usuario
   routine?: {
